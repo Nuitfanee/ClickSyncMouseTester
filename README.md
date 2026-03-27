@@ -16,6 +16,16 @@ The current application includes five production pages:
 - `SensitivityMatching`: dual-mouse sensitivity matching and recommendation workflow.
 - `AngleCalibration`: sensor angle measurement and trajectory-quality inspection.
 
+## UI Preview / 界面预览
+
+A quick look at the current desktop UI:
+
+| Home Navigation | Polling Rate |
+| --- | --- |
+| ![Home navigation UI](Resources/images/UI1.png) | ![Polling Rate page](Resources/images/UI2.png) |
+| Sensitivity Match | Performance Chart |
+| ![Sensitivity Match page](Resources/images/UI3.png) | ![Mouse performance chart window](Resources/images/UI4.png) |
+
 ## Architecture
 
 The runtime structure is roughly:
@@ -183,4 +193,3 @@ dotnet run --project .\ClickSyncMouseTester.vbproj
 如果你分发基于本仓库构建的二进制程序，应同时提供对应源码，并保留本项目的许可证文本与第三方资源说明。
 
 仓库中的第三方资源可能使用不同许可证，请同时查看 `THIRD_PARTY_NOTICES.md` 与 `founts/` 内原始授权文件。
-
