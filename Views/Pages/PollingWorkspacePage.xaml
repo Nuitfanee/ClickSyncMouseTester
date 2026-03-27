@@ -1,0 +1,273 @@
+<UserControl x:Class="Views.Pages.PollingWorkspacePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:WpfApp1.Controls"
+             Loaded="PollingWorkspacePage_Loaded"
+             Unloaded="PollingWorkspacePage_Unloaded"
+             IsVisibleChanged="PollingWorkspacePage_IsVisibleChanged"
+             DataContextChanged="PollingWorkspacePage_DataContextChanged"
+             SnapsToDevicePixels="True"
+             UseLayoutRounding="True">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="{StaticResource Layout.Main.GapColumnWidth}" />
+            <ColumnDefinition Width="{StaticResource Layout.Main.RailColumnWidth}" />
+        </Grid.ColumnDefinitions>
+
+        <Border x:Name="CaptureSurface"
+                Grid.Column="0"
+                Background="{DynamicResource WindowBackgroundBrush}"
+                Focusable="True"
+                Padding="{StaticResource Layout.CaptureSurface.Padding}"
+                RenderOptions.ClearTypeHint="{StaticResource ClearTypeHint.Enabled}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                        <TextBlock Text="{Binding StatusPillText, NotifyOnTargetUpdated=True}" Margin="0,0,12,0" Style="{StaticResource StatusPillTextStyle}" VerticalAlignment="Center">
+                            <TextBlock.RenderTransform>
+                                <TranslateTransform Y="0" />
+                            </TextBlock.RenderTransform>
+                            <TextBlock.Triggers>
+                                <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="0.45"
+                                                             To="1"
+                                                             Duration="0:0:0.14"
+                                                             EasingFunction="{StaticResource MotionInOutEase}" />
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                             From="1"
+                                                             To="0"
+                                                             Duration="0:0:0.14"
+                                                             EasingFunction="{StaticResource MotionOutEase}" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </TextBlock.Triggers>
+                        </TextBlock>
+                        <Ellipse Style="{StaticResource StatusLampStyle}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+
+                <Grid Grid.Row="1" VerticalAlignment="Top" Margin="{StaticResource Layout.Hero.Margin}" MinHeight="{StaticResource Layout.Hero.MinHeight}">
+                    <TextBlock Text="{DynamicResource Capture.Head.Measuring}"
+                               Style="{StaticResource HeroWatermarkTextStyle}"
+                               FontSize="{StaticResource Layout.Hero.WatermarkFontSize}"
+                               VerticalAlignment="Top"
+                               HorizontalAlignment="Center"
+                               Margin="0,30,0,0"
+                               IsHitTestVisible="False" />
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="{DynamicResource Capture.Head.Rate}"
+                                   Style="{StaticResource InvariantMicroLabelStyle}"
+                                   Foreground="{DynamicResource VoltGreenBrush}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,8" />
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding CurrentRateText}"
+                                       Style="{StaticResource HeroValueTextStyle}"
+                                       Margin="0,0,0,-24"
+                                       RenderOptions.ClearTypeHint="{StaticResource ClearTypeHint.Enabled}">
+                                <TextBlock.FontSize>
+                                    <MultiBinding Converter="{StaticResource ResponsiveFontSizeConverter}"
+                                                  ConverterParameter="214|214|380|1240|940">
+                                        <Binding RelativeSource="{RelativeSource AncestorType=Window}" Path="ActualWidth" />
+                                        <Binding RelativeSource="{RelativeSource AncestorType=Window}" Path="ActualHeight" />
+                                    </MultiBinding>
+                                </TextBlock.FontSize>
+                            </TextBlock>
+                            <TextBlock Text="{DynamicResource Unit.Hertz}"
+                                       Style="{StaticResource HeroUnitTextStyle}"
+                                       FontSize="{StaticResource Layout.Hero.UnitFontSize}"
+                                       VerticalAlignment="Bottom"
+                                       Margin="14,0,0,26" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+
+                <Border Grid.Row="2"
+                        Background="{DynamicResource WindowBackgroundBrush}"
+                        BorderBrush="{DynamicResource HairlineBrush}"
+                        BorderThickness="{StaticResource Thickness.Hairline.Top}"
+                        Padding="{StaticResource Layout.Metrics.Padding}"
+                        RenderOptions.ClearTypeHint="{StaticResource ClearTypeHint.Enabled}">
+                    <Grid Margin="18,0,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{DynamicResource Metrics.Peak}" Style="{StaticResource MicroLabelStyle}" />
+                            <TextBlock Text="{Binding PeakRateText, StringFormat={}{0} Hz}" Margin="0,12,0,0" Style="{StaticResource MetricValueStyle}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="{DynamicResource Metrics.WindowJitter}" Style="{StaticResource MicroLabelStyle}" />
+                            <TextBlock Text="{Binding WindowJitterText, StringFormat={}{0} ms}" Margin="0,12,0,0" Style="{StaticResource MetricValueStyle}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="{DynamicResource Metrics.DropCount}" Style="{StaticResource MicroLabelStyle}" />
+                            <TextBlock Text="{Binding DroppedPacketCountText}" Margin="0,12,0,0" Style="{StaticResource MetricValueStyle}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="3">
+                            <TextBlock Text="{DynamicResource Metrics.CaptureLatencyP95}" Style="{StaticResource MicroLabelStyle}" />
+                            <TextBlock Text="{Binding CaptureLatencyP95Text, StringFormat={}{0} ms}" Margin="0,12,0,0" Style="{StaticResource MetricValueStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="3" Height="{StaticResource Layout.History.Height}" Margin="0,0,0,6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="{DynamicResource History.Label}" Style="{StaticResource MicroLabelStyle}" VerticalAlignment="Center" />
+                        <Border Width="{StaticResource Layout.History.HeaderRuleWidth}" Height="1" Background="{DynamicResource HairlineBrush}" Margin="12,0,12,0" VerticalAlignment="Center" />
+                        <TextBlock Text="{DynamicResource History.Trace}" Style="{StaticResource InvariantHistoryTraceTextStyle}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <controls:PollingHistoryChartControl Grid.Row="1"
+                                                         HistoryPoints="{Binding HistoryPoints}"
+                                                         PeakRate="{Binding PeakRate}"
+                                                         CurrentRate="{Binding RawCurrentRate}"
+                                                         IsLocked="{Binding IsLocked}">
+                        <controls:PollingHistoryChartControl.Style>
+                            <Style TargetType="{x:Type controls:PollingHistoryChartControl}">
+                                <Setter Property="Opacity" Value="1" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HistoryPoints.Count}" Value="0">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                     To="0.32"
+                                                                     Duration="0:0:0.2"
+                                                                     EasingFunction="{StaticResource MotionInOutEase}" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.ExitActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                     To="1"
+                                                                     Duration="0:0:0.18"
+                                                                     EasingFunction="{StaticResource MotionOutEase}" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.ExitActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </controls:PollingHistoryChartControl.Style>
+                    </controls:PollingHistoryChartControl>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="2"
+                Margin="{StaticResource Layout.ControlRail.Margin}"
+                Padding="{StaticResource Layout.ControlRail.Padding}"
+                Background="{DynamicResource GlassShellBackgroundBrush}"
+                BorderBrush="{DynamicResource GlassShellBorderBrush}"
+                BorderThickness="1,0,0,0"
+                RenderOptions.ClearTypeHint="{StaticResource ClearTypeHint.Enabled}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Margin="0,0,0,6">
+                    <TextBlock Text="{DynamicResource Control.Rail.Label}" Style="{StaticResource MicroLabelStyle}" Foreground="{DynamicResource VoltGreenBrush}" Margin="0,0,0,42" />
+                    <TextBlock Text="{DynamicResource Control.TargetDevice.Label}" Style="{StaticResource MicroLabelStyle}" Margin="0,0,0,14" />
+                    <ComboBox
+                              ItemsSource="{Binding Devices}"
+                              SelectedItem="{Binding SelectedDevice}"
+                              IsEnabled="{Binding IsDeviceSelectionEnabled}"
+                              Style="{StaticResource AvantGardeComboBoxStyle}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DisplayLabel}" Style="{StaticResource DeviceComboItemTextStyle}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Margin="0,38,0,0">
+                    <TextBlock Text="{DynamicResource Control.ReportMode.Label}" Style="{StaticResource MicroLabelStyle}" Margin="0,0,0,14" />
+                    <ToggleButton
+                                  IsChecked="{Binding IsRawPacketRateMode, Mode=TwoWay}"
+                                  IsEnabled="{Binding IsRateModeSwitchEnabled}"
+                                  Style="{StaticResource PollingRateModeToggleStyle}" />
+                    <TextBlock Text="{Binding RateModeDescriptionText}"
+                               Margin="0,16,2,0"
+                               MinHeight="{StaticResource Layout.ControlRail.ModeDescriptionMinHeight}"
+                               VerticalAlignment="Top"
+                               TextWrapping="Wrap"
+                               Style="{StaticResource HintTextStyle}" />
+                </StackPanel>
+
+                <Grid Grid.Row="2" Margin="0,42,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="18" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Button Grid.Row="0"
+                            Margin="10,0"
+                            Command="{Binding StartCommand}"
+                            Content="{Binding StartButtonText}"
+                            Style="{StaticResource VoltButtonStyle}" />
+
+                    <Grid Grid.Row="2" Margin="10,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Command="{Binding RefreshDevicesCommand}" Content="{DynamicResource Button.RefreshDevices}" Style="{StaticResource MinimalGhostButtonStyle}" />
+                        <Button Grid.Column="2" Command="{Binding StopCommand}" Content="{DynamicResource Button.Stop}" Style="{StaticResource MinimalGhostButtonStyle}" />
+                    </Grid>
+                </Grid>
+
+                <Border Grid.Row="3" Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,44,0,34" />
+
+                <StackPanel Grid.Row="4" Margin="0,10,2,0">
+                    <TextBlock Text="{DynamicResource Session.NotesLabel}" Style="{StaticResource MicroLabelStyle}" />
+                    <TextBlock Text="{Binding StatusMessage, NotifyOnTargetUpdated=True}" Margin="0,18,0,0" TextWrapping="Wrap" Style="{StaticResource StatusMessageTextStyle}">
+                        <TextBlock.Triggers>
+                            <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                         From="0.5"
+                                                         To="1"
+                                                         Duration="0:0:0.16"
+                                                         EasingFunction="{StaticResource MotionInOutEase}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </TextBlock.Triggers>
+                    </TextBlock>
+                    <TextBlock Text="{Binding HintText}" Margin="0,16,0,0" TextWrapping="Wrap" Style="{StaticResource HintTextStyle}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

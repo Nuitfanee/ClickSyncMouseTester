@@ -1,0 +1,55 @@
+<Project>
+  <UsingTask TaskName="GenerateBundle"
+             AssemblyFile="$(MSBuildSDKsPath)\Microsoft.NET.Sdk\tools\net10.0\Microsoft.NET.Build.Tasks.dll" />
+
+  <PropertyGroup>
+    <BuildOutputDir Condition="'$(BuildOutputDir)' == ''">$(MSBuildProjectDirectory)\..\.artifacts\build\Release\net10.0-windows\</BuildOutputDir>
+    <BundleWorkingDir Condition="'$(BundleWorkingDir)' == ''">$(MSBuildProjectDirectory)\..\.artifacts\publish\win-x64-single-file\</BundleWorkingDir>
+    <PublishedSingleFileName Condition="'$(PublishedSingleFileName)' == ''">ClickSyncMouseTester.exe</PublishedSingleFileName>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-x64</RuntimeIdentifier>
+    <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">10.0</TargetFrameworkVersion>
+    <EnableCompressionInSingleFile Condition="'$(EnableCompressionInSingleFile)' == ''">true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <BundleInput Include="$(BuildOutputDir)ClickSyncMouseTester.exe">
+      <RelativePath>ClickSyncMouseTester.exe</RelativePath>
+    </BundleInput>
+    <BundleInput Include="$(BuildOutputDir)ClickSyncMouseTester.dll">
+      <RelativePath>ClickSyncMouseTester.dll</RelativePath>
+    </BundleInput>
+    <BundleInput Include="$(BuildOutputDir)ClickSyncMouseTester.deps.json">
+      <RelativePath>ClickSyncMouseTester.deps.json</RelativePath>
+    </BundleInput>
+    <BundleInput Include="$(BuildOutputDir)ClickSyncMouseTester.runtimeconfig.json">
+      <RelativePath>ClickSyncMouseTester.runtimeconfig.json</RelativePath>
+    </BundleInput>
+  </ItemGroup>
+
+  <Target Name="Bundle">
+    <RemoveDir Directories="$(BundleWorkingDir)" />
+    <MakeDir Directories="$(BundleWorkingDir)" />
+    <Copy SourceFiles="@(BundleInput)"
+          DestinationFiles="@(BundleInput->'$(BundleWorkingDir)%(RelativePath)')" />
+
+    <ItemGroup>
+      <FilesToBundle Include="@(BundleInput->'$(BundleWorkingDir)%(RelativePath)')">
+        <RelativePath>%(BundleInput.RelativePath)</RelativePath>
+      </FilesToBundle>
+    </ItemGroup>
+
+    <GenerateBundle FilesToBundle="@(FilesToBundle)"
+                    AppHostName="$(PublishedSingleFileName)"
+                    IncludeSymbols="false"
+                    EnableCompressionInSingleFile="$(EnableCompressionInSingleFile)"
+                    IncludeNativeLibraries="false"
+                    IncludeAllContent="false"
+                    TargetFrameworkVersion="$(TargetFrameworkVersion)"
+                    RuntimeIdentifier="$(RuntimeIdentifier)"
+                    OutputDir="$(BundleWorkingDir)"
+                    ShowDiagnosticOutput="false" />
+
+    <Delete Files="@(FilesToBundle)"
+            Condition="'%(FilesToBundle.RelativePath)' != '$(PublishedSingleFileName)'" />
+  </Target>
+</Project>

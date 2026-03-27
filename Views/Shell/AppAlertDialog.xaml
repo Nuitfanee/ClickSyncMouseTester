@@ -1,0 +1,56 @@
+<Window x:Class="Views.Shell.AppAlertDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent"
+        AllowsTransparency="False"
+        MinWidth="360"
+        MaxWidth="520"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        FontFamily="{DynamicResource Font.Body}"
+        TextOptions.TextRenderingMode="{StaticResource TextRenderingMode.ClearType}"
+        TextOptions.TextFormattingMode="{StaticResource TextFormattingMode.UI}"
+        TextOptions.TextHintingMode="{StaticResource TextHintingMode.UI}">
+    <Border Background="{DynamicResource WindowBackgroundBrush}"
+            BorderBrush="{DynamicResource HairlineBrush}"
+            BorderThickness="1"
+            Padding="28"
+            RenderOptions.ClearTypeHint="{StaticResource ClearTypeHint.Enabled}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="{Binding TitleText, RelativeSource={RelativeSource AncestorType=Window}}"
+                       Style="{StaticResource StatusMessageTextStyle}"
+                       FontSize="22"
+                       Foreground="{DynamicResource TextStrongBrush}" />
+
+            <TextBlock Grid.Row="1"
+                       Margin="0,16,0,0"
+                       Text="{Binding MessageText, RelativeSource={RelativeSource AncestorType=Window}}"
+                       Style="{StaticResource HintTextStyle}"
+                       FontSize="14"
+                       Foreground="{DynamicResource TextStrongBrush}"
+                       TextWrapping="Wrap" />
+
+            <Button x:Name="ConfirmButton"
+                    Grid.Row="2"
+                    Width="120"
+                    Margin="0,26,0,0"
+                    HorizontalAlignment="Right"
+                    Content="{Binding ConfirmText, RelativeSource={RelativeSource AncestorType=Window}}"
+                    IsDefault="True"
+                    IsCancel="True"
+                    Click="ConfirmButton_Click"
+                    Style="{StaticResource VoltButtonStyle}" />
+        </Grid>
+    </Border>
+</Window>

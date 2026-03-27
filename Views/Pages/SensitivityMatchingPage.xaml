@@ -1,0 +1,2532 @@
+<UserControl x:Class="Views.Pages.SensitivityMatchingPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:WpfApp1.Converters"
+             xmlns:models="clr-namespace:WpfApp1.Models"
+             xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
+             Loaded="SensitivityMatchingPage_Loaded"
+             Unloaded="SensitivityMatchingPage_Unloaded"
+             IsVisibleChanged="SensitivityMatchingPage_IsVisibleChanged"
+             DataContextChanged="SensitivityMatchingPage_DataContextChanged"
+             SizeChanged="SensitivityMatchingPage_SizeChanged"
+             SnapsToDevicePixels="True"
+             UseLayoutRounding="True">
+    <UserControl.Resources>
+        <converters:TrackProgressOffsetConverter x:Key="TrackProgressOffsetConverter" />
+
+        <Style x:Key="SensitivityMatchPanelBorderStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource KeyDetectionPanelBorderStyle}">
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Padding" Value="18,16" />
+        </Style>
+
+        <SolidColorBrush x:Key="OutlineBorderBrush"
+                         Color="{DynamicResource GhostHoverColor}" />
+
+        <Style x:Key="SensitivityMatchInsetBorderStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource KeyDetectionInsetSurfaceBorderStyle}">
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Padding" Value="16,14" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchHeroSurfaceBorderStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource SensitivityMatchInsetBorderStyle}">
+            <Setter Property="Padding" Value="0" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchStepTagBorderStyle"
+               TargetType="Border">
+            <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Margin" Value="8,0,0,0" />
+            <Style.Triggers>
+                <Trigger Property="Tag" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource VoltGreenBrush}" />
+                    <Setter Property="Background" Value="{DynamicResource GhostHoverBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SensitivityMatchStepTagTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource MicroLabelStyle}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchHeadlineTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource KeyDetectionSectionTitleTextStyle}">
+            <Setter Property="FontSize" Value="34" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchIntroOpeningWordTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HeroValueTextStyle}">
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="124" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchIntroHeroPrimaryWordTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HeroValueTextStyle}">
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="156" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchIntroHeroStackWordTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HeroValueTextStyle}">
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="138" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchIntroHeroLabelTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource BaseTextBlockStyle}">
+            <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="38" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.Hero}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchIntroHeroConnectorTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HeroValueTextStyle}">
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="52" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSectionTitleTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource KeyDetectionSectionTitleTextStyle}">
+            <Setter Property="FontSize" Value="22" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchCompactTitleTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchSectionTitleTextStyle}">
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchCompactValueTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource KeyDetectionMetricValueTextStyle}">
+            <Setter Property="FontSize" Value="28" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchLabelTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource MicroLabelStyle}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchInputTextBoxStyle"
+               TargetType="TextBox"
+               BasedOn="{StaticResource KeyDetectionThresholdTextBoxStyle}">
+            <Setter Property="Height" Value="46" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="TextAlignment" Value="Left" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchPrimaryButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource VoltButtonStyle}">
+            <Setter Property="MinWidth" Value="168" />
+            <Setter Property="Height" Value="46" />
+            <Setter Property="Padding" Value="20,0" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSecondaryButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource MinimalGhostButtonStyle}">
+            <Setter Property="MinWidth" Value="148" />
+            <Setter Property="Height" Value="46" />
+            <Setter Property="Padding" Value="18,0" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupDeviceNameTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchSectionTitleTextStyle}">
+            <Setter Property="FontSize" Value="26" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupBindingStateTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource BaseTextBlockStyle}">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupMetaTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HintTextStyle}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupOptionalBindingStateTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchSetupBindingStateTextStyle}">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupOptionalMetaTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchSetupMetaTextStyle}">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupDpiInputTextBoxStyle"
+               TargetType="TextBox"
+               BasedOn="{StaticResource SensitivityMatchInputTextBoxStyle}">
+            <Setter Property="Width" Value="136" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupEditorialDpiInputTextBoxStyle"
+               TargetType="TextBox"
+               BasedOn="{StaticResource SensitivityMatchSetupDpiInputTextBoxStyle}">
+            <Setter Property="Width" Value="168" />
+            <Setter Property="Height" Value="54" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CaretBrush" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="InputMethod.IsInputMethodEnabled" Value="False" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="EditorialInputSurface"
+                                    Background="{TemplateBinding Background}">
+                                <ScrollViewer x:Name="PART_ContentHost"
+                                              Margin="0,10,0,8"
+                                              VerticalAlignment="Center" />
+                            </Border>
+                            <Rectangle x:Name="EditorialInputTopRule"
+                                       Height="1"
+                                       VerticalAlignment="Top"
+                                       Fill="{TemplateBinding BorderBrush}"
+                                       Opacity="0.18" />
+                            <Rectangle x:Name="EditorialInputBottomRule"
+                                       Height="1"
+                                       VerticalAlignment="Bottom"
+                                       Fill="{TemplateBinding BorderBrush}"
+                                       Opacity="0.82" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="EditorialInputSurface" Property="Background" Value="#08FFFFFF" />
+                                <Setter TargetName="EditorialInputBottomRule" Property="Fill" Value="{DynamicResource TextStrongBrush}" />
+                                <Setter TargetName="EditorialInputBottomRule" Property="Opacity" Value="1" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="EditorialInputSurface" Property="Background" Value="{DynamicResource GhostHoverBrush}" />
+                                <Setter TargetName="EditorialInputBottomRule" Property="Fill" Value="{DynamicResource TextStrongBrush}" />
+                                <Setter TargetName="EditorialInputBottomRule" Property="Opacity" Value="1" />
+                                <Setter TargetName="EditorialInputTopRule" Property="Opacity" Value="0.32" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="EditorialInputSurface" Property="Opacity" Value="0.36" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupSourceEditorialDpiInputTextBoxStyle"
+               TargetType="TextBox"
+               BasedOn="{StaticResource SensitivityMatchSetupEditorialDpiInputTextBoxStyle}">
+            <Setter Property="HorizontalContentAlignment" Value="Right" />
+            <Setter Property="TextAlignment" Value="Right" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupTargetEditorialDpiInputTextBoxStyle"
+               TargetType="TextBox"
+               BasedOn="{StaticResource SensitivityMatchSetupEditorialDpiInputTextBoxStyle}">
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="TextAlignment" Value="Left" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupBindButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource SensitivityMatchSecondaryButtonStyle}">
+            <Setter Property="MinWidth" Value="216" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupEditorialBindButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource SensitivityMatchSetupBindButtonStyle}">
+            <Setter Property="MinWidth" Value="196" />
+            <Setter Property="Height" Value="54" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource VoltGreenBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="EditorialButtonSurface"
+                                    Background="{TemplateBinding Background}" />
+                            <Rectangle x:Name="EditorialButtonTopRule"
+                                       Height="1"
+                                       VerticalAlignment="Top"
+                                       Fill="{TemplateBinding BorderBrush}"
+                                       Opacity="0.18" />
+                            <Rectangle x:Name="EditorialButtonBottomRule"
+                                       Height="1"
+                                       VerticalAlignment="Bottom"
+                                       Fill="{TemplateBinding BorderBrush}"
+                                       Opacity="0.82" />
+                            <ContentPresenter x:Name="EditorialButtonContent"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="EditorialButtonSurface" Property="Background" Value="#08FFFFFF" />
+                                <Setter TargetName="EditorialButtonBottomRule" Property="Fill" Value="{DynamicResource VoltGreenBrush}" />
+                                <Setter TargetName="EditorialButtonBottomRule" Property="Opacity" Value="1" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="EditorialButtonSurface" Property="Background" Value="{DynamicResource GhostHoverBrush}" />
+                                <Setter TargetName="EditorialButtonContent" Property="Margin" Value="0,1,0,-1" />
+                                <Setter TargetName="EditorialButtonBottomRule" Property="Fill" Value="{DynamicResource VoltGreenBrush}" />
+                                <Setter TargetName="EditorialButtonBottomRule" Property="Opacity" Value="1" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="EditorialButtonSurface" Property="Background" Value="{DynamicResource GhostHoverBrush}" />
+                                <Setter TargetName="EditorialButtonBottomRule" Property="Fill" Value="{DynamicResource VoltGreenBrush}" />
+                                <Setter TargetName="EditorialButtonBottomRule" Property="Opacity" Value="1" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="EditorialButtonSurface" Property="Opacity" Value="0.34" />
+                                <Setter TargetName="EditorialButtonContent" Property="Opacity" Value="0.46" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupOverlayLabelTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchLabelTextStyle}">
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupInfoBandLabelTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchSetupOverlayLabelTextStyle}">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupInfoBandDeviceNameTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchSetupDeviceNameTextStyle}">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupInfoBandBindingStateTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchSetupOptionalBindingStateTextStyle}">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupInfoBandMetaTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchSetupOptionalMetaTextStyle}">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupEditorialInfoBandLabelTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchLabelTextStyle}">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFaintBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupEditorialInfoBandDeviceNameTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource BaseTextBlockStyle}">
+            <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupEditorialInfoBandBindingStateTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchSetupOptionalBindingStateTextStyle}">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupEditorialInfoBandStableBindingStateTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchSetupEditorialInfoBandBindingStateTextStyle}">
+            <Setter Property="Height" Value="22" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="Visibility" Value="Hidden" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SensitivityMatchSetupEditorialInfoBandMetaTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchSetupOptionalMetaTextStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <DataTemplate x:Key="SensitivityMatchSetupSourceEditorialInfoBandTemplate">
+            <Grid Width="388"
+                  Height="84"
+                  HorizontalAlignment="Right">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="8" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="8" />
+                    <RowDefinition Height="22" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           HorizontalAlignment="Right"
+                           Text="{Binding LabelText}"
+                           TextAlignment="Right"
+                           Style="{StaticResource SensitivityMatchSetupEditorialInfoBandLabelTextStyle}" />
+                <TextBlock Grid.Row="2"
+                           HorizontalAlignment="Right"
+                           MaxWidth="388"
+                           Text="{Binding DeviceTitle}"
+                           TextAlignment="Right"
+                           Style="{StaticResource SensitivityMatchSetupEditorialInfoBandDeviceNameTextStyle}" />
+                <TextBlock Grid.Row="4"
+                           HorizontalAlignment="Right"
+                           Text="{Binding BindingStateText}"
+                           TextAlignment="Right"
+                           Style="{StaticResource SensitivityMatchSetupEditorialInfoBandStableBindingStateTextStyle}" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SensitivityMatchSetupTargetEditorialInfoBandTemplate">
+            <Grid Width="388"
+                  Height="84"
+                  HorizontalAlignment="Left">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="8" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="8" />
+                    <RowDefinition Height="22" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           HorizontalAlignment="Left"
+                           Text="{Binding LabelText}"
+                           TextAlignment="Left"
+                           Style="{StaticResource SensitivityMatchSetupEditorialInfoBandLabelTextStyle}" />
+                <TextBlock Grid.Row="2"
+                           HorizontalAlignment="Left"
+                           MaxWidth="388"
+                           Text="{Binding DeviceTitle}"
+                           TextAlignment="Left"
+                           Style="{StaticResource SensitivityMatchSetupEditorialInfoBandDeviceNameTextStyle}" />
+                <TextBlock Grid.Row="4"
+                           HorizontalAlignment="Left"
+                           Text="{Binding BindingStateText}"
+                           TextAlignment="Left"
+                           Style="{StaticResource SensitivityMatchSetupEditorialInfoBandStableBindingStateTextStyle}" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SensitivityMatchSetupInfoBandTemplate">
+            <Grid HorizontalAlignment="{Binding BandHorizontalAlignment}">
+                <Grid.LayoutTransform>
+                    <ScaleTransform ScaleX="{Binding BandScaleX}" />
+                </Grid.LayoutTransform>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="18" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="{Binding GapAfterTitle}" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="{Binding GapAfterBindingState}" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Margin="0,4,0,0"
+                           Text="{Binding LabelText}"
+                           Style="{StaticResource SensitivityMatchSetupInfoBandLabelTextStyle}">
+                    <TextBlock.LayoutTransform>
+                        <ScaleTransform ScaleX="{Binding BandScaleX}" />
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+
+                <TextBlock Grid.Column="2"
+                           MaxWidth="246"
+                           Text="{Binding DeviceTitle}"
+                           Style="{StaticResource SensitivityMatchSetupInfoBandDeviceNameTextStyle}">
+                    <TextBlock.LayoutTransform>
+                        <ScaleTransform ScaleX="{Binding BandScaleX}" />
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+
+                <TextBlock Grid.Column="4"
+                           Text="{Binding BindingStateText}"
+                           Style="{StaticResource SensitivityMatchSetupInfoBandBindingStateTextStyle}">
+                    <TextBlock.LayoutTransform>
+                        <ScaleTransform ScaleX="{Binding BandScaleX}" />
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+
+                <TextBlock Grid.Column="6"
+                           MaxWidth="136"
+                           Text="{Binding MetaText}"
+                           Style="{StaticResource SensitivityMatchSetupInfoBandMetaTextStyle}">
+                    <TextBlock.LayoutTransform>
+                        <ScaleTransform ScaleX="{Binding BandScaleX}" />
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+            </Grid>
+        </DataTemplate>
+
+        <Style x:Key="SensitivityMatchProgressBarStyle"
+               TargetType="ProgressBar">
+            <Setter Property="Height" Value="10" />
+            <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource VoltGreenBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchRoundBorderStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource SensitivityMatchInsetBorderStyle}">
+            <Setter Property="MinHeight" Value="136" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource VoltGreenBrush}" />
+                    <Setter Property="Background" Value="{DynamicResource GhostHoverBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource VoltGreenBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsFailed}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource ComboItemSelectedForegroundBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureDeviceBandBorderStyle"
+               TargetType="Border">
+            <Setter Property="Padding" Value="0,0,0,12" />
+            <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureDeviceLabelTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchLabelTextStyle}">
+            <Setter Property="Foreground" Value="{DynamicResource TextFaintBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureDeviceNameTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource BaseTextBlockStyle}">
+            <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureDeviceSecondaryTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HintTextStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureOptionalDeviceSecondaryTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchMeasureDeviceSecondaryTextStyle}">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureHeroPrimaryTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HeroValueTextStyle}">
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="188" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMeasureActiveState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource VoltGreenBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureFailureState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource ComboItemSelectedForegroundBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureExpiredState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureHeroLabelTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource BaseTextBlockStyle}">
+            <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="TextAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureHeroSupportTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource StatusMessageTextStyle}">
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="LineHeight" Value="28" />
+            <Setter Property="TextAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureLaneHostStyle"
+               TargetType="Grid">
+            <Setter Property="Opacity" Value="0.52" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMeasureActiveState}" Value="True">
+                    <Setter Property="Opacity" Value="1" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureFailureState}" Value="True">
+                    <Setter Property="Opacity" Value="0.72" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureExpiredState}" Value="True">
+                    <Setter Property="Opacity" Value="0.34" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureLaneLabelTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchMeasureDeviceLabelTextStyle}">
+            <Setter Property="TextAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureLaneDeviceTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource BaseTextBlockStyle}">
+            <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+            <Setter Property="Opacity" Value="0.92" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="MeasureEditorialAxisLabelTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchLabelTextStyle}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFaintBrush}" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+        </Style>
+
+        <Style x:Key="MeasureEditorialLaneSupportTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HintTextStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="LineHeight" Value="20" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+        </Style>
+
+        <Style x:Key="MeasureEditorialCenterPrimaryTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HeroValueTextStyle}">
+            <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+            <Setter Property="FontWeight" Value="Light" />
+            <Setter Property="FontSize" Value="88" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMeasureActiveState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource VoltGreenBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureFailureState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource ComboItemSelectedForegroundBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureExpiredState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureEditorialCenterSupportTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource StatusMessageTextStyle}">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="LineHeight" Value="24" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="Opacity" Value="0.9" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="TextTrimming" Value="None" />
+        </Style>
+
+        <Style x:Key="MeasureEditorialCenterMetaTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HintTextStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="LineHeight" Value="20" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureLaneValueTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HeroValueTextStyle}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="64" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Style.Triggers>
+                <Trigger Property="Text" Value="--">
+                    <Setter Property="Foreground" Value="{DynamicResource TextFaintBrush}" />
+                </Trigger>
+                <DataTrigger Binding="{Binding IsMeasureActiveState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource VoltGreenBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureFailureState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource ComboItemSelectedForegroundBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureExpiredState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureGiantPercentageTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HeroValueTextStyle}">
+            <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+            <Setter Property="FontWeight" Value="Light" />
+            <Setter Property="FontSize" Value="132" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Style.Triggers>
+                <Trigger Property="Text" Value="--">
+                    <Setter Property="Foreground" Value="{DynamicResource TextFaintBrush}" />
+                </Trigger>
+                <DataTrigger Binding="{Binding IsMeasureActiveState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource VoltGreenBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureFailureState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource ComboItemSelectedForegroundBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureExpiredState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureWatermarkTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HeroValueTextStyle}">
+            <Setter Property="FontWeight" Value="Black" />
+            <Setter Property="FontSize" Value="96" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="Opacity" Value="0.022" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+        </Style>
+
+        <Style x:Key="MeasureTransitionOverlayWordTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchIntroHeroPrimaryWordTextStyle}">
+            <Setter Property="FontWeight" Value="Black" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+
+        <Style x:Key="MeasureLaneHostPanelStyle"
+               TargetType="FrameworkElement">
+            <Setter Property="Opacity" Value="0.72" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMeasureActiveState}" Value="True">
+                    <Setter Property="Opacity" Value="1" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureFailureState}" Value="True">
+                    <Setter Property="Opacity" Value="0.82" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureExpiredState}" Value="True">
+                    <Setter Property="Opacity" Value="0.46" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding HasFinalRecommendation}" Value="True">
+                    <Setter Property="Opacity" Value="0.24" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureCenterRoundHostStyle"
+               TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Visible" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+
+        <Style x:Key="MeasureCenterResultHostStyle"
+               TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Hidden" />
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+
+        <Style x:Key="MeasureCenterResultTitleTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HeroValueTextStyle}">
+            <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <Style x:Key="MeasureCenterResultLabelTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchLabelTextStyle}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFaintBrush}" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <Style x:Key="MeasureCenterResultValueTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HeroValueTextStyle}">
+            <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+            <Setter Property="FontWeight" Value="Light" />
+            <Setter Property="FontSize" Value="60" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+        </Style>
+
+        <Style x:Key="MeasureCenterResultInlineValueTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource MeasureCenterResultValueTextStyle}">
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="MeasureEditorialRoundsMetaTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchLabelTextStyle}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+            <Setter Property="TextAlignment" Value="Right" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+        </Style>
+
+        <Style x:Key="MeasureEditorialRoundRowBorderStyle"
+               TargetType="Border">
+            <Setter Property="Padding" Value="0,14" />
+            <Setter Property="MinHeight" Value="76" />
+            <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Opacity" Value="0.68" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="Opacity" Value="1" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource VoltGreenBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                    <Setter Property="Opacity" Value="0.84" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsFailed}" Value="True">
+                    <Setter Property="Opacity" Value="0.88" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource ComboItemSelectedForegroundBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureEditorialRoundTitleTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchLabelTextStyle}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFaintBrush}" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+        </Style>
+
+        <Style x:Key="MeasureEditorialRoundStatusTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchLabelTextStyle}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource VoltGreenBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsFailed}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource ComboItemSelectedForegroundBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureEditorialRoundDetailTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HintTextStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="LineHeight" Value="20" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="MeasureEditorialRoundValueTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource BaseTextBlockStyle}">
+            <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="26" />
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextAlignment" Value="Right" />
+        </Style>
+
+        <Style x:Key="MeasureEditorialRoundTrackSurfaceStyle"
+               TargetType="Border">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Opacity" Value="1" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="Opacity" Value="1" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureEditorialRoundTrackLineStyle"
+               TargetType="Border">
+            <Setter Property="Height" Value="10" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="Background" Value="{DynamicResource HairlineBrush}" />
+            <Setter Property="Opacity" Value="0.58" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource VoltGreenBrush}" />
+                    <Setter Property="Opacity" Value="0.2" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureEditorialRoundTrackStartMarkerStyle"
+               TargetType="Rectangle">
+            <Setter Property="Width" Value="2" />
+            <Setter Property="Height" Value="18" />
+            <Setter Property="Fill" Value="{DynamicResource TextFaintBrush}" />
+            <Setter Property="Opacity" Value="0.72" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="Fill" Value="{DynamicResource VoltGreenBrush}" />
+                    <Setter Property="Opacity" Value="0.88" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureEditorialRoundTrackArrowStyle"
+               TargetType="Path">
+            <Setter Property="Stroke" Value="{DynamicResource TextMutedBrush}" />
+            <Setter Property="StrokeThickness" Value="1.8" />
+            <Setter Property="StrokeStartLineCap" Value="Round" />
+            <Setter Property="StrokeEndLineCap" Value="Round" />
+            <Setter Property="StrokeLineJoin" Value="Round" />
+            <Setter Property="Opacity" Value="0.72" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="Stroke" Value="{DynamicResource VoltGreenBrush}" />
+                    <Setter Property="Opacity" Value="0.94" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureEditorialRoundTrackCaptionTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HintTextStyle}">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureEditorialRoundTrackMouseHostStyle"
+               TargetType="Grid">
+            <Setter Property="Opacity" Value="0.88" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="Opacity" Value="1" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureEditorialRoundTrackMouseBodyStyle"
+               TargetType="Border">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Background" Value="#5B6167" />
+            <Setter Property="BorderBrush" Value="#18FFFFFF" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style x:Key="MeasureFooterStartButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource SensitivityMatchPrimaryButtonStyle}">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasFinalRecommendation}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureFooterResultActionsHostStyle"
+               TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasFinalRecommendation}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureLaneProgressBarStyle"
+               TargetType="ProgressBar"
+               BasedOn="{StaticResource SensitivityMatchProgressBarStyle}">
+            <Setter Property="Height" Value="4" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="{DynamicResource HairlineBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFaintBrush}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMeasureActiveState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource VoltGreenBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureFailureState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource ComboItemSelectedForegroundBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMeasureExpiredState}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MeasureMinimalRoundBorderStyle"
+               TargetType="Border">
+            <Setter Property="Padding" Value="24,16" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="4,0,0,0" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource VoltGreenBrush}" />
+                    <Setter Property="Background" Value="{DynamicResource GhostHoverBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                    <Setter Property="Opacity" Value="0.4" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsFailed}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource ComboItemSelectedForegroundBrush}" />
+                    <Setter Property="Opacity" Value="0.8" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureRoundsStripBorderStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource KeyDetectionInsetSurfaceBorderStyle}">
+            <Setter Property="Padding" Value="14,12" />
+            <Setter Property="MinHeight" Value="112" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource VoltGreenBrush}" />
+                    <Setter Property="Background" Value="{DynamicResource GhostHoverBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource TextFaintBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsFailed}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource ComboItemSelectedForegroundBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureRoundTitleTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchMeasureDeviceLabelTextStyle}">
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureRoundValueTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource KeyDetectionMetricValueTextStyle}">
+            <Setter Property="FontSize" Value="26" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureRoundStatusTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource SensitivityMatchLabelTextStyle}">
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureRoundDetailTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HintTextStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="LineHeight" Value="20" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureFooterStatusBorderStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource SensitivityMatchInsetBorderStyle}">
+            <Setter Property="Padding" Value="14,10" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureFooterStatusPillTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource StatusPillTextStyle}">
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        </Style>
+
+        <Style x:Key="SensitivityMatchMeasureFooterHintTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource HintTextStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="LineHeight" Value="18" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="SectionIntroStyle"
+               TargetType="Grid">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsIntroStep}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SectionSetupStyle"
+               TargetType="Grid">
+            <Setter Property="Visibility" Value="Visible" />
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="IsEnabled" Value="False" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSetupStep}" Value="True">
+                    <Setter Property="Opacity" Value="1" />
+                    <Setter Property="IsHitTestVisible" Value="True" />
+                    <Setter Property="IsEnabled" Value="True" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SectionSetupFooterStyle"
+               TargetType="Grid">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="IsEnabled" Value="False" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSetupStep}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Setter Property="Opacity" Value="1" />
+                    <Setter Property="IsHitTestVisible" Value="True" />
+                    <Setter Property="IsEnabled" Value="True" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SectionMeasureStyle"
+               TargetType="Grid">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMeasureStep}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource WindowBackgroundBrush}"
+          RenderOptions.ClearTypeHint="{StaticResource ClearTypeHint.Enabled}">
+        <Grid Margin="{StaticResource Layout.SensitivityMatch.PageMargin}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="1" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="1" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    BorderThickness="1">
+                <Border.Style>
+                    <Style TargetType="Border"
+                           BasedOn="{StaticResource SensitivityMatchPanelBorderStyle}">
+                        <Setter Property="MinHeight" Value="{StaticResource Layout.SensitivityMatch.HeaderMinHeight}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsIntroStep}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSetupStep}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsMeasureStep}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.35*" />
+                        <ColumnDefinition Width="0.95*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Margin="0,0,28,0">
+                        <TextBlock Text="{DynamicResource SensitivityMatch.Header.Eyebrow}"
+                                   Style="{StaticResource KeyDetectionEyebrowTextStyle}" />
+                        <TextBlock Margin="0,8,0,0"
+                                   Text="{DynamicResource SensitivityMatch.PageTitle}"
+                                   Style="{StaticResource SensitivityMatchHeadlineTextStyle}" />
+                        <StackPanel Margin="0,14,0,0"
+                                    Orientation="Horizontal">
+                            <Border Padding="12,6"
+                                    HorizontalAlignment="Left"
+                                    Tag="{Binding StatusPillText}">
+                                <Border.Style>
+                                    <Style TargetType="Border"
+                                           BasedOn="{StaticResource SensitivityMatchInsetBorderStyle}">
+                                        <Style.Triggers>
+                                            <Trigger Property="Tag" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding StatusPillText}"
+                                           Style="{StaticResource StatusPillTextStyle}" />
+                            </Border>
+                            <TextBlock Margin="14,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding AvailableDeviceCountText}"
+                                       Style="{StaticResource SensitivityMatchLabelTextStyle}" />
+                        </StackPanel>
+                        <TextBlock Margin="0,14,0,0"
+                                   Text="{Binding StatusMessage}"
+                                   TextWrapping="Wrap"
+                                   Style="{StaticResource StatusMessageTextStyle}" />
+                        <TextBlock Margin="0,6,0,0"
+                                   Text="{Binding HintText}"
+                                   TextWrapping="Wrap"
+                                   Style="{StaticResource HintTextStyle}" />
+                    </StackPanel>
+
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <WrapPanel HorizontalAlignment="Right">
+                            <Border>
+                                <Border.Style>
+                                    <Style TargetType="Border"
+                                           BasedOn="{StaticResource SensitivityMatchStepTagBorderStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CurrentStep}"
+                                                         Value="{x:Static models:SensitivityMatchWizardStep.Intro}">
+                                                <Setter Property="Tag" Value="True" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{DynamicResource SensitivityMatch.Step.Intro}"
+                                           Style="{StaticResource SensitivityMatchStepTagTextStyle}" />
+                            </Border>
+                            <Border>
+                                <Border.Style>
+                                    <Style TargetType="Border"
+                                           BasedOn="{StaticResource SensitivityMatchStepTagBorderStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CurrentStep}"
+                                                         Value="{x:Static models:SensitivityMatchWizardStep.Setup}">
+                                                <Setter Property="Tag" Value="True" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{DynamicResource SensitivityMatch.Step.Setup}"
+                                           Style="{StaticResource SensitivityMatchStepTagTextStyle}" />
+                            </Border>
+                            <Border>
+                                <Border.Style>
+                                    <Style TargetType="Border"
+                                           BasedOn="{StaticResource SensitivityMatchStepTagBorderStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CurrentStep}"
+                                                         Value="{x:Static models:SensitivityMatchWizardStep.Measure}">
+                                                <Setter Property="Tag" Value="True" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{DynamicResource SensitivityMatch.Step.Measure}"
+                                           Style="{StaticResource SensitivityMatchStepTagTextStyle}" />
+                            </Border>
+                        </WrapPanel>
+
+                        <Border Grid.Row="2"
+                                Style="{StaticResource SensitivityMatchInsetBorderStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="18" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{DynamicResource SensitivityMatch.Setup.DeviceCountLabel}"
+                                               Style="{StaticResource SensitivityMatchLabelTextStyle}" />
+                                    <TextBlock Margin="0,8,0,0"
+                                               Text="{Binding AvailableDeviceCountText}"
+                                               Style="{StaticResource SensitivityMatchCompactValueTextStyle}" />
+                                </StackPanel>
+                                <Border Grid.Column="2"
+                                        BorderBrush="{DynamicResource HairlineBrush}"
+                                        BorderThickness="1,0,0,0"
+                                        Padding="18,0,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="{DynamicResource SensitivityMatch.Header.RequirementsLabel}"
+                                                   Style="{StaticResource SensitivityMatchLabelTextStyle}" />
+                                        <TextBlock Margin="0,8,0,0"
+                                                   Text="{DynamicResource SensitivityMatch.Header.Requirements}"
+                                                   TextWrapping="Wrap"
+                                                   Style="{StaticResource HintTextStyle}" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1"
+                    Background="{DynamicResource HairlineBrush}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsIntroStep}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSetupStep}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsMeasureStep}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+            </Border>
+
+            <Border Grid.Row="2"
+                    BorderThickness="1,0,1,0"
+                    Style="{StaticResource SensitivityMatchPanelBorderStyle}">
+                <Grid>
+                    <Grid x:Name="IntroSectionHost"
+                          Style="{StaticResource SectionIntroStyle}">
+                        <Grid x:Name="IntroHeroRoot"
+                              ClipToBounds="True">
+                            <Grid x:Name="IntroOpeningGuideLayer"
+                                  Opacity="0"
+                                  Panel.ZIndex="0"
+                                  IsHitTestVisible="False">
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Orientation="Horizontal">
+                                    <TextBlock x:Name="IntroOpeningWord1Block"
+                                               Text="{DynamicResource SensitivityMatch.Intro.Hero.Opening.Word1}"
+                                               Style="{StaticResource SensitivityMatchIntroOpeningWordTextStyle}">
+                                        <TextBlock.Margin>0,0,22,0</TextBlock.Margin>
+                                    </TextBlock>
+                                    <TextBlock x:Name="IntroOpeningWord2Block"
+                                               Text="{DynamicResource SensitivityMatch.Intro.Hero.Opening.Word2}"
+                                               Style="{StaticResource SensitivityMatchIntroOpeningWordTextStyle}">
+                                        <TextBlock.Margin>0,0,22,0</TextBlock.Margin>
+                                    </TextBlock>
+                                    <TextBlock x:Name="IntroOpeningWord3Block"
+                                               Text="{DynamicResource SensitivityMatch.Intro.Hero.Opening.Word3}"
+                                               Style="{StaticResource SensitivityMatchIntroOpeningWordTextStyle}">
+                                        <TextBlock.Margin>0,0,22,0</TextBlock.Margin>
+                                    </TextBlock>
+                                    <TextBlock x:Name="IntroOpeningWord4Block"
+                                               Text="{DynamicResource SensitivityMatch.Intro.Hero.Opening.Word4}"
+                                               Style="{StaticResource SensitivityMatchIntroOpeningWordTextStyle}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Canvas x:Name="IntroMorphCanvas"
+                                    Panel.ZIndex="1"
+                                    Opacity="0"
+                                    IsHitTestVisible="False" />
+
+                            <Grid x:Name="IntroSettledLayer"
+                                  Opacity="0"
+                                  Panel.ZIndex="2"
+                                  IsHitTestVisible="False">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="168" />
+                                    <RowDefinition Height="74" />
+                                    <RowDefinition Height="154" />
+                                    <RowDefinition Height="150" />
+                                    <RowDefinition Height="148" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.32*" />
+                                    <ColumnDefinition Width="0.52*" />
+                                    <ColumnDefinition Width="1.36*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RenderTransform>
+                                    <TranslateTransform x:Name="IntroSettledTranslate"
+                                                        Y="22" />
+                                </Grid.RenderTransform>
+
+                                <TextBlock x:Name="IntroHeroTopLeftWord"
+                                           Grid.Row="0"
+                                           Grid.Column="0"
+                                           Margin="8,2,0,0"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Top"
+                                           Text="{DynamicResource SensitivityMatch.Intro.Hero.TopLeftPrimary}"
+                                           Style="{StaticResource SensitivityMatchIntroHeroPrimaryWordTextStyle}" />
+
+                                <TextBlock x:Name="IntroHeroLeftLabel"
+                                           Grid.Row="5"
+                                           Grid.Column="0"
+                                           Margin="4,0,0,26"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Bottom"
+                                           Text="{DynamicResource SensitivityMatch.Intro.Hero.LeftSideLabel}"
+                                           Style="{StaticResource SensitivityMatchIntroHeroLabelTextStyle}" />
+
+                                <TextBlock x:Name="IntroHeroConnector"
+                                           Grid.Row="3"
+                                           Grid.Column="1"
+                                           Margin="0,14,0,0"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Top"
+                                           Text="{DynamicResource SensitivityMatch.Intro.Hero.CenterConnector}"
+                                           Style="{StaticResource SensitivityMatchIntroHeroConnectorTextStyle}" />
+
+                                <TextBlock x:Name="IntroHeroRightLabel"
+                                           Grid.Row="0"
+                                           Grid.Column="2"
+                                           Margin="0,18,10,0"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Top"
+                                           Text="{DynamicResource SensitivityMatch.Intro.Hero.RightSideLabel}"
+                                           Style="{StaticResource SensitivityMatchIntroHeroLabelTextStyle}" />
+
+                                <StackPanel Grid.Row="2"
+                                            Grid.RowSpan="4"
+                                            Grid.Column="2"
+                                            Margin="0,0,10,18"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Bottom"
+                                            Orientation="Vertical">
+                                    <TextBlock x:Name="IntroHeroBottomRightWord1"
+                                               HorizontalAlignment="Right"
+                                               Text="{DynamicResource SensitivityMatch.Intro.Hero.BottomRightLine1}"
+                                               Style="{StaticResource SensitivityMatchIntroHeroStackWordTextStyle}" />
+
+                                    <TextBlock x:Name="IntroHeroBottomRightWord2"
+                                               Margin="0,-34,0,0"
+                                               HorizontalAlignment="Right"
+                                               Text="{DynamicResource SensitivityMatch.Intro.Hero.BottomRightLine2}"
+                                               Style="{StaticResource SensitivityMatchIntroHeroStackWordTextStyle}" />
+
+                                    <TextBlock x:Name="IntroHeroBottomRightWord3"
+                                               Margin="0,-34,0,0"
+                                               HorizontalAlignment="Right"
+                                               Text="{DynamicResource SensitivityMatch.Intro.Hero.BottomRightLine3}"
+                                               Style="{StaticResource SensitivityMatchIntroHeroStackWordTextStyle}" />
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+
+                    <Grid x:Name="SetupSectionHost"
+                          Style="{StaticResource SectionSetupStyle}">
+                        <Grid x:Name="SetupHeroRoot"
+                              ClipToBounds="True">
+                            <Grid x:Name="SetupSettledLayer"
+                                  Panel.ZIndex="0"
+                                  IsHitTestVisible="False">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="196" />
+                                    <RowDefinition Height="104" />
+                                    <RowDefinition Height="146" />
+                                    <RowDefinition Height="128" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="114" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.08*" />
+                                    <ColumnDefinition Width="0.86*" />
+                                    <ColumnDefinition Width="1.06*" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock x:Name="SetupHeroTopLeftWord"
+                                           Grid.Row="0"
+                                           Grid.RowSpan="2"
+                                           Grid.Column="0"
+                                           Grid.ColumnSpan="2"
+                                           Margin="0,8,0,0"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Top"
+                                           Text="{DynamicResource SensitivityMatch.Setup.Hero.TopLeftPrimary}"
+                                           Style="{StaticResource SensitivityMatchIntroHeroPrimaryWordTextStyle}" />
+
+                                <TextBlock x:Name="SetupHeroRightLabel"
+                                           Grid.Row="4"
+                                           Grid.RowSpan="2"
+                                           Grid.Column="1"
+                                           Grid.ColumnSpan="2"
+                                           Margin="0,0,0,6"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Bottom"
+                                           Text="{DynamicResource SensitivityMatch.Setup.Hero.RightSideLabel}"
+                                           Style="{StaticResource SensitivityMatchIntroHeroPrimaryWordTextStyle}" />
+                            </Grid>
+
+                            <Grid x:Name="SetupUtilityOverlay"
+                                  Panel.ZIndex="1">
+                                <Grid.RenderTransform>
+                                    <TranslateTransform x:Name="SetupUtilityTranslate" />
+                                </Grid.RenderTransform>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="196" />
+                                    <RowDefinition Height="104" />
+                                    <RowDefinition Height="146" />
+                                    <RowDefinition Height="128" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="114" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.08*" />
+                                    <ColumnDefinition Width="0.86*" />
+                                    <ColumnDefinition Width="1.06*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Row="0"
+                                      Grid.RowSpan="6"
+                                      Grid.Column="0"
+                                      Grid.ColumnSpan="3"
+                                      Margin="0,42,0,54">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="1*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="1*" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="1*" />
+                                    </Grid.RowDefinitions>
+
+                                    <Rectangle Grid.Column="1"
+                                               Grid.Row="0"
+                                               Grid.RowSpan="3"
+                                               Width="1"
+                                               Margin="0,118,0,118"
+                                               VerticalAlignment="Stretch"
+                                               Fill="{DynamicResource HairlineBrush}"
+                                               Opacity="0.16" />
+
+                                    <Grid x:Name="SetupSourcePanel"
+                                          Grid.Row="1"
+                                          Grid.Column="0"
+                                          Margin="0,0,58,0"
+                                          HorizontalAlignment="Right"
+                                          VerticalAlignment="Top"
+                                          Width="436">
+                                        <Grid.RenderTransform>
+                                            <TranslateTransform x:Name="SetupSourcePanelTranslate" />
+                                        </Grid.RenderTransform>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="24" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <ContentControl x:Name="SetupSourceInfoBandHost"
+                                                        Grid.Row="0"
+                                                        HorizontalAlignment="Right"
+                                                        Content="{Binding SourceInfoBand}"
+                                                        ContentTemplate="{StaticResource SensitivityMatchSetupSourceEditorialInfoBandTemplate}">
+                                            <ContentControl.RenderTransform>
+                                                <TranslateTransform x:Name="SetupSourceInfoBandTranslate" />
+                                            </ContentControl.RenderTransform>
+                                        </ContentControl>
+
+                                        <Rectangle Grid.Row="1"
+                                                   Height="1"
+                                                   VerticalAlignment="Center"
+                                                   Fill="{DynamicResource HairlineBrush}"
+                                                   Opacity="0.24" />
+
+                                        <Grid Grid.Row="2"
+                                              HorizontalAlignment="Right">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="24" />
+                                                <ColumnDefinition Width="168" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="12" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0"
+                                                       Grid.Column="2"
+                                                       HorizontalAlignment="Right"
+                                                       Text="{DynamicResource SensitivityMatch.Setup.SourceDpi}"
+                                                       Style="{StaticResource SensitivityMatchSetupOverlayLabelTextStyle}" />
+                                            <Button Grid.Row="2"
+                                                    Grid.Column="0"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center"
+                                                    Command="{Binding BindSlotCommand}"
+                                                    CommandParameter="{x:Static models:SensitivityMatchBindingSlot.SourceMouse}"
+                                                    Content="{Binding SourceBindButtonText}"
+                                                    IsEnabled="{Binding HasMinimumDeviceCount}"
+                                                    Style="{StaticResource SensitivityMatchSetupEditorialBindButtonStyle}" />
+                                            <TextBox Grid.Row="2"
+                                                     Grid.Column="2"
+                                                     HorizontalAlignment="Right"
+                                                     TextChanged="SetupDpiTextBox_TextChanged"
+                                                     Text="{Binding SourceDpiText, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource SensitivityMatchSetupSourceEditorialDpiInputTextBoxStyle}" />
+                                        </Grid>
+                                    </Grid>
+
+                                    <Grid x:Name="SetupTargetPanel"
+                                          Grid.Row="1"
+                                          Grid.Column="2"
+                                          Margin="58,0,0,0"
+                                          HorizontalAlignment="Left"
+                                          VerticalAlignment="Top"
+                                          Width="436">
+                                        <Grid.RenderTransform>
+                                            <TranslateTransform x:Name="SetupTargetPanelTranslate" />
+                                        </Grid.RenderTransform>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="24" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <ContentControl x:Name="SetupTargetInfoBandHost"
+                                                        Grid.Row="0"
+                                                        HorizontalAlignment="Left"
+                                                        Content="{Binding TargetInfoBand}"
+                                                        ContentTemplate="{StaticResource SensitivityMatchSetupTargetEditorialInfoBandTemplate}">
+                                            <ContentControl.RenderTransform>
+                                                <TranslateTransform x:Name="SetupTargetInfoBandTranslate" />
+                                            </ContentControl.RenderTransform>
+                                        </ContentControl>
+
+                                        <Rectangle Grid.Row="1"
+                                                   Height="1"
+                                                   VerticalAlignment="Center"
+                                                   Fill="{DynamicResource HairlineBrush}"
+                                                   Opacity="0.24" />
+
+                                        <Grid Grid.Row="2"
+                                              HorizontalAlignment="Left">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="168" />
+                                                <ColumnDefinition Width="24" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="12" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0"
+                                                       Grid.Column="0"
+                                                       HorizontalAlignment="Left"
+                                                       Text="{DynamicResource SensitivityMatch.Setup.TargetDpi}"
+                                                       Style="{StaticResource SensitivityMatchSetupOverlayLabelTextStyle}" />
+                                            <TextBox Grid.Row="2"
+                                                     Grid.Column="0"
+                                                     HorizontalAlignment="Left"
+                                                     TextChanged="SetupDpiTextBox_TextChanged"
+                                                     Text="{Binding TargetCurrentDpiText, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource SensitivityMatchSetupTargetEditorialDpiInputTextBoxStyle}" />
+                                            <Button Grid.Row="2"
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center"
+                                                    Command="{Binding BindSlotCommand}"
+                                                    CommandParameter="{x:Static models:SensitivityMatchBindingSlot.TargetMouse}"
+                                                    Content="{Binding TargetBindButtonText}"
+                                                    IsEnabled="{Binding HasMinimumDeviceCount}"
+                                                    Style="{StaticResource SensitivityMatchSetupEditorialBindButtonStyle}" />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+
+                    <Grid x:Name="MeasureSectionHost"
+                          Style="{StaticResource SectionMeasureStyle}"
+                          ClipToBounds="True">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0"
+                              Margin="0,28,0,28">
+                            <Grid x:Name="MeasureSettledLayer"
+                                  Panel.ZIndex="0"
+                                  IsHitTestVisible="False">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="1*" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock x:Name="MeasureHeroLeftWord"
+                                           Grid.Column="0"
+                                           Margin="0,0,0,0"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Top"
+                                           RenderTransformOrigin="0,0"
+                                           Text="SOURCE"
+                                           Style="{StaticResource MeasureWatermarkTextStyle}">
+                                    <TextBlock.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform x:Name="MeasureSourceScale" />
+                                            <TranslateTransform x:Name="MeasureSourceTranslate" />
+                                        </TransformGroup>
+                                    </TextBlock.RenderTransform>
+                                </TextBlock>
+
+                                <TextBlock x:Name="MeasureHeroRightWord"
+                                           Grid.Column="2"
+                                           Margin="0,0,0,0"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Bottom"
+                                           RenderTransformOrigin="0,0"
+                                           Text="TARGET"
+                                           Style="{StaticResource MeasureWatermarkTextStyle}">
+                                    <TextBlock.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform x:Name="MeasureTargetScale" />
+                                            <TranslateTransform x:Name="MeasureTargetTranslate" />
+                                        </TransformGroup>
+                                    </TextBlock.RenderTransform>
+                                </TextBlock>
+                            </Grid>
+
+                            <Grid x:Name="MeasureDataLayer"
+                                  Margin="0,20,0,34"
+                                  Panel.ZIndex="1">
+                                <Grid.RenderTransform>
+                                    <TranslateTransform x:Name="MeasureDataTranslate" />
+                                </Grid.RenderTransform>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="1*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Column="0"
+                                      Margin="0,38,24,34"
+                                      Style="{StaticResource MeasureLaneHostPanelStyle}">
+                                    <Grid HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Stretch">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0"
+                                                   Margin="0,76,0,0"
+                                                   HorizontalAlignment="Right"
+                                                   Tag="{Binding MeasureSourceValueText}"
+                                                   Text="{DynamicResource SensitivityMatch.Measure.SourceLane}"
+                                                   TextAlignment="Right">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock"
+                                                       BasedOn="{StaticResource MeasureEditorialAxisLabelTextStyle}">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Tag" Value="--">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <TextBlock Grid.Row="1"
+                                                   Margin="0,8,-36,0"
+                                                   HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center"
+                                                   Text="{Binding MeasureSourceValueText}"
+                                                   TextAlignment="Right">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock"
+                                                       BasedOn="{StaticResource MeasureGiantPercentageTextStyle}">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Text" Value="--">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <StackPanel Grid.Row="2"
+                                                    Margin="0,0,0,52"
+                                                    HorizontalAlignment="Stretch"
+                                                    VerticalAlignment="Bottom"
+                                                    Tag="{Binding MeasureSourceValueText}">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Tag" Value="--">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <TextBlock HorizontalAlignment="Right"
+                                                       MaxWidth="318"
+                                                       Text="{Binding SourceInfoBand.DeviceTitle}"
+                                                       TextAlignment="Right"
+                                                       Style="{StaticResource SensitivityMatchMeasureLaneDeviceTextStyle}" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="0"
+                                                    Grid.RowSpan="3"
+                                                    Width="318"
+                                                    Margin="0,18,0,14"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Tag="{Binding MeasureSourceValueText}">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Tag" Value="--">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <TextBlock HorizontalAlignment="Right"
+                                                       Text="{DynamicResource SensitivityMatch.Measure.SourceLane}"
+                                                       TextAlignment="Right"
+                                                       Style="{StaticResource MeasureEditorialAxisLabelTextStyle}" />
+                                            <TextBlock Margin="0,12,0,0"
+                                                       HorizontalAlignment="Right"
+                                                       Text="{Binding SourceProgressText}"
+                                                       TextAlignment="Right"
+                                                       Style="{StaticResource MeasureEditorialLaneSupportTextStyle}" />
+                                            <Rectangle Height="1"
+                                                       Margin="72,18,0,18"
+                                                       Fill="{DynamicResource HairlineBrush}"
+                                                       Opacity="0.14" />
+                                            <TextBlock HorizontalAlignment="Right"
+                                                       MaxWidth="318"
+                                                       Text="{Binding SourceInfoBand.DeviceTitle}"
+                                                       TextAlignment="Right"
+                                                       Style="{StaticResource SensitivityMatchMeasureLaneDeviceTextStyle}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+
+                                <Grid Grid.Column="1"
+                                      Width="392"
+                                      Margin="8,0"
+                                      VerticalAlignment="Stretch">
+                                    <Grid x:Name="MeasureCenterRoundHost"
+                                          Style="{StaticResource MeasureCenterRoundHostStyle}">
+                                        <Grid.RenderTransform>
+                                            <TranslateTransform x:Name="MeasureCenterRoundTranslate" />
+                                        </Grid.RenderTransform>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+
+                                        <Rectangle Grid.Row="0"
+                                                   Width="1"
+                                                   Margin="0,6,0,20"
+                                                   VerticalAlignment="Stretch"
+                                                   Fill="{DynamicResource HairlineBrush}"
+                                                   Opacity="0.28" />
+
+                                        <StackPanel Grid.Row="1"
+                                                    Width="368"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding MeasureHeroLabelText}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock"
+                                                           BasedOn="{StaticResource MeasureEditorialAxisLabelTextStyle}">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Style.Triggers>
+                                                            <Trigger Property="Text" Value="">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Margin="0,14,0,0"
+                                                       Text="{Binding MeasureHeroSupportText}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock"
+                                                           BasedOn="{StaticResource MeasureCenterResultTitleTextStyle}">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Style.Triggers>
+                                                            <Trigger Property="Text" Value="">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Margin="0,10,0,0"
+                                                       MaxWidth="368"
+                                                       Text="{Binding HintText}"
+                                                       Style="{StaticResource MeasureEditorialCenterSupportTextStyle}" />
+                                        </StackPanel>
+
+                                        <Rectangle Grid.Row="2"
+                                                   Width="1"
+                                                   Margin="0,20,0,6"
+                                                   VerticalAlignment="Stretch"
+                                                   Fill="{DynamicResource HairlineBrush}"
+                                                   Opacity="0.28" />
+                                    </Grid>
+
+                                    <Grid x:Name="MeasureCenterResultHost"
+                                          MaxWidth="360"
+                                          VerticalAlignment="Stretch"
+                                          Style="{StaticResource MeasureCenterResultHostStyle}">
+                                        <Grid.RenderTransform>
+                                            <TranslateTransform x:Name="MeasureCenterResultTranslate" />
+                                        </Grid.RenderTransform>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+
+                                        <Rectangle Grid.Row="0"
+                                                   Width="1"
+                                                   Margin="0,6,0,24"
+                                                   VerticalAlignment="Stretch"
+                                                   Fill="{DynamicResource HairlineBrush}"
+                                                   Opacity="0.22" />
+
+                                        <StackPanel Grid.Row="1"
+                                                    Width="340"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center">
+                                            <Grid Margin="0,10,0,0">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <StackPanel Grid.Row="0">
+                                                    <TextBlock Text="{DynamicResource SensitivityMatch.Result.RecommendedDpi}"
+                                                               Style="{StaticResource MeasureCenterResultLabelTextStyle}" />
+                                                    <TextBlock Margin="0,6,0,0"
+                                                               Text="{Binding RecommendedTargetDpiText}"
+                                                               Style="{StaticResource MeasureCenterResultValueTextStyle}" />
+                                                </StackPanel>
+
+                                                <Rectangle Grid.Row="1"
+                                                           Height="1"
+                                                           Margin="26,12,26,12"
+                                                           Fill="{DynamicResource HairlineBrush}"
+                                                           Opacity="0.16" />
+
+                                                <StackPanel Grid.Row="2">
+                                                    <TextBlock Text="{DynamicResource SensitivityMatch.Result.Scale}"
+                                                               Style="{StaticResource MeasureCenterResultLabelTextStyle}" />
+                                                    <TextBlock Margin="0,6,0,0"
+                                                               Text="{Binding ScaleText}"
+                                                               Style="{StaticResource MeasureCenterResultValueTextStyle}" />
+                                                </StackPanel>
+
+                                                <Rectangle Grid.Row="3"
+                                                           Height="1"
+                                                           Margin="26,12,26,12"
+                                                           Fill="{DynamicResource HairlineBrush}"
+                                                           Opacity="0.16" />
+
+                                                <StackPanel Grid.Row="4">
+                                                    <TextBlock Text="{DynamicResource SensitivityMatch.Result.Consistency}"
+                                                               Style="{StaticResource MeasureCenterResultLabelTextStyle}" />
+                                                    <TextBlock Margin="0,6,0,0"
+                                                               Text="{Binding ConsistencyText}"
+                                                               Style="{StaticResource MeasureCenterResultInlineValueTextStyle}" />
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <TextBlock Margin="0,12,0,0"
+                                                       MaxWidth="320"
+                                                       Text="{Binding HintText}"
+                                                       Style="{StaticResource MeasureEditorialCenterMetaTextStyle}" />
+                                        </StackPanel>
+
+                                        <Rectangle Grid.Row="2"
+                                                   Width="1"
+                                                   Margin="0,24,0,6"
+                                                   VerticalAlignment="Stretch"
+                                                   Fill="{DynamicResource HairlineBrush}"
+                                                   Opacity="0.22" />
+                                    </Grid>
+                                </Grid>
+
+                                <Grid Grid.Column="2"
+                                      Margin="24,38,0,34"
+                                      Style="{StaticResource MeasureLaneHostPanelStyle}">
+                                    <Grid HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Stretch">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0"
+                                                   Margin="0,76,0,0"
+                                                   HorizontalAlignment="Left"
+                                                   Tag="{Binding MeasureTargetValueText}"
+                                                   Text="{DynamicResource SensitivityMatch.Measure.TargetLane}"
+                                                   TextAlignment="Left">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock"
+                                                       BasedOn="{StaticResource MeasureEditorialAxisLabelTextStyle}">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Tag" Value="--">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <TextBlock Grid.Row="1"
+                                                   Margin="-36,8,0,0"
+                                                   HorizontalAlignment="Left"
+                                                   VerticalAlignment="Center"
+                                                   Text="{Binding MeasureTargetValueText}"
+                                                   TextAlignment="Left">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock"
+                                                       BasedOn="{StaticResource MeasureGiantPercentageTextStyle}">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Text" Value="--">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <StackPanel Grid.Row="2"
+                                                    Margin="0,0,0,52"
+                                                    HorizontalAlignment="Stretch"
+                                                    VerticalAlignment="Bottom"
+                                                    Tag="{Binding MeasureTargetValueText}">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Tag" Value="--">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <TextBlock HorizontalAlignment="Left"
+                                                       MaxWidth="318"
+                                                       Text="{Binding TargetInfoBand.DeviceTitle}"
+                                                       TextAlignment="Left"
+                                                       Style="{StaticResource SensitivityMatchMeasureLaneDeviceTextStyle}" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="0"
+                                                    Grid.RowSpan="3"
+                                                    Width="318"
+                                                    Margin="0,18,0,14"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center"
+                                                    Tag="{Binding MeasureTargetValueText}">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Tag" Value="--">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <TextBlock HorizontalAlignment="Left"
+                                                       Text="{DynamicResource SensitivityMatch.Measure.TargetLane}"
+                                                       TextAlignment="Left"
+                                                       Style="{StaticResource MeasureEditorialAxisLabelTextStyle}" />
+                                            <TextBlock Margin="0,12,0,0"
+                                                       HorizontalAlignment="Left"
+                                                       Text="{Binding TargetProgressText}"
+                                                       TextAlignment="Left"
+                                                       Style="{StaticResource MeasureEditorialLaneSupportTextStyle}" />
+                                            <Rectangle Height="1"
+                                                       Margin="0,18,72,18"
+                                                       Fill="{DynamicResource HairlineBrush}"
+                                                       Opacity="0.14" />
+                                            <TextBlock HorizontalAlignment="Left"
+                                                       MaxWidth="318"
+                                                       Text="{Binding TargetInfoBand.DeviceTitle}"
+                                                       TextAlignment="Left"
+                                                       Style="{StaticResource SensitivityMatchMeasureLaneDeviceTextStyle}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+
+                        <Grid x:Name="MeasureRoundsList"
+                              Grid.Row="1"
+                              Margin="0,4,0,10">
+                            <Grid.RenderTransform>
+                                <TranslateTransform x:Name="MeasureRoundsTranslate" />
+                            </Grid.RenderTransform>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0"
+                                  Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="{DynamicResource SensitivityMatch.Measure.RoundsTitle}"
+                                               Style="{StaticResource MeasureEditorialAxisLabelTextStyle}" />
+
+                                <Rectangle Grid.Column="1"
+                                           Height="1"
+                                           Margin="16,8,0,0"
+                                           VerticalAlignment="Top"
+                                           Fill="{DynamicResource HairlineBrush}"
+                                           Opacity="0.16" />
+                            </Grid>
+
+                            <ItemsControl Grid.Row="1"
+                                          ItemsSource="{Binding Rounds}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource MeasureEditorialRoundRowBorderStyle}">
+                                                <Grid VerticalAlignment="Center">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="84" />
+                                                        <ColumnDefinition Width="112" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBlock Grid.Column="0"
+                                                               VerticalAlignment="Center"
+                                                               Text="{Binding Title}"
+                                                               Style="{StaticResource MeasureEditorialRoundTitleTextStyle}" />
+
+                                                    <TextBlock Grid.Column="1"
+                                                               VerticalAlignment="Center"
+                                                               Text="{Binding StatusText}"
+                                                               Style="{StaticResource MeasureEditorialRoundStatusTextStyle}" />
+
+                                                    <TextBlock Grid.Column="2"
+                                                               Margin="18,0,28,0"
+                                                               VerticalAlignment="Center"
+                                                               Text="{Binding DetailText}">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock"
+                                                                   BasedOn="{StaticResource MeasureEditorialRoundDetailTextStyle}">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ShowProgressTrack}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+
+                                                    <Border Grid.Column="2"
+                                                            Margin="18,0,28,0"
+                                                            HorizontalAlignment="Stretch">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border"
+                                                                   BasedOn="{StaticResource MeasureEditorialRoundTrackSurfaceStyle}">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ShowProgressTrack}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <Grid Height="48">
+                                                            <Grid ClipToBounds="True">
+                                                                <Border Margin="0,19,0,0"
+                                                                        HorizontalAlignment="Stretch"
+                                                                        VerticalAlignment="Top"
+                                                                        Style="{StaticResource MeasureEditorialRoundTrackLineStyle}" />
+
+                                                                <Rectangle Margin="0,14,0,0"
+                                                                           HorizontalAlignment="Left"
+                                                                           VerticalAlignment="Top"
+                                                                           Style="{StaticResource MeasureEditorialRoundTrackStartMarkerStyle}" />
+
+                                                                <Canvas x:Name="RoundTrackTravelCanvas"
+                                                                        HorizontalAlignment="Stretch"
+                                                                        VerticalAlignment="Top"
+                                                                        Height="48"
+                                                                        ClipToBounds="True"
+                                                                        UseLayoutRounding="True">
+                                                                    <Grid Canvas.Left="10"
+                                                                          Canvas.Top="7"
+                                                                          Style="{StaticResource MeasureEditorialRoundTrackMouseHostStyle}"
+                                                                          UseLayoutRounding="True">
+                                                                        <Grid.RenderTransform>
+                                                                            <TranslateTransform>
+                                                                                <TranslateTransform.X>
+                                                                                    <MultiBinding Converter="{StaticResource TrackProgressOffsetConverter}"
+                                                                                                  ConverterParameter="60">
+                                                                                        <Binding Path="TrackProgressValue" />
+                                                                                        <Binding ElementName="RoundTrackTravelCanvas"
+                                                                                                 Path="ActualWidth" />
+                                                                                    </MultiBinding>
+                                                                                </TranslateTransform.X>
+                                                                            </TranslateTransform>
+                                                                        </Grid.RenderTransform>
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="24" />
+                                                                            <ColumnDefinition Width="2" />
+                                                                            <ColumnDefinition Width="24" />
+                                                                        </Grid.ColumnDefinitions>
+
+                                                                        <Grid Grid.Column="0">
+                                                                            <Border Style="{StaticResource MeasureEditorialRoundTrackMouseBodyStyle}" />
+                                                                            <Border Width="6"
+                                                                                    Height="13"
+                                                                                    VerticalAlignment="Top"
+                                                                                    HorizontalAlignment="Center"
+                                                                                    Margin="0,6,0,0"
+                                                                                    CornerRadius="3"
+                                                                                    Background="#101215" />
+                                                                            <Rectangle Height="1"
+                                                                                       Margin="0,18,0,0"
+                                                                                       VerticalAlignment="Top"
+                                                                                       Fill="#16000000" />
+                                                                        </Grid>
+
+                                                                        <Grid Grid.Column="2">
+                                                                            <Border Style="{StaticResource MeasureEditorialRoundTrackMouseBodyStyle}" />
+                                                                            <Border Width="6"
+                                                                                    Height="13"
+                                                                                    VerticalAlignment="Top"
+                                                                                    HorizontalAlignment="Center"
+                                                                                    Margin="0,6,0,0"
+                                                                                    CornerRadius="3"
+                                                                                    Background="#101215" />
+                                                                            <Rectangle Height="1"
+                                                                                       Margin="0,18,0,0"
+                                                                                       VerticalAlignment="Top"
+                                                                                       Fill="#16000000" />
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                </Canvas>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <TextBlock Grid.Column="3"
+                                                               MinWidth="84"
+                                                               HorizontalAlignment="Right"
+                                                               VerticalAlignment="Center"
+                                                               Text="{Binding ValueText}"
+                                                               Style="{StaticResource MeasureEditorialRoundValueTextStyle}" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                        </Grid>
+
+                    <Canvas x:Name="MeasureTransitionOverlay"
+                            Panel.ZIndex="8"
+                            Visibility="Collapsed"
+                            IsHitTestVisible="False">
+                        <TextBlock x:Name="MeasureTransitionLeftWord"
+                                   Text="SOURCE"
+                                   RenderTransformOrigin="0,0"
+                                   Style="{StaticResource MeasureTransitionOverlayWordTextStyle}">
+                            <TextBlock.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform x:Name="MeasureTransitionLeftScale" />
+                                    <TranslateTransform x:Name="MeasureTransitionLeftTranslate" />
+                                </TransformGroup>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+
+                        <TextBlock x:Name="MeasureTransitionRightWord"
+                                   Text="TARGET"
+                                   RenderTransformOrigin="0,0"
+                                   Style="{StaticResource MeasureTransitionOverlayWordTextStyle}">
+                            <TextBlock.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform x:Name="MeasureTransitionRightScale" />
+                                    <TranslateTransform x:Name="MeasureTransitionRightTranslate" />
+                                </TransformGroup>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                    </Canvas>
+                </Grid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="3" Background="{DynamicResource HairlineBrush}" />
+
+            <Border Grid.Row="4"
+                    MinHeight="{StaticResource Layout.SensitivityMatch.ActionMinHeight}"
+                    BorderThickness="1,0,1,1"
+                    Style="{StaticResource SensitivityMatchPanelBorderStyle}">
+                <Grid>
+                    <Grid x:Name="IntroActionSectionHost"
+                          Style="{StaticResource SectionIntroStyle}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid x:Name="IntroActionHost"
+                              Grid.Column="1"
+                              Opacity="0">
+                            <Grid.RenderTransform>
+                                <TranslateTransform x:Name="IntroActionTranslate"
+                                                    Y="12" />
+                            </Grid.RenderTransform>
+                            <Button x:Name="IntroStartButton"
+                                    Click="IntroStartButton_Click"
+                                    Content="{DynamicResource SensitivityMatch.Button.StartSetup}"
+                                    IsHitTestVisible="False"
+                                    IsTabStop="False"
+                                    Style="{StaticResource SensitivityMatchPrimaryButtonStyle}" />
+                        </Grid>
+                    </Grid>
+
+                    <Grid x:Name="SetupFooterHost"
+                          Style="{StaticResource SectionSetupFooterStyle}">
+                        <Grid.RenderTransform>
+                            <TranslateTransform x:Name="SetupFooterTranslate" />
+                        </Grid.RenderTransform>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button Click="SetupBackButton_Click"
+                                Content="{DynamicResource SensitivityMatch.Button.Back}"
+                                Style="{StaticResource SensitivityMatchSecondaryButtonStyle}" />
+                        <Button Grid.Column="2"
+                                Click="ContinueToMeasureButton_Click"
+                                Content="{DynamicResource SensitivityMatch.Button.ContinueToMeasure}"
+                                IsEnabled="{Binding IsContinueFromSetupEnabled}"
+                                Style="{StaticResource SensitivityMatchPrimaryButtonStyle}" />
+                    </Grid>
+
+                    <Grid x:Name="MeasureFooterHost"
+                          Style="{StaticResource SectionMeasureStyle}">
+                        <Grid.RenderTransform>
+                            <TranslateTransform x:Name="MeasureFooterTranslate" />
+                        </Grid.RenderTransform>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button Click="MeasureBackButton_Click"
+                                Content="{DynamicResource SensitivityMatch.Button.Back}"
+                                Style="{StaticResource SensitivityMatchSecondaryButtonStyle}" />
+
+                        <StackPanel Grid.Column="1"
+                                    HorizontalAlignment="Center"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <TextBlock
+                                       Foreground="{DynamicResource TextStrongBrush}"
+                                       Text="{Binding StatusPillText}"
+                                       Style="{StaticResource SensitivityMatchLabelTextStyle}" />
+                        </StackPanel>
+
+                        <Button Grid.Column="2"
+                                Command="{Binding StartRoundCommand}"
+                                Content="{Binding StartRoundButtonText}"
+                                Style="{StaticResource MeasureFooterStartButtonStyle}" />
+
+                        <StackPanel Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    Style="{StaticResource MeasureFooterResultActionsHostStyle}">
+                            <Button Command="{Binding RemeasureCommand}"
+                                    Content="{DynamicResource SensitivityMatch.Button.Remeasure}"
+                                    Style="{StaticResource SensitivityMatchSecondaryButtonStyle}" />
+                            <Button Margin="10,0,0,0"
+                                    Command="{Binding CopyRecommendedDpiCommand}"
+                                    Content="{DynamicResource SensitivityMatch.Button.CopyRecommendedDpi}"
+                                    Style="{StaticResource SensitivityMatchPrimaryButtonStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
