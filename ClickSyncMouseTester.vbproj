@@ -1,0 +1,92 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>ClickSyncMouseTester</AssemblyName>
+    <RootNamespace>WpfApp1</RootNamespace>
+    <MyType>Custom</MyType>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionStrict>Off</OptionStrict>
+    <OptionInfer>On</OptionInfer>
+    <NoWarn>41999;42016;42017;42018;42019;42020;42021;42022;42032;42036;42314</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Import Include="System.Threading.Tasks" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows" />
+    <Import Include="System.Windows.Controls" />
+    <Import Include="System.Windows.Data" />
+    <Import Include="System.Windows.Documents" />
+    <Import Include="System.Windows.Input" />
+    <Import Include="System.Windows.Shapes" />
+    <Import Include="System.Windows.Media" />
+    <Import Include="System.Windows.Media.Imaging" />
+    <Import Include="System.Windows.Navigation" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ApplicationDefinition Remove="ClickSyncMouseTester.Tests\**\*.xaml" />
+    <ApplicationDefinition Remove="artifacts\**\*.xaml" />
+    <ApplicationDefinition Remove="obj\**\*.xaml" />
+    <ApplicationDefinition Remove="obj_temp*\**\*.xaml" />
+    <ApplicationDefinition Remove="obj_codex\**\*.xaml" />
+    <ApplicationDefinition Remove="bin_temp*\**\*.xaml" />
+    <ApplicationDefinition Remove=".codex-verify\**\*.xaml" />
+    <Page Remove="ClickSyncMouseTester.Tests\**\*.xaml" />
+    <Page Remove="artifacts\**\*.xaml" />
+    <Page Remove="obj\**\*.xaml" />
+    <Page Remove="obj_temp*\**\*.xaml" />
+    <Page Remove="obj_codex\**\*.xaml" />
+    <Page Remove="bin_temp*\**\*.xaml" />
+    <Page Remove=".codex-verify\**\*.xaml" />
+    <Compile Remove="ClickSyncMouseTester.Tests\**\*.vb" />
+    <Compile Remove="artifacts\**\*.vb" />
+    <Compile Remove="obj\**\*.vb" />
+    <Compile Remove="obj_temp*\**\*.vb" />
+    <Compile Remove="obj_codex\**\*.vb" />
+    <Compile Remove="bin_temp*\**\*.vb" />
+    <Compile Remove=".codex-verify\**\*.vb" />
+    <EmbeddedResource Remove="ClickSyncMouseTester.Tests\**\*" />
+    <EmbeddedResource Remove="artifacts\**\*" />
+    <EmbeddedResource Remove="obj_temp*\**\*" />
+    <EmbeddedResource Remove="bin_temp*\**\*" />
+    <None Remove="ClickSyncMouseTester.Tests\**\*" />
+    <None Remove="artifacts\**\*" />
+    <None Remove="obj_temp*\**\*" />
+    <None Remove="bin_temp*\**\*" />
+    <None Remove="founts\SpaceGrotesk\ttf\static\*.ttf" />
+    <Resource Include="founts\SpaceGrotesk\ttf\static\*.ttf" />
+    <None Remove="founts\苹方\*.otf" />
+    <Resource Remove="founts\苹方\*.otf" />
+    <None Update="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+    <Compile Update="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Update="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+    </EmbeddedResource>
+    <Compile Update="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+</Project>

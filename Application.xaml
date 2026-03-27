@@ -1,0 +1,44 @@
+<Application x:Class="Application"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:pageViews="clr-namespace:WpfApp1.Views.Pages"
+    xmlns:pageViewModels="clr-namespace:WpfApp1.ViewModels.Pages"
+    xmlns:viewModels="clr-namespace:WpfApp1.ViewModels">
+    <Application.Resources>
+        <ResourceDictionary>
+            <FontFamily x:Key="Font.Meta">Segoe UI</FontFamily>
+            <FontFamily x:Key="Font.MicroUi">Segoe UI</FontFamily>
+            <FontFamily x:Key="Font.Body">Segoe UI</FontFamily>
+            <FontFamily x:Key="Font.DisplaySans">Segoe UI</FontFamily>
+            <FontFamily x:Key="Font.ListDisplay">Segoe UI</FontFamily>
+            <FontFamily x:Key="Font.Serif">Segoe UI</FontFamily>
+            <FontFamily x:Key="Font.Mono">Consolas</FontFamily>
+            <FontFamily x:Key="Font.EditorialSerif">Segoe UI</FontFamily>
+            <FontFamily x:Key="Font.EditorialDisplay">Segoe UI</FontFamily>
+            <DataTemplate DataType="{x:Type viewModels:MainWindowViewModel}">
+                <pageViews:PollingWorkspacePage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type pageViewModels:MousePerformancePageViewModel}">
+                <pageViews:MousePerformancePage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type pageViewModels:KeyDetectionPageViewModel}">
+                <pageViews:KeyDetectionPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type pageViewModels:SensitivityMatchingPageViewModel}">
+                <pageViews:SensitivityMatchingPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type pageViewModels:AngleCalibrationPageViewModel}">
+                <pageViews:AngleCalibrationPage />
+            </DataTemplate>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Typography/Typography.Invariant.xaml" />
+                <ResourceDictionary Source="Resources/Tokens/Motion.xaml" />
+                <ResourceDictionary Source="Resources/Tokens/Layout.xaml" />
+                <ResourceDictionary Source="Resources/Tokens/TextRendering.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Text.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Controls.xaml" />
+                <ResourceDictionary Source="Resources/Themes/Theme.Dark.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
