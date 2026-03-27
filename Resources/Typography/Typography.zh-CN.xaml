@@ -1,0 +1,42 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:windows="clr-namespace:System.Windows;assembly=PresentationCore">
+    <sys:Double x:Key="TypeScale.MicroLabel">12</sys:Double>
+    <sys:Double x:Key="TypeScale.MetricValue">28</sys:Double>
+    <sys:Double x:Key="TypeScale.RailMetricValue">18</sys:Double>
+    <sys:Double x:Key="TypeScale.BodySupport">14</sys:Double>
+    <sys:Double x:Key="TypeScale.StatusMessage">14</sys:Double>
+    <sys:Double x:Key="TypeScale.Hint">13</sys:Double>
+    <sys:Double x:Key="TypeScale.PrimaryButton">14</sys:Double>
+    <sys:Double x:Key="TypeScale.SecondaryButton">12</sys:Double>
+    <sys:Double x:Key="TypeScale.ModeButton">11.5</sys:Double>
+    <sys:Double x:Key="TypeScale.ComboBox">15</sys:Double>
+    <sys:Double x:Key="TypeScale.StatusPill">12</sys:Double>
+    <sys:Double x:Key="TypeScale.HistoryTrace">14</sys:Double>
+    <sys:Double x:Key="TypeScale.NavigationMenuTitle">80</sys:Double>
+    <sys:Double x:Key="LineHeight.NavigationMenuTitle">94</sys:Double>
+    <sys:Double x:Key="Layout.Navigation.MenuItemMinHeight.Localized">144</sys:Double>
+    <sys:Double x:Key="Layout.Navigation.MenuMaxHeight.Localized">760</sys:Double>
+    <sys:Double x:Key="Layout.Navigation.ContentMaxWidth.Localized">1200</sys:Double>
+    <x:Static x:Key="TextWeight.MicroLabel" Member="windows:FontWeights.Normal" />
+    <x:Static x:Key="TextWeight.BodySupport" Member="windows:FontWeights.Normal" />
+    <x:Static x:Key="TextWeight.StatusMessage" Member="windows:FontWeights.Normal" />
+    <x:Static x:Key="TextWeight.Hint" Member="windows:FontWeights.Normal" />
+    <x:Static x:Key="TextWeight.StatusPill" Member="windows:FontWeights.Normal" />
+    <x:Static x:Key="TextWeight.HistoryTrace" Member="windows:FontWeights.Normal" />
+    <x:Static x:Key="TextWeight.ComboBox" Member="windows:FontWeights.Normal" />
+    <x:Static x:Key="TextWeight.PrimaryButton" Member="windows:FontWeights.SemiBold" />
+    <x:Static x:Key="TextWeight.SecondaryButton" Member="windows:FontWeights.Normal" />
+    <x:Static x:Key="TextWeight.ModeButton" Member="windows:FontWeights.Medium" />
+    <GridLength x:Key="Layout.Navigation.ItemLeadSpacing.Localized">16</GridLength>
+    <Thickness x:Key="Layout.Navigation.MenuRegionMargin.Localized">0,0,0,0</Thickness>
+    <Thickness x:Key="Layout.Navigation.ItemPadding.Localized">0,2,0,2</Thickness>
+    <Thickness x:Key="Layout.Navigation.ContentStartMargin.Localized">8,0,0,0</Thickness>
+    <Thickness x:Key="Layout.Navigation.TitleMaskMargin.Localized">0,0,0,0</Thickness>
+    <Thickness x:Key="Layout.Navigation.TitleMaskPadding.Localized">0,1,0,2</Thickness>
+    <ScaleTransform x:Key="Transform.NavigationMenuTitle"
+                    x:Shared="False"
+                    ScaleX="1"
+                    ScaleY="1" />
+</ResourceDictionary>

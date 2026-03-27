@@ -1,0 +1,44 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:infra="clr-namespace:WpfApp1.Infrastructure">
+    <Duration x:Key="MotionQuickDuration">0:0:0.12</Duration>
+    <Duration x:Key="MotionMediumDuration">0:0:0.2</Duration>
+    <Duration x:Key="MotionEntryDuration">0:0:0.24</Duration>
+    <Duration x:Key="MotionWindowStartupDuration">0:0:0.34</Duration>
+    <Duration x:Key="MotionPageSwapDuration">0:0:0.18</Duration>
+    <Duration x:Key="MotionCurtainDuration">0:0:0.26</Duration>
+    <Duration x:Key="MotionNavigationCurtainEnterDuration">0:0:0.8</Duration>
+    <Duration x:Key="MotionNavigationCurtainExitDuration">0:0:0.8</Duration>
+    <Duration x:Key="MotionNavigationContentEnterDuration">0:0:0.12</Duration>
+    <Duration x:Key="MotionNavigationContentExitDuration">0:0:0.08</Duration>
+    <Duration x:Key="MotionNavigationItemEnterDuration">0:0:0.8</Duration>
+    <Duration x:Key="MotionNavigationItemExitDuration">0:0:0.24</Duration>
+    <Duration x:Key="MotionPulseDuration">0:0:0.9</Duration>
+    <sys:Double x:Key="MotionNavigationItemEnterBaseDelayMs">400</sys:Double>
+    <sys:Double x:Key="MotionNavigationItemEnterStaggerRangeMs">300</sys:Double>
+    <sys:Double x:Key="MotionNavigationItemEnterStaggerPower">1.5</sys:Double>
+
+    <CubicEase x:Key="MotionOutEase" EasingMode="EaseOut" />
+    <QuadraticEase x:Key="MotionInOutEase" EasingMode="EaseInOut" />
+    <infra:CubicBezierEase x:Key="MotionNavigationCurtainEnterEase"
+                           X1="0.78"
+                           Y1="0"
+                           X2="0.13"
+                           Y2="1" />
+    <infra:CubicBezierEase x:Key="MotionNavigationCurtainExitEase"
+                           X1="0.78"
+                           Y1="0"
+                           X2="0.13"
+                           Y2="1" />
+    <infra:CubicBezierEase x:Key="MotionNavigationContentEnterEase"
+                           X1="0.1"
+                           Y1="0.8"
+                           X2="0.2"
+                           Y2="1" />
+    <infra:CubicBezierEase x:Key="MotionNavigationContentExitEase"
+                           X1="0.78"
+                           Y1="0"
+                           X2="0.13"
+                           Y2="1" />
+</ResourceDictionary>

@@ -1,0 +1,237 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="clr-namespace:WpfApp1.Converters">
+    <converters:ResponsiveFontSizeConverter x:Key="ResponsiveFontSizeConverter" />
+
+    <Style x:Key="BaseTextBlockStyle" TargetType="TextBlock">
+        <Setter Property="TextOptions.TextRenderingMode" Value="{StaticResource TextRenderingMode.ClearType}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+        <Setter Property="TextOptions.TextHintingMode" Value="{StaticResource TextHintingMode.UI}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="RenderOptions.ClearTypeHint" Value="{StaticResource ClearTypeHint.Enabled}" />
+    </Style>
+
+    <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}" />
+
+    <Style x:Key="MicroLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.MicroUi}" />
+        <Setter Property="FontWeight" Value="{DynamicResource TextWeight.MicroLabel}" />
+        <Setter Property="FontSize" Value="{DynamicResource TypeScale.MicroLabel}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="InvariantMicroLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.ListDisplay}" />
+        <Setter Property="FontWeight" Value="{StaticResource TextWeight.InvariantEnglish.MicroLabel}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeScale.InvariantEnglish.MicroLabel}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="MetricValueStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="FontSize" Value="{DynamicResource TypeScale.MetricValue}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="{StaticResource TextRenderingMode.ClearType}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        <Setter Property="Typography.NumeralStyle" Value="Lining" />
+    </Style>
+
+    <Style x:Key="StatusMessageTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Body}" />
+        <Setter Property="FontWeight" Value="{DynamicResource TextWeight.StatusMessage}" />
+        <Setter Property="FontSize" Value="{DynamicResource TypeScale.StatusMessage}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="HintTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Body}" />
+        <Setter Property="FontWeight" Value="{DynamicResource TextWeight.Hint}" />
+        <Setter Property="FontSize" Value="{DynamicResource TypeScale.Hint}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="LineHeight" Value="20" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="StatusPillTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.MicroUi}" />
+        <Setter Property="FontWeight" Value="{DynamicResource TextWeight.StatusPill}" />
+        <Setter Property="FontSize" Value="{DynamicResource TypeScale.StatusPill}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="HistoryTraceTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.MicroUi}" />
+        <Setter Property="FontWeight" Value="{DynamicResource TextWeight.HistoryTrace}" />
+        <Setter Property="FontSize" Value="{DynamicResource TypeScale.HistoryTrace}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="InvariantHistoryTraceTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.ListDisplay}" />
+        <Setter Property="FontWeight" Value="{StaticResource TextWeight.InvariantEnglish.HistoryTrace}" />
+        <Setter Property="FontSize" Value="{StaticResource TypeScale.InvariantEnglish.HistoryTrace}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="DeviceComboItemTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.ListDisplay}" />
+        <Setter Property="FontWeight" Value="{DynamicResource TextWeight.ComboBox}" />
+        <Setter Property="FontSize" Value="{DynamicResource TypeScale.ComboBox}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="{StaticResource TextRenderingMode.Grayscale}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="HeroWatermarkTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.ListDisplay}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource HeroWatermarkBrush}" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="{StaticResource TextRenderingMode.Grayscale}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.Hero}" />
+    </Style>
+
+    <Style x:Key="HeroValueTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="Light" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="{StaticResource TextRenderingMode.ClearType}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.Hero}" />
+        <Setter Property="TextOptions.TextHintingMode" Value="{StaticResource TextHintingMode.Hero}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        <Setter Property="Typography.NumeralStyle" Value="Lining" />
+    </Style>
+
+    <Style x:Key="HeroUnitTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="NavigationMenuTitleTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Body}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="{DynamicResource TypeScale.NavigationMenuTitle}" />
+        <Setter Property="LineHeight" Value="{DynamicResource LineHeight.NavigationMenuTitle}" />
+        <Setter Property="LineStackingStrategy" Value="MaxHeight" />
+        <Setter Property="LayoutTransform" Value="{DynamicResource Transform.NavigationMenuTitle}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="NavigationMenuMetaTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Mono}" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="FontSize" Value="10.5" />
+        <Setter Property="Foreground" Value="{DynamicResource NavigationMenuTextBrush}" />
+        <Setter Property="Opacity" Value="0.62" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="{StaticResource TextRenderingMode.Grayscale}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        <Setter Property="Typography.NumeralStyle" Value="Lining" />
+    </Style>
+
+    <Style x:Key="NavigationMenuIndexTextStyle" TargetType="TextBlock" BasedOn="{StaticResource NavigationMenuMetaTextStyle}">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <Style x:Key="KeyDetectionSectionTitleTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Body}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="KeyDetectionEyebrowTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.MicroUi}" />
+        <Setter Property="FontWeight" Value="{DynamicResource TextWeight.MicroLabel}" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="Foreground" Value="{DynamicResource TextFaintBrush}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="KeyDetectionCardTitleTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Body}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="KeyDetectionCardValueTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="36" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        <Setter Property="Typography.NumeralStyle" Value="Lining" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.Hero}" />
+    </Style>
+
+    <Style x:Key="KeyDetectionCountValueTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="21" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        <Setter Property="Typography.NumeralStyle" Value="Lining" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="KeyDetectionMetricValueTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        <Setter Property="Typography.NumeralStyle" Value="Lining" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="KeyDetectionTimingValueTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        <Setter Property="Typography.NumeralStyle" Value="Lining" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="KeyDetectionSubMetricValueTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="Opacity" Value="0.88" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        <Setter Property="Typography.NumeralStyle" Value="Lining" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+
+    <Style x:Key="KeyDetectionScrollValueTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        <Setter Property="Typography.NumeralStyle" Value="Lining" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+    </Style>
+</ResourceDictionary>

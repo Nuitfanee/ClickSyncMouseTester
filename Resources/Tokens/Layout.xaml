@@ -1,0 +1,85 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:Double x:Key="Layout.Window.DefaultWidth">1240</sys:Double>
+    <sys:Double x:Key="Layout.Window.DefaultHeight">940</sys:Double>
+    <sys:Double x:Key="Layout.Window.MinWidth">1240</sys:Double>
+    <sys:Double x:Key="Layout.Window.MinHeight">940</sys:Double>
+    <CornerRadius x:Key="Layout.Window.CornerRadius">0</CornerRadius>
+    <CornerRadius x:Key="Layout.Window.TopCornerRadius">0</CornerRadius>
+
+    <sys:Double x:Key="Layout.Chrome.CaptionHeight">44</sys:Double>
+    <Thickness x:Key="Layout.Chrome.ResizeBorderThickness">6</Thickness>
+    <GridLength x:Key="Layout.Chrome.RowHeight">44</GridLength>
+    <sys:Double x:Key="Layout.Chrome.ModeButtonHeight">28</sys:Double>
+    <sys:Double x:Key="Layout.Chrome.IconButtonWidth">40</sys:Double>
+    <sys:Double x:Key="Layout.Chrome.NavigationButtonWidth">48</sys:Double>
+    <GridLength x:Key="Layout.Chrome.NavigationButtonColumnWidth">48</GridLength>
+    <sys:Double x:Key="Layout.Chrome.NavigationButtonHeight">44</sys:Double>
+    <sys:Double x:Key="Layout.Chrome.CloseButtonWidth">44</sys:Double>
+    <sys:Double x:Key="Layout.Chrome.GlyphFontSize">10</sys:Double>
+    <sys:Double x:Key="Layout.Chrome.SectionDividerHeight">16</sys:Double>
+    <sys:Double x:Key="Layout.Chrome.SignalSize">10</sys:Double>
+    <sys:Double x:Key="Layout.Chrome.LampSize">6</sys:Double>
+    <sys:Double x:Key="Layout.Chrome.NavigationGlyphWidth">15</sys:Double>
+    <sys:Double x:Key="Layout.Chrome.NavigationGlyphHeight">7</sys:Double>
+    <sys:Double x:Key="Layout.Chrome.NavigationGlyphLineWidth">14</sys:Double>
+    <Thickness x:Key="Layout.Chrome.ContentMargin">0,0,8,0</Thickness>
+    <Thickness x:Key="Layout.Chrome.NavigationButtonMargin">0</Thickness>
+    <Thickness x:Key="Layout.Chrome.NavigationGlyphMargin">0,-2,0,0</Thickness>
+    <Thickness x:Key="Layout.OuterFrame.Margin">0</Thickness>
+    <Thickness x:Key="Thickness.WindowOuterBorder.All">0.5</Thickness>
+    <Thickness x:Key="Thickness.Hairline.Top">0,1,0,0</Thickness>
+
+    <Thickness x:Key="Layout.Main.Margin">48,18,48,24</Thickness>
+    <GridLength x:Key="Layout.Main.GapColumnWidth">32</GridLength>
+    <GridLength x:Key="Layout.Main.RailColumnWidth">356</GridLength>
+
+    <Thickness x:Key="Layout.CaptureSurface.Padding">14,0,0,0</Thickness>
+    <Thickness x:Key="Layout.Hero.Margin">0,52,0,0</Thickness>
+    <sys:Double x:Key="Layout.Hero.MinHeight">250</sys:Double>
+    <sys:Double x:Key="Layout.Hero.WatermarkFontSize">112</sys:Double>
+    <sys:Double x:Key="Layout.Hero.UnitFontSize">30</sys:Double>
+
+    <Thickness x:Key="Layout.Metrics.Padding">0,28,0,24</Thickness>
+    <sys:Double x:Key="Layout.History.Height">320</sys:Double>
+    <sys:Double x:Key="Layout.History.HeaderRuleWidth">32</sys:Double>
+
+    <Thickness x:Key="Layout.ControlRail.Margin">0,-18,0,0</Thickness>
+    <Thickness x:Key="Layout.ControlRail.Padding">34,68,34,52</Thickness>
+    <sys:Double x:Key="Layout.ControlRail.ModeDescriptionMinHeight">64</sys:Double>
+    <sys:Double x:Key="Layout.PollingModeSwitch.Width">244</sys:Double>
+    <sys:Double x:Key="Layout.PollingModeSwitch.Height">46</sys:Double>
+    <sys:Double x:Key="Layout.PollingModeSwitch.ThumbWidth">114</sys:Double>
+    <sys:Double x:Key="Layout.PollingModeSwitch.ThumbTravel">118</sys:Double>
+
+    <Thickness x:Key="Layout.Navigation.OverlayPadding">0,72,0,72</Thickness>
+    <Thickness x:Key="Layout.Navigation.ItemPadding">0,4,0,4</Thickness>
+    <Thickness x:Key="Layout.Navigation.MenuRegionMargin">0,36,0,0</Thickness>
+    <Thickness x:Key="Layout.Navigation.ContentStartMargin">48,0,0,0</Thickness>
+    <Thickness x:Key="Layout.Navigation.TitleMaskMargin">0,0,0,0</Thickness>
+    <Thickness x:Key="Layout.Navigation.TitleMaskPadding">0,2,0,2</Thickness>
+    <sys:Double x:Key="Layout.Navigation.FrameWidth">860</sys:Double>
+    <GridLength x:Key="Layout.Navigation.CloseRailWidth">96</GridLength>
+    <GridLength x:Key="Layout.Navigation.CloseRailGap">44</GridLength>
+    <sys:Double x:Key="Layout.Navigation.ContentMaxWidth">1200</sys:Double>
+    <sys:Double x:Key="Layout.Navigation.ContentOffsetX">-20</sys:Double>
+    <sys:Double x:Key="Layout.Navigation.VerticalGuideOffsetX">28</sys:Double>
+    <GridLength x:Key="Layout.Navigation.ItemLeadSpacing">16</GridLength>
+    <sys:Double x:Key="Layout.KeyDetection.CardMinHeight">228</sys:Double>
+    <sys:Double x:Key="Layout.KeyDetection.ThresholdInputWidth">96</sys:Double>
+    <Thickness x:Key="Layout.KeyDetection.PageMargin">8,10,8,10</Thickness>
+
+    <Thickness x:Key="Layout.AngleCalibration.PageMargin">0,-18,0,0</Thickness>
+    <GridLength x:Key="Layout.AngleCalibration.SectionGap">1</GridLength>
+    <sys:Double x:Key="Layout.AngleCalibration.TopCardHeight">104</sys:Double>
+    <sys:Double x:Key="Layout.AngleCalibration.ResultCardMinHeight">104</sys:Double>
+    <sys:Double x:Key="Layout.AngleCalibration.ResultValueFontSize">42</sys:Double>
+    <Thickness x:Key="Layout.AngleCalibration.CardPadding">16,12,16,12</Thickness>
+    <Thickness x:Key="Layout.AngleCalibration.MeasurementCardPadding">0,16,0,0</Thickness>
+    <Thickness x:Key="Layout.AngleCalibration.MeasurementSurfacePadding">16,14,16,16</Thickness>
+
+    <Thickness x:Key="Layout.SensitivityMatch.PageMargin">0,-18,0,0</Thickness>
+    <sys:Double x:Key="Layout.SensitivityMatch.HeaderMinHeight">184</sys:Double>
+    <sys:Double x:Key="Layout.SensitivityMatch.ActionMinHeight">78</sys:Double>
+</ResourceDictionary>

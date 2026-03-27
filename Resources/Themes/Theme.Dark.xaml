@@ -1,0 +1,117 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="WindowBackgroundColor">#050505</Color>
+    <Color x:Key="ControlPanelColor">#0B0B0C</Color>
+    <Color x:Key="TextStrongColor">#FFFFFF</Color>
+    <Color x:Key="TextMutedColor">#737373</Color>
+    <Color x:Key="TextFaintColor">#404040</Color>
+    <Color x:Key="WindowOuterBorderColor">#33FFFFFF</Color>
+    <Color x:Key="HairlineColor">#1E1E20</Color>
+    <Color x:Key="AccentColor">#B62FFF</Color>
+    <Color x:Key="AccentHoverColor">#C34BFF</Color>
+    <Color x:Key="GhostHoverColor">#1A131416</Color>
+    <Color x:Key="AccentForegroundColor">#050505</Color>
+    <Color x:Key="TitleBarModeButtonBackgroundColor">#2609090A</Color>
+    <Color x:Key="TitleBarModeButtonHoverColor">#36111315</Color>
+    <Color x:Key="ComboItemHoverColor">#101010</Color>
+    <Color x:Key="ComboItemHoverAccentColor">#B8FF5A</Color>
+    <Color x:Key="ComboItemSelectedColor">#321A133B</Color>
+    <Color x:Key="ComboItemSelectedActiveColor">#42211A4D</Color>
+    <Color x:Key="ComboItemSelectedForegroundColor">#C34BFF</Color>
+    <Color x:Key="HeroWatermarkColor">#08080A</Color>
+    <Color x:Key="ControlPanelTextureDotColor">#080809</Color>
+    <Color x:Key="GlassTitleBarBackgroundColor">#D0050505</Color>
+    <Color x:Key="GlassTitleBarBorderColor">#1E1E20</Color>
+    <Color x:Key="GlassShellBackgroundColor">#D40A0A0B</Color>
+    <Color x:Key="GlassShellBorderColor">#221F1F23</Color>
+    <Color x:Key="GlassPopupBackgroundColor">#FB0E0E10</Color>
+    <Color x:Key="GlassPopupBorderColor">#50303034</Color>
+    <Color x:Key="NavigationCurtainBackgroundColor">#6A21A7</Color>
+    <Color x:Key="NavigationCurtainBorderColor">#6A21A7</Color>
+    <Color x:Key="NavigationButtonSurfaceColor">#6A21A7</Color>
+    <Color x:Key="NavigationButtonGlyphColor">#FFFFFF</Color>
+    <Color x:Key="NavigationMenuTextColor">#000000</Color>
+    <Color x:Key="NavigationMenuTextActiveColor">#FFFFFF</Color>
+    <Color x:Key="NavigationMenuHoverSurfaceColor">#000000</Color>
+    <Color x:Key="ChartBackgroundColor">#050505</Color>
+    <Color x:Key="ChartGridColor">#18181A</Color>
+    <Color x:Key="ChartGridStrongColor">#212124</Color>
+    <Color x:Key="ChartAxisColor">#333338</Color>
+    <Color x:Key="ChartAreaFillColor">#18FFFFFF</Color>
+    <Color x:Key="ChartLiveBandColor">#16B62FFF</Color>
+    <Color x:Key="ChartCurveUnderlayColor">#38000000</Color>
+    <Color x:Key="ChartCurveColor">#F1F1F1</Color>
+    <Color x:Key="ChartAccentColor">#B62FFF</Color>
+    <Color x:Key="ChartLabelColor">#737373</Color>
+    <Color x:Key="ChartStrongLabelColor">#FFFFFF</Color>
+    <Color x:Key="ChartBackdropColor">#0B0B0D</Color>
+    <Color x:Key="ChartLatestPointFillColor">#B62FFF</Color>
+    <Color x:Key="ChartLatestPointOuterColor">#050505</Color>
+    <Color x:Key="ChartLatestPointOuterStrokeColor">#99FFFFFF</Color>
+
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}" />
+    <SolidColorBrush x:Key="ControlPanelBrush" Color="{StaticResource ControlPanelColor}" />
+    <SolidColorBrush x:Key="TextStrongBrush" Color="{StaticResource TextStrongColor}" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMutedColor}" />
+    <SolidColorBrush x:Key="TextFaintBrush" Color="{StaticResource TextFaintColor}" />
+    <SolidColorBrush x:Key="WindowOuterBorderBrush" Color="{StaticResource WindowOuterBorderColor}" />
+    <SolidColorBrush x:Key="HairlineBrush" Color="{StaticResource HairlineColor}" />
+    <SolidColorBrush x:Key="VoltGreenBrush" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="VoltGreenHoverBrush" Color="{StaticResource AccentHoverColor}" />
+    <SolidColorBrush x:Key="GhostHoverBrush" Color="{StaticResource GhostHoverColor}" />
+    <SolidColorBrush x:Key="AccentForegroundBrush" Color="{StaticResource AccentForegroundColor}" />
+    <SolidColorBrush x:Key="TitleBarModeButtonBackgroundBrush" Color="{StaticResource TitleBarModeButtonBackgroundColor}" />
+    <SolidColorBrush x:Key="TitleBarModeButtonHoverBrush" Color="{StaticResource TitleBarModeButtonHoverColor}" />
+    <SolidColorBrush x:Key="ComboItemHoverBrush" Color="{StaticResource ComboItemHoverColor}" />
+    <SolidColorBrush x:Key="ComboItemHoverAccentBrush" Color="{StaticResource ComboItemHoverAccentColor}" />
+    <SolidColorBrush x:Key="ComboItemSelectedBrush" Color="{StaticResource ComboItemSelectedColor}" />
+    <SolidColorBrush x:Key="ComboItemSelectedActiveBrush" Color="{StaticResource ComboItemSelectedActiveColor}" />
+    <SolidColorBrush x:Key="ComboItemSelectedForegroundBrush" Color="{StaticResource ComboItemSelectedForegroundColor}" />
+    <SolidColorBrush x:Key="HeroWatermarkBrush" Color="{StaticResource HeroWatermarkColor}" />
+    <SolidColorBrush x:Key="ControlPanelTextureDotBrush" Color="{StaticResource ControlPanelTextureDotColor}" />
+    <SolidColorBrush x:Key="GlassTitleBarBackgroundBrush" Color="{StaticResource GlassTitleBarBackgroundColor}" />
+    <SolidColorBrush x:Key="GlassTitleBarBorderBrush" Color="{StaticResource GlassTitleBarBorderColor}" />
+    <SolidColorBrush x:Key="GlassShellBackgroundBrush" Color="{StaticResource GlassShellBackgroundColor}" />
+    <SolidColorBrush x:Key="GlassShellBorderBrush" Color="{StaticResource GlassShellBorderColor}" />
+    <SolidColorBrush x:Key="GlassPopupBackgroundBrush" Color="{StaticResource GlassPopupBackgroundColor}" />
+    <SolidColorBrush x:Key="GlassPopupBorderBrush" Color="{StaticResource GlassPopupBorderColor}" />
+    <SolidColorBrush x:Key="NavigationCurtainBackgroundBrush" Color="{StaticResource NavigationCurtainBackgroundColor}" />
+    <SolidColorBrush x:Key="NavigationCurtainBorderBrush" Color="{StaticResource NavigationCurtainBorderColor}" />
+    <SolidColorBrush x:Key="NavigationButtonSurfaceBrush" Color="{StaticResource NavigationButtonSurfaceColor}" />
+    <SolidColorBrush x:Key="NavigationButtonGlyphBrush" Color="{StaticResource NavigationButtonGlyphColor}" />
+    <SolidColorBrush x:Key="NavigationMenuTextBrush" Color="{StaticResource NavigationMenuTextColor}" />
+    <SolidColorBrush x:Key="NavigationMenuTextActiveBrush" Color="{StaticResource NavigationMenuTextActiveColor}" />
+    <SolidColorBrush x:Key="NavigationMenuHoverSurfaceBrush" Color="{StaticResource NavigationMenuHoverSurfaceColor}" />
+    <SolidColorBrush x:Key="ChartBackgroundBrush" Color="{StaticResource ChartBackgroundColor}" />
+    <SolidColorBrush x:Key="ChartGridBrush" Color="{StaticResource ChartGridColor}" />
+    <SolidColorBrush x:Key="ChartGridStrongBrush" Color="{StaticResource ChartGridStrongColor}" />
+    <SolidColorBrush x:Key="ChartAxisBrush" Color="{StaticResource ChartAxisColor}" />
+    <SolidColorBrush x:Key="ChartAreaFillBrush" Color="{StaticResource ChartAreaFillColor}" />
+    <SolidColorBrush x:Key="ChartLiveBandBrush" Color="{StaticResource ChartLiveBandColor}" />
+    <SolidColorBrush x:Key="ChartCurveUnderlayBrush" Color="{StaticResource ChartCurveUnderlayColor}" />
+    <SolidColorBrush x:Key="ChartCurveBrush" Color="{StaticResource ChartCurveColor}" />
+    <SolidColorBrush x:Key="ChartAccentBrush" Color="{StaticResource ChartAccentColor}" />
+    <SolidColorBrush x:Key="ChartLabelBrush" Color="{StaticResource ChartLabelColor}" />
+    <SolidColorBrush x:Key="ChartStrongLabelBrush" Color="{StaticResource ChartStrongLabelColor}" />
+    <SolidColorBrush x:Key="ChartBackdropBrush" Color="{StaticResource ChartBackdropColor}" />
+    <SolidColorBrush x:Key="ChartLatestPointFillBrush" Color="{StaticResource ChartLatestPointFillColor}" />
+    <SolidColorBrush x:Key="ChartLatestPointOuterBrush" Color="{StaticResource ChartLatestPointOuterColor}" />
+    <SolidColorBrush x:Key="ChartLatestPointOuterStrokeBrush" Color="{StaticResource ChartLatestPointOuterStrokeColor}" />
+
+    <DrawingBrush x:Key="ControlPanelTextureBrush" TileMode="Tile" Viewport="0,0,4,4" ViewportUnits="Absolute">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="{StaticResource ControlPanelBrush}">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="0,0,4,4" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="{StaticResource ControlPanelTextureDotBrush}">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="0,0,1,1" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+</ResourceDictionary>

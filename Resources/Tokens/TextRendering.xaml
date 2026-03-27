@@ -1,0 +1,15 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:media="clr-namespace:System.Windows.Media;assembly=PresentationCore">
+    <media:TextFormattingMode x:Key="TextFormattingMode.UI">Display</media:TextFormattingMode>
+    <media:TextFormattingMode x:Key="TextFormattingMode.Body">Ideal</media:TextFormattingMode>
+    <media:TextFormattingMode x:Key="TextFormattingMode.Hero">Ideal</media:TextFormattingMode>
+
+    <media:TextHintingMode x:Key="TextHintingMode.UI">Fixed</media:TextHintingMode>
+    <media:TextHintingMode x:Key="TextHintingMode.Hero">Fixed</media:TextHintingMode>
+
+    <media:TextRenderingMode x:Key="TextRenderingMode.ClearType">ClearType</media:TextRenderingMode>
+    <media:TextRenderingMode x:Key="TextRenderingMode.Grayscale">Grayscale</media:TextRenderingMode>
+
+    <media:ClearTypeHint x:Key="ClearTypeHint.Enabled">Enabled</media:ClearTypeHint>
+</ResourceDictionary>
