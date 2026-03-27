@@ -92,33 +92,7 @@ If you redistribute binaries built from this repository, you should also provide
 
 Some bundled assets may use different licenses. Please also review `THIRD_PARTY_NOTICES.md` and the original license files inside `founts/`.
 
-## Third-Party Assets
 
-The repository currently includes `Space Grotesk` font files under `founts/SpaceGrotesk/`. Those font files are not automatically relicensed under GPL v2.0, so the original font license files should be preserved when redistributing source or packaged builds.
-
-## Recommended GitHub Contents
-
-Recommended to publish:
-
-- `Controls/`, `Converters/`, `Infrastructure/`, `Models/`, `Navigation/`, `Resources/`, `Services/`, `ViewModels/`, `Views/`
-- `build/`, `docs/`, `founts/`, `My Project/`, `Properties/`
-- `Application.xaml`, `Application.xaml.vb`, `MainWindow.xaml`, `MainWindow.xaml.vb`, `app.manifest`
-- `ClickSyncMouseTester.vbproj`, `ClickSyncMouseTester.slnx`, `.gitignore`, `README.md`, `LICENSE`, `THIRD_PARTY_NOTICES.md`
-
-Usually not worth publishing:
-
-- Generated output and caches: `bin/`, `obj/`, `artifacts/`, `.artifacts/`
-- Local tool state: `.vs/`, `.codex/`, `.dotnet/`, `.dotnet-cli/`, `.dotnet_home/`
-- Local comparison or scratch directories: `_compare/`
-- Content you do not plan to maintain publicly: `js/`, `docs/plans/`
-
-## Pre-Release Open-Source Checklist
-
-Before publishing the repository, it is worth checking:
-
-- whether `artifacts/`, `_compare/`, or `.codex/` still contain private notes or local-only files;
-- whether you want to keep the historical `WpfApp1` namespace for compatibility;
-- whether you want to add a future `ClickSyncMouseTester.Tests` project for regression coverage.
 
 <a id="zh-cn"></a>
 
@@ -210,30 +184,3 @@ dotnet run --project .\ClickSyncMouseTester.vbproj
 
 仓库中的第三方资源可能使用不同许可证，请同时查看 `THIRD_PARTY_NOTICES.md` 与 `founts/` 内原始授权文件。
 
-## 第三方资源
-
-当前仓库内包含 `founts/SpaceGrotesk/` 下的 `Space Grotesk` 字体文件。这些字体不自动转为 GPL v2.0 授权，分发时应保留其原始字体许可证文本。
-
-## 建议上传到 GitHub 的内容
-
-建议上传：
-
-- `Controls/`, `Converters/`, `Infrastructure/`, `Models/`, `Navigation/`, `Resources/`, `Services/`, `ViewModels/`, `Views/`
-- `build/`, `docs/`, `founts/`, `My Project/`, `Properties/`
-- `Application.xaml`, `Application.xaml.vb`, `MainWindow.xaml`, `MainWindow.xaml.vb`, `app.manifest`
-- `ClickSyncMouseTester.vbproj`, `ClickSyncMouseTester.slnx`, `.gitignore`, `README.md`, `LICENSE`, `THIRD_PARTY_NOTICES.md`
-
-通常不建议上传：
-
-- 生成物与缓存：`bin/`, `obj/`, `artifacts/`, `.artifacts/`
-- 本地工具状态：`.vs/`, `.codex/`, `.dotnet/`, `.dotnet-cli/`, `.dotnet_home/`
-- 本地对比或临时目录：`_compare/`
-- 如果你不准备长期维护，也建议暂不公开：`js/`, `docs/plans/`
-
-## 开源前检查建议
-
-在公开仓库前，建议再确认：
-
-- `artifacts/`、`_compare/`、`.codex/` 中是否有本地临时文件或私有备注；
-- 是否要继续保留历史兼容用的 `WpfApp1` 命名空间；
-- 是否准备后续补一个 `ClickSyncMouseTester.Tests` 测试工程用于回归验证。
