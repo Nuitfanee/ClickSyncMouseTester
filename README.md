@@ -20,11 +20,21 @@ The current application includes five production pages:
 
 A quick look at the current desktop UI:
 
-| Home Navigation | Polling Rate |
-| --- | --- |
-| ![Home navigation UI](Resources/images/UI1.png) | ![Polling Rate page](Resources/images/UI2.png) |
-| Sensitivity Match | Performance Chart |
-| ![Sensitivity Match page](Resources/images/UI3.png) | ![Mouse performance chart window](Resources/images/UI4.png) |
+### Home Navigation
+
+![Home navigation UI](Resources/images/UI1.png)
+
+### Polling Rate
+
+![Polling Rate page](Resources/images/UI2.png)
+
+### Sensitivity Match
+
+![Sensitivity Match page](Resources/images/UI3.png)
+
+### Performance Chart
+
+![Mouse performance chart window](Resources/images/UI4.png)
 
 ## Architecture
 
