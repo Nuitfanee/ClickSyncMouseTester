@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>ClickSyncMouseTester</AssemblyName>
+    <OutputType>WinExe</OutputType>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Assets\Icons\Application.ico</ApplicationIcon>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+    <RootNamespace>ClickSyncMouseTester</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Assets\Fonts\Bundled\SpaceGrotesk\ttf\static\*.ttf" />
+    <None Remove="Assets\Fonts\Bundled\moderne-3d-schwabacher\*.ttf" />
+    <None Remove="Assets\Icons\AppIcon.ico" />
+    <Resource Include="Assets\Fonts\Bundled\SpaceGrotesk\ttf\static\*.ttf" />
+    <Resource Include="Assets\Fonts\Bundled\moderne-3d-schwabacher\*.ttf" />
+    <Resource Include="Assets\Icons\AppIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="Application.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ClickSyncMouseTester.ChartGpu\ClickSyncMouseTester.ChartGpu.csproj" />
+  </ItemGroup>
+</Project>

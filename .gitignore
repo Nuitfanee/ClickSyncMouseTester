@@ -1,0 +1,85 @@
+﻿# -----------------------------------------------------------------------------
+# ClickSyncMouseTester .gitignore
+# Keep source, docs, project files, icons, fonts, and XAML resources tracked.
+# Ignore local IDE state, build outputs, NuGet caches, logs, and generated files.
+# -----------------------------------------------------------------------------
+
+# Build outputs
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Bb]uild[Ll]og.*
+
+# Visual Studio / Rider / VS Code user state
+.vs/
+.vscode/.vs/
+.idea/
+*.user
+*.rsuser
+*.suo
+*.sln.docstates
+*.userosscache
+*.sln.ide
+*.DotSettings.user
+.build_verify/
+.sln_build_verify/
+.tmp_build/
+
+# .NET / NuGet generated files and local package cache
+project.lock.json
+project.assets.json
+*.nuget.props
+*.nuget.targets
+packages/
+.nuget/
+*.nupkg
+*.snupkg
+
+# Test, coverage, and diagnostics output
+[Tt]est[Rr]esults/
+TestResult*/
+coverage/
+coverage.*
+*.coverage
+*.coveragexml
+*.trx
+*.log
+*.binlog
+font-diagnostics.txt
+
+# Native/compiler intermediates
+*.ilk
+*.iobj
+*.ipdb
+*.apphost.exe
+*.pdb
+
+# Publish / installer artifacts
+publish/
+artifacts/
+*.msix
+*.msixbundle
+*.appx
+*.appxbundle
+*.zip
+*.7z
+*.rar
+
+# Recovery / temporary tool workspaces
+archive/
+recovered/
+.tools/
+.codegraph/
+*.bak
+*.tmp
+*.temp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini

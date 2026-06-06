@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Window x:Class="ClickSyncMouseTester.Views.Shell.AppAlertDialog" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" SizeToContent="WidthAndHeight" Icon="/Assets/Icons/AppIcon.ico" WindowStartupLocation="CenterOwner" Background="#00FFFFFF" AllowsTransparency="False" MinWidth="360" MaxWidth="520" SnapsToDevicePixels="True" UseLayoutRounding="True" FontFamily="{DynamicResource Font.Body}" TextOptions.TextRenderingMode="{StaticResource TextRenderingMode.ClearType}" TextOptions.TextFormattingMode="{StaticResource TextFormattingMode.UI}" TextOptions.TextHintingMode="{StaticResource TextHintingMode.UI}" xmlns:shell="clr-namespace:ClickSyncMouseTester.Views.Shell;assembly=ClickSyncMouseTester">
+  <FrameworkElement.Resources>
+    <ResourceDictionary>
+      <Style x:Key="AppAlertPrimaryButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource VoltButtonStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Body}" />
+        <Setter Property="Foreground" Value="#FFFFFF" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="MinWidth" Value="112" />
+        <Setter Property="Padding" Value="18,0" />
+      </Style>
+      <Style x:Key="AppAlertSecondaryButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MinimalGhostButtonStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Body}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="MinWidth" Value="96" />
+        <Setter Property="Padding" Value="16,0" />
+      </Style>
+    </ResourceDictionary>
+  </FrameworkElement.Resources>
+  <Border Background="{DynamicResource GlassPopupBackgroundBrush}" BorderBrush="{DynamicResource GlassPopupBorderBrush}" BorderThickness="1" Padding="24,22,24,22" RenderOptions.ClearTypeHint="{StaticResource ClearTypeHint.Enabled}">
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+      <Border Width="54" Height="3" HorizontalAlignment="Left" Background="{DynamicResource VoltGreenBrush}" CornerRadius="1.5" Opacity="0.96" />
+      <TextBlock Name="TitleTextBlock" Grid.Row="1" Margin="0,16,0,0" Style="{StaticResource StatusMessageTextStyle}" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextStrongBrush}">
+      </TextBlock>
+      <TextBlock Name="MessageTextBlock" Grid.Row="2" MaxWidth="404" Margin="0,14,0,0" Style="{StaticResource HintTextStyle}" FontSize="13.5" Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap">
+      </TextBlock>
+      <StackPanel Grid.Row="3" Margin="0,22,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
+        <Button Name="SecondaryButton" Margin="0,0,12,0" HorizontalAlignment="Right" IsCancel="True" Visibility="Collapsed" Style="{StaticResource AppAlertSecondaryButtonStyle}" Click="SecondaryButton_Click" />
+        <Button Name="ConfirmButton" HorizontalAlignment="Right" IsDefault="True" Style="{StaticResource AppAlertPrimaryButtonStyle}" Click="ConfirmButton_Click" />
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

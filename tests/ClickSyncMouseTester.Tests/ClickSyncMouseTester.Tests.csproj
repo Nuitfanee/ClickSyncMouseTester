@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>ClickSyncMouseTester.Tests</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PlatformTarget>x64</PlatformTarget>
+    <RootNamespace>ClickSyncMouseTester.Tests</RootNamespace>
+    <UseWPF>false</UseWPF>
+    <UseAppHost>false</UseAppHost>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ClickSyncMouseTester\ClickSyncMouseTester.csproj" />
+  </ItemGroup>
+</Project>

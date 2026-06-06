@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:windows="clr-namespace:System.Windows;assembly=PresentationCore">
+  <system:Double x:Key="TypeScale.MicroLabel" xmlns:system="clr-namespace:System;assembly=System.Private.CoreLib">11</system:Double>
+  <Double x:Key="TypeScale.MetricValue" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">28</Double>
+  <Double x:Key="TypeScale.RailMetricValue" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">18</Double>
+  <Double x:Key="TypeScale.BodySupport" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">13</Double>
+  <Double x:Key="TypeScale.StatusMessage" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">13.5</Double>
+  <Double x:Key="TypeScale.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">12</Double>
+  <Double x:Key="TypeScale.PrimaryButton" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">13.5</Double>
+  <Double x:Key="TypeScale.SecondaryButton" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">11.5</Double>
+  <Double x:Key="TypeScale.ModeButton" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">11</Double>
+  <Double x:Key="TypeScale.ComboBox" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">14</Double>
+  <Double x:Key="TypeScale.StatusPill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">11</Double>
+  <Double x:Key="TypeScale.HistoryTrace" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">13.5</Double>
+  <Double x:Key="TypeScale.NavigationMenuTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">80</Double>
+  <Double x:Key="LineHeight.NavigationMenuTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">98</Double>
+  <Double x:Key="Layout.Navigation.MenuItemMinHeight.Localized" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">144</Double>
+  <Double x:Key="Layout.Navigation.MenuMaxHeight.Localized" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">760</Double>
+  <Double x:Key="Layout.Navigation.ContentMaxWidth.Localized" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">1280</Double>
+  <x:StaticExtension x:Key="TextWeight.MicroLabel" Member="windows:FontWeights.Medium" />
+  <x:StaticExtension x:Key="TextWeight.BodySupport" Member="windows:FontWeights.Normal" />
+  <x:StaticExtension x:Key="TextWeight.StatusMessage" Member="windows:FontWeights.Medium" />
+  <x:StaticExtension x:Key="TextWeight.Hint" Member="windows:FontWeights.Normal" />
+  <x:StaticExtension x:Key="TextWeight.StatusPill" Member="windows:FontWeights.Medium" />
+  <x:StaticExtension x:Key="TextWeight.HistoryTrace" Member="windows:FontWeights.Medium" />
+  <x:StaticExtension x:Key="TextWeight.ComboBox" Member="windows:FontWeights.Medium" />
+  <x:StaticExtension x:Key="TextWeight.PrimaryButton" Member="windows:FontWeights.Bold" />
+  <x:StaticExtension x:Key="TextWeight.SecondaryButton" Member="windows:FontWeights.Medium" />
+  <x:StaticExtension x:Key="TextWeight.ModeButton" Member="windows:FontWeights.Medium" />
+  <GridLength x:Key="Layout.Navigation.ItemLeadSpacing.Localized">16</GridLength>
+  <Thickness x:Key="Layout.Navigation.MenuRegionMargin.Localized">0,0,0,0</Thickness>
+  <Thickness x:Key="Layout.Navigation.ItemPadding.Localized">0,3,0,3</Thickness>
+  <Thickness x:Key="Layout.Navigation.ContentStartMargin.Localized">12,0,0,0</Thickness>
+  <Thickness x:Key="Layout.Navigation.TitleMaskMargin.Localized">0,0,0,0</Thickness>
+  <Thickness x:Key="Layout.Navigation.TitleMaskPadding.Localized">0,1,0,2</Thickness>
+  <ScaleTransform x:Key="Transform.NavigationMenuTitle" ScaleX="0.9" ScaleY="1.00" />
+</ResourceDictionary>
