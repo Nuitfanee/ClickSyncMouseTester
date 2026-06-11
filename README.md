@@ -6,6 +6,7 @@ It is currently a C# WPF application targeting `net10.0-windows`. The app observ
 
 下载地址 Download link：  
 https://github.com/Nuitfanee/ClickSyncMouseTester/releases
+
 蓝奏云下载地址 ：
 https://wwbwg.lanzouv.com/b0syqhnze  密码:1234
 
