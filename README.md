@@ -4,7 +4,9 @@ ClickSyncMouseTester is a Windows desktop tool for mouse input testing, Raw Inpu
 
 It is currently a C# WPF application targeting `net10.0-windows`. The app observes what a normal Windows user-mode application receives through Raw Input, then exposes that data through focused testing pages and a GPU-backed chart window.
 
-蓝奏云下载地址：
+下载地址 Download link：  
+https://github.com/Nuitfanee/ClickSyncMouseTester/releases
+蓝奏云下载地址 ：
 https://wwbwg.lanzouv.com/b0syqhnze  密码:1234
 
 ## Documentation
