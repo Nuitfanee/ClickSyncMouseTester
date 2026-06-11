@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:brand="clr-namespace:ClickSyncMouseTester.Controls.Brand" xmlns:sys="clr-namespace:System;assembly=System.Private.CoreLib">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Resources/Brand/BrandLogos.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+  <sys:String x:Key="BrandLogo.CurrentKey">rog</sys:String>
+
+  <brand:SelectedBrandLogoDefinition x:Key="NavigationBrandLogoDefinition" SelectedKey="{StaticResource BrandLogo.CurrentKey}" ResourceKeyPrefix="BrandLogo." FallbackKey="nuit" />
+</ResourceDictionary>

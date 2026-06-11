@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:brand="clr-namespace:ClickSyncMouseTester.Controls.Brand">
+  <brand:BrandLogoVectorPreset x:Key="atk">
+    <brand:BrandLogoVectorPreset.Elements>
+      <brand:BrandLogoVectorElement LayoutBounds="3.88,4.14,22.25,23.74">
+        <brand:BrandLogoVectorElement.Geometry>
+          <GeometryGroup FillRule="Nonzero">
+            <PathGeometry FillRule="Nonzero" Figures="M16.228 11.6278C17.122 12.2382 20.3233 13.6714 28.2385 10.5744C28.4597 10.4885 28.6358 10.796 28.4507 10.9542C25.4842 13.4408 17.6323 20.6971 12.2727 31.8731C12.1553 32.1127 11.8167 31.9771 11.8889 31.7194C13.1125 27.2933 15.3656 18.4637 15.9255 11.7906C15.9391 11.6278 16.1061 11.5374 16.2371 11.6278H16.228Z" />
+            <PathGeometry FillRule="Nonzero" Figures="M12.2993 20.3719C11.4053 19.7616 8.20404 18.3284 0.288883 21.4253C0.0676375 21.5112 -0.108456 21.2038 0.0766679 21.0456C3.04316 18.5635 10.8996 11.3027 16.2592 0.126668C16.3766 -0.112948 16.7152 0.0226835 16.643 0.280383C15.4193 4.70649 13.1663 13.5361 12.6064 20.2092C12.5928 20.3719 12.4258 20.4624 12.2948 20.3719H12.2993Z" />
+          </GeometryGroup>
+        </brand:BrandLogoVectorElement.Geometry>
+      </brand:BrandLogoVectorElement>
+
+      <brand:BrandLogoVectorElement LayoutBounds="35.55,6.36,8.9,19.29">
+        <brand:BrandLogoVectorElement.Geometry>
+          <PathGeometry FillRule="Nonzero" Figures="M39.8233 10.7012L34.5225 21.0137H36.7801L39.8233 15.0911L42.8666 21.0137H45.1242L39.8233 10.7012Z" />
+        </brand:BrandLogoVectorElement.Geometry>
+      </brand:BrandLogoVectorElement>
+
+      <brand:BrandLogoVectorElement LayoutBounds="45.42,6.36,8.16,19.29">
+        <brand:BrandLogoVectorElement.Geometry>
+          <PathGeometry FillRule="Nonzero" Figures="M53.6853 10.8687H44.8535V12.9845H48.2128V21.0139H50.326V12.9845H53.6853V10.8687Z" />
+        </brand:BrandLogoVectorElement.Geometry>
+      </brand:BrandLogoVectorElement>
+
+      <brand:BrandLogoVectorElement LayoutBounds="56.42,6.36,8.16,19.29">
+        <brand:BrandLogoVectorElement.Geometry>
+          <GeometryGroup FillRule="Nonzero">
+            <PathGeometry FillRule="Nonzero" Figures="M57.911 10.8687H55.7979V21.0139H57.911V10.8687Z" />
+            <PathGeometry FillRule="Nonzero" Figures="M65.0761 11.0044H62.4212L58.6465 15.9414L62.4212 20.8784H65.0761L61.3014 15.9414L65.0761 11.0044Z" />
+          </GeometryGroup>
+        </brand:BrandLogoVectorElement.Geometry>
+      </brand:BrandLogoVectorElement>
+    </brand:BrandLogoVectorPreset.Elements>
+  </brand:BrandLogoVectorPreset>
+</ResourceDictionary>

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/ClickSyncMouseTester/ClickSyncMouseTester.csproj" />
+  <Project Path="src/ClickSyncMouseTester.ChartGpu/ClickSyncMouseTester.ChartGpu.csproj" />
+  <Project Path="tests/ClickSyncMouseTester.Tests/ClickSyncMouseTester.Tests.csproj" />
+</Solution>

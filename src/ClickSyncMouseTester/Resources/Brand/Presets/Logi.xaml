@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:brand="clr-namespace:ClickSyncMouseTester.Controls.Brand">
+  <brand:BrandLogoVectorPreset x:Key="logi">
+    <brand:BrandLogoVectorPreset.Elements>
+      <brand:BrandLogoVectorElement LayoutBounds="0,0,28.96,30.76">
+        <brand:BrandLogoVectorElement.Geometry>
+          <GeometryGroup FillRule="Nonzero">
+            <GeometryGroup.Transform>
+              <TranslateTransform X="-140.04" Y="0" />
+            </GeometryGroup.Transform>
+            <PathGeometry FillRule="Nonzero" Figures="M155.82 0v6.383c-5.131 0-9.194 4.04-9.194 8.996 0 4.957 4.063 8.997 9.194 8.997v6.383c-8.7 0-15.78-6.895-15.78-15.38C140.04 6.895 147.12 0 155.82 0Z" />
+            <PathGeometry FillRule="Nonzero" Figures="M155 12.838v5.984h7.556v7.016H169v-13h-14Z" />
+          </GeometryGroup>
+        </brand:BrandLogoVectorElement.Geometry>
+      </brand:BrandLogoVectorElement>
+
+      <brand:BrandLogoVectorElement LayoutBounds="0,0,84.95,31.48">
+        <brand:BrandLogoVectorElement.Geometry>
+          <GeometryGroup FillRule="Nonzero">
+            <PathGeometry FillRule="Nonzero" Figures="M35.421 6.034c-1.153 0-2.06.896-2.06 2.058 0 1.138.907 2.034 2.06 2.034 1.202 0 2.11-.896 2.11-2.034 0-1.162-.908-2.058-2.11-2.058Zm7.776 1.768h-3.14v3.824h-1.692v2.76h1.692v9.66h3.14v-9.66h1.717v-2.76h-1.717V7.802Zm23.034 6.439c1.324 0 2.404.678 3.238 1.622l2.183-2.13c-1.227-1.526-3.165-2.494-5.372-2.494-3.802 0-6.795 2.857-6.795 6.585 0 3.728 2.993 6.584 6.795 6.584 2.207 0 4.145-.968 5.371-2.493l-2.182-2.13c-.81.92-1.914 1.622-3.263 1.622-2.012 0-3.557-1.55-3.557-3.583 0-2.034 1.545-3.583 3.582-3.583Zm13.54-3.002c-1.545 0-2.87.581-3.802 1.574v-6.44h-3.14v17.672h3.14v-6.754c0-1.791 1.153-3.026 3.066-3.026 1.79 0 2.772 1.09 2.772 3.026v6.754h3.14v-7.31c0-3.438-2.183-5.496-5.176-5.496Zm-27.792 0c-3.778 0-6.648 2.857-6.648 6.657 0 3.753 2.625 6.512 6.697 6.512 2.257 0 4.268-.823 5.74-2.372l-2.11-2.058c-1.03.968-2.134 1.67-3.557 1.67-1.717 0-3.017-.968-3.458-2.59h9.787v-.75c0-4.236-2.65-7.069-6.451-7.069Zm-3.41 5.302c.417-1.647 1.692-2.566 3.336-2.566s2.87.895 3.263 2.566h-6.599Z" />
+            <PathGeometry FillRule="Nonzero" Figures="M25.83 28.45c-2.011 0-3.606-1.549-3.606-3.559h-3.189c0 3.729 2.993 6.585 6.795 6.585s6.795-2.856 6.795-6.585h-3.19c0 2.01-1.594 3.56-3.605 3.56Zm8.046-4.406h3.14V11.626h-3.14v12.42Z" />
+            <PathGeometry FillRule="Nonzero" Figures="M0 24.045h3.14V6.373H0v17.672Z" />
+            <PathGeometry FillRule="Nonzero" Figures="M11.161 11.24c-3.802 0-6.795 2.857-6.795 6.585 0 3.728 2.993 6.584 6.795 6.584s6.795-2.856 6.795-6.584c0-3.728-2.993-6.585-6.795-6.585Zm0 10.168A3.569 3.569 0 017.555 17.8c0-2.009 1.595-3.558 3.606-3.558 2.036 0 3.63 1.55 3.63 3.583 0 2.033-1.594 3.583-3.63 3.583Zm21.341-7.311v-2.47h-4.415a7.01 7.01 0 00-2.257-.387c-3.802 0-6.795 2.857-6.795 6.585 0 3.728 2.993 6.584 6.795 6.584s6.795-2.856 6.795-6.584c0-1.26-.344-2.494-1.03-3.414l.907-.314Zm-6.672 7.31c-2.011 0-3.606-1.573-3.606-3.607 0-2.009 1.595-3.558 3.606-3.558 2.036 0 3.63 1.55 3.63 3.583 0 2.033-1.594 3.583-3.63 3.583Z" />
+          </GeometryGroup>
+        </brand:BrandLogoVectorElement.Geometry>
+      </brand:BrandLogoVectorElement>
+    </brand:BrandLogoVectorPreset.Elements>
+  </brand:BrandLogoVectorPreset>
+</ResourceDictionary>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:brand="clr-namespace:ClickSyncMouseTester.Controls.Brand">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Resources/Brand/Presets/Crdrako.xaml" />
+    <ResourceDictionary Source="/Resources/Brand/Presets/Atk.xaml" />
+    <ResourceDictionary Source="/Resources/Brand/Presets/Lamzu.xaml" />
+    <ResourceDictionary Source="/Resources/Brand/Presets/Maicong.xaml" />
+    <ResourceDictionary Source="/Resources/Brand/Presets/Rapoo.xaml" />
+    <ResourceDictionary Source="/Resources/Brand/Presets/Logi.xaml" />
+    <ResourceDictionary Source="/Resources/Brand/Presets/Razer.xaml" />
+    <ResourceDictionary Source="/Resources/Brand/Presets/Zowie.xaml" />
+    <ResourceDictionary Source="/Resources/Brand/Presets/Rog.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+  <FontFamily x:Key="BrandLogo.NuitFontFamily">pack://application:,,,/./Assets/Fonts/Bundled/moderne-3d-schwabacher/#Moderne 3D Schwabacher</FontFamily>
+  <FontFamily x:Key="BrandLogo.VaxeeFontFamily">pack://application:,,,/./Assets/Fonts/Bundled/century-gothic/#Century Gothic</FontFamily>
+
+  <brand:TextBrandLogoDefinition x:Key="BrandLogo.nuit" Text="NUIT" FontFamily="{StaticResource BrandLogo.NuitFontFamily}" />
+
+  <brand:TextBrandLogoDefinition x:Key="BrandLogo.vaxee" Text="vaxee" FontFamily="{StaticResource BrandLogo.VaxeeFontFamily}" />
+
+  <brand:PresetVectorBrandLogoDefinition x:Key="BrandLogo.logi" PresetKey="logi" />
+
+  <brand:PresetVectorBrandLogoDefinition x:Key="BrandLogo.razer" PresetKey="razer" />
+
+  <brand:PresetVectorBrandLogoDefinition x:Key="BrandLogo.crdrako" PresetKey="crdrako" SplitGeometryGroup="True" />
+
+  <brand:PresetVectorBrandLogoDefinition x:Key="BrandLogo.atk" PresetKey="atk" SplitGeometryGroup="True" />
+
+  <brand:PresetVectorBrandLogoDefinition x:Key="BrandLogo.lamzu" PresetKey="lamzu" SplitGeometryGroup="True" />
+
+  <brand:PresetVectorBrandLogoDefinition x:Key="BrandLogo.maicong" PresetKey="maicong" SplitGeometryGroup="True" />
+
+  <brand:PresetVectorBrandLogoDefinition x:Key="BrandLogo.rapoo" PresetKey="rapoo" SplitGeometryGroup="True" />
+
+  <brand:PresetVectorBrandLogoDefinition x:Key="BrandLogo.zowie" PresetKey="zowie" />
+
+  <brand:PresetVectorBrandLogoDefinition x:Key="BrandLogo.rog" PresetKey="rog" />
+</ResourceDictionary>

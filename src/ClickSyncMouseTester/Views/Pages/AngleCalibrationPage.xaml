@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UserControl x:Class="ClickSyncMouseTester.Views.Pages.AngleCalibrationPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:ClickSyncMouseTester.Controls" SnapsToDevicePixels="True" UseLayoutRounding="True" xmlns:pages="clr-namespace:ClickSyncMouseTester.Views.Pages" Loaded="AngleCalibrationPage_Loaded" Unloaded="AngleCalibrationPage_Unloaded">
+  <FrameworkElement.Resources>
+    <ResourceDictionary>
+      <Style x:Key="AngleCalibrationPanelBorderStyle" TargetType="{x:Type Border}" BasedOn="{StaticResource KeyDetectionPanelBorderStyle}">
+        <Setter Property="Border.CornerRadius" Value="0" />
+        <Setter Property="Border.Padding" Value="{StaticResource Layout.AngleCalibration.CardPadding}" />
+      </Style>
+      <Style x:Key="AngleCalibrationMeasurementCardBorderStyle" TargetType="{x:Type Border}" BasedOn="{StaticResource AngleCalibrationPanelBorderStyle}">
+        <Setter Property="Border.Padding" Value="{StaticResource Layout.AngleCalibration.MeasurementCardPadding}" />
+      </Style>
+      <Style x:Key="AngleCalibrationInsetBorderStyle" TargetType="{x:Type Border}" BasedOn="{StaticResource KeyDetectionInsetSurfaceBorderStyle}">
+        <Setter Property="Border.CornerRadius" Value="0" />
+        <Setter Property="Border.Padding" Value="{StaticResource Layout.AngleCalibration.MeasurementSurfacePadding}" />
+        <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}" />
+      </Style>
+      <Style x:Key="AngleCalibrationActionButtonBaseStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MinimalGhostButtonStyle}">
+        <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
+        <Setter Property="Background" Value="{DynamicResource VoltGreenBrush}" />
+        <Setter Property="BorderBrush" Value="#00FFFFFF" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Meta}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FrameworkElement.Cursor" Value="Hand" />
+        <Setter Property="FrameworkElement.FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="{x:Type Button}">
+              <Grid SnapsToDevicePixels="True">
+                <Border Name="ButtonBorder" Background="{TemplateBinding Control.Background}" BorderBrush="{TemplateBinding Control.BorderBrush}" BorderThickness="{TemplateBinding Control.BorderThickness}" CornerRadius="0" Opacity="0.94" />
+                <ContentPresenter Margin="{TemplateBinding Control.Padding}" HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}" />
+              </Grid>
+              <ControlTemplate.Triggers>
+                <Trigger Property="UIElement.IsMouseOver" Value="True">
+                  <Setter TargetName="ButtonBorder" Value="{DynamicResource VoltGreenHoverBrush}" Property="Border.Background" />
+                  <Setter TargetName="ButtonBorder" Property="UIElement.Opacity" Value="1" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                  <Setter TargetName="ButtonBorder" Property="UIElement.Opacity" Value="0.82" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                  <Setter TargetName="ButtonBorder" Property="UIElement.Opacity" Value="0.22" />
+                  <Setter TargetName="ButtonBorder" Value="{DynamicResource TextMutedBrush}" Property="Border.Background" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+      <Style x:Key="AngleCalibrationActionPanelButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource AngleCalibrationActionButtonBaseStyle}">
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="{x:Type Button}">
+              <Grid SnapsToDevicePixels="True">
+                <Border Name="ButtonBorder" Background="{TemplateBinding Control.Background}" BorderBrush="{TemplateBinding Control.BorderBrush}" BorderThickness="{TemplateBinding Control.BorderThickness}" CornerRadius="0" Opacity="0.95" />
+                <ContentPresenter Margin="{TemplateBinding Control.Padding}" HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}" />
+              </Grid>
+              <ControlTemplate.Triggers>
+                <Trigger Property="UIElement.IsMouseOver" Value="True">
+                  <Setter TargetName="ButtonBorder" Value="{DynamicResource VoltGreenHoverBrush}" Property="Border.Background" />
+                  <Setter TargetName="ButtonBorder" Property="UIElement.Opacity" Value="1" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                  <Setter TargetName="ButtonBorder" Property="UIElement.Opacity" Value="0.82" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                  <Setter TargetName="ButtonBorder" Property="UIElement.Opacity" Value="0.22" />
+                  <Setter TargetName="ButtonBorder" Value="{DynamicResource TextMutedBrush}" Property="Border.Background" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+      <Style x:Key="AngleCalibrationCaptureButtonStyle" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="#00FFFFFF" />
+        <Setter Property="BorderBrush" Value="#00FFFFFF" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FrameworkElement.Cursor" Value="Cross" />
+        <Setter Property="FrameworkElement.FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="{x:Type Button}">
+              <Border Background="{TemplateBinding Control.Background}" BorderBrush="{TemplateBinding Control.BorderBrush}" BorderThickness="{TemplateBinding Control.BorderThickness}">
+                <ContentPresenter HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}" />
+              </Border>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+      <Style x:Key="AngleCalibrationStatLabelTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MicroLabelStyle}">
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="11" />
+      </Style>
+      <Style x:Key="AngleCalibrationStatValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        <Setter Property="Typography.NumeralStyle" Value="Lining" />
+      </Style>
+      <Style x:Key="AngleCalibrationResultValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource HeroValueTextStyle}">
+        <Setter Property="FontSize" Value="{StaticResource Layout.AngleCalibration.ResultValueFontSize}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Style.Triggers>
+          <DataTrigger Value="True" Binding="{Binding HasRecommendedAngle}">
+            <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+          </DataTrigger>
+        </Style.Triggers>
+      </Style>
+      <Style x:Key="AngleCalibrationResultUnitTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource HeroUnitTextStyle}">
+        <Setter Property="Visibility" Value="Collapsed" />
+        <Style.Triggers>
+          <DataTrigger Value="True" Binding="{Binding HasRecommendedAngle}">
+            <Setter Property="Visibility" Value="Visible" />
+          </DataTrigger>
+        </Style.Triggers>
+      </Style>
+      <Style x:Key="AngleCalibrationHintTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Body}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+      </Style>
+      <Style x:Key="AngleCalibrationQualityHintTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Body}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Visibility" Value="Collapsed" />
+        <Style.Triggers>
+          <DataTrigger Value="True" Binding="{Binding HasQualityHint}">
+            <Setter Property="Visibility" Value="Visible" />
+          </DataTrigger>
+        </Style.Triggers>
+      </Style>
+    </ResourceDictionary>
+  </FrameworkElement.Resources>
+  <Grid Background="{DynamicResource WindowBackgroundBrush}" RenderOptions.ClearTypeHint="{StaticResource ClearTypeHint.Enabled}">
+    <Grid Margin="{StaticResource Layout.AngleCalibration.PageMargin}">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="{StaticResource Layout.AngleCalibration.SectionGap}" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+      <Grid Row="0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="1.76*" />
+          <ColumnDefinition Width="0.24*" />
+        </Grid.ColumnDefinitions>
+        <Border Grid.Column="0" MinHeight="{StaticResource Layout.AngleCalibration.ResultCardMinHeight}" Height="{StaticResource Layout.AngleCalibration.TopCardHeight}" BorderThickness="1,1,1,0" Style="{StaticResource AngleCalibrationPanelBorderStyle}">
+          <Grid>
+            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Text="{DynamicResource AngleCalibration.Result.Title}" Style="{StaticResource KeyDetectionCardTitleTextStyle}" FontSize="36" />
+            <Grid HorizontalAlignment="Center" Margin="135,0,0,0" VerticalAlignment="Center">
+              <FrameworkElement.Style>
+                <Style TargetType="{x:Type Grid}">
+                  <Setter Property="UIElement.Opacity" Value="0.72" />
+                  <Style.Triggers>
+                    <DataTrigger Value="True" Binding="{Binding HasRecommendedAngle}">
+                      <Setter Property="UIElement.Opacity" Value="1" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </FrameworkElement.Style>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <TextBlock Style="{StaticResource AngleCalibrationResultValueTextStyle}" Text="{Binding RecommendedAngleText}" />
+              <TextBlock Grid.Column="1" Margin="4,5,0,0" VerticalAlignment="Center" Text="°" Style="{StaticResource AngleCalibrationResultUnitTextStyle}" FontSize="20" />
+            </Grid>
+          </Grid>
+        </Border>
+        <Border Grid.Column="1" Height="{StaticResource Layout.AngleCalibration.TopCardHeight}" BorderThickness="1,1,1,0" Padding="0" Style="{StaticResource AngleCalibrationPanelBorderStyle}">
+          <Grid>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="*" />
+              <RowDefinition Height="1" />
+              <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Button Grid.Row="0" Content="{DynamicResource AngleCalibration.Button.CopyAngle}" Style="{StaticResource AngleCalibrationActionPanelButtonStyle}" Command="{Binding CopyAngleCommand}" />
+            <Border Grid.Row="1" Background="{DynamicResource HairlineBrush}" IsHitTestVisible="False" />
+            <Button Grid.Row="2" Content="{DynamicResource AngleCalibration.Button.Reset}" Style="{StaticResource AngleCalibrationActionPanelButtonStyle}" Command="{Binding ResetCommand}" />
+          </Grid>
+        </Border>
+      </Grid>
+      <Border Grid.Row="1" Background="{DynamicResource HairlineBrush}" IsHitTestVisible="False" />
+      <Border Grid.Row="2" MinHeight="420" BorderThickness="1,0,1,1" Style="{StaticResource AngleCalibrationMeasurementCardBorderStyle}">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <Grid Margin="18,0,18,10">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{DynamicResource AngleCalibration.Stats.Swipes}" Style="{StaticResource AngleCalibrationStatLabelTextStyle}" />
+                <TextBlock Margin="8,0,0,0" Style="{StaticResource AngleCalibrationStatValueTextStyle}" Text="{Binding SwipeCountText}" />
+              </StackPanel>
+              <StackPanel Margin="180,0,0,0" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{DynamicResource AngleCalibration.Stats.Samples}" Style="{StaticResource AngleCalibrationStatLabelTextStyle}" />
+                <TextBlock Margin="8,0,0,0" Style="{StaticResource AngleCalibrationStatValueTextStyle}" Text="{Binding SampleCountText}" />
+              </StackPanel>
+              <StackPanel Margin="180,0,0,0" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{DynamicResource AngleCalibration.Stats.Stability}" Style="{StaticResource AngleCalibrationStatLabelTextStyle}" />
+                <TextBlock Margin="8,0,0,0" Style="{StaticResource AngleCalibrationStatValueTextStyle}" Text="{Binding StabilityText}" />
+              </StackPanel>
+            </StackPanel>
+          </Grid>
+          <Border Grid.Row="1" MinHeight="320" Style="{StaticResource AngleCalibrationInsetBorderStyle}" Padding="0">
+            <Button Name="CaptureSurfaceButton" Style="{StaticResource AngleCalibrationCaptureButtonStyle}" Command="{Binding CaptureSurfaceCommand}">
+              <Grid Margin="{StaticResource Layout.AngleCalibration.MeasurementSurfacePadding}">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="10" />
+                  <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <StackPanel>
+                  <TextBlock Style="{StaticResource AngleCalibrationHintTextStyle}" Text="{Binding TopHintText}" />
+                  <TextBlock Margin="0,6,0,0" Style="{StaticResource AngleCalibrationQualityHintTextStyle}" Text="{Binding QualityHintText}" />
+                </StackPanel>
+                <controls:AngleCalibrationTraceControl Grid.Row="2" RenderFrame="{Binding RenderFrame}" />
+              </Grid>
+            </Button>
+          </Border>
+        </Grid>
+      </Border>
+    </Grid>
+  </Grid>
+</UserControl>

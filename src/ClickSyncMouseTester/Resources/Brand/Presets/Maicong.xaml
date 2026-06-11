@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:brand="clr-namespace:ClickSyncMouseTester.Controls.Brand">
+  <brand:BrandLogoVectorPreset x:Key="maicong">
+    <brand:BrandLogoVectorPreset.Elements>
+      <brand:BrandLogoVectorElement LayoutBounds="4,4.92,18,22.15">
+        <brand:BrandLogoVectorElement.Geometry>
+          <PathGeometry FillRule="EvenOdd" Figures="M13.5994 14.5672L6.65763 5.71936H3V26.4095H6.97961V12.5774L13.593 21.0003L20.2385 12.5581V26.4095H24.2181V5.71936H20.5605L13.5994 14.5672Z" />
+        </brand:BrandLogoVectorElement.Geometry>
+      </brand:BrandLogoVectorElement>
+
+      <brand:BrandLogoVectorElement LayoutBounds="29.38,4.92,15.23,22.15">
+        <brand:BrandLogoVectorElement.Geometry>
+          <PathGeometry FillRule="EvenOdd" Figures="M37.606 22.9192C33.7938 22.9192 30.69 19.8154 30.69 16.0032C30.69 12.191 33.7938 9.08718 37.606 9.08718C40.053 9.08718 42.2102 10.3686 43.4402 12.2941L46.2349 9.36408C44.2387 6.78184 41.1155 5.11401 37.606 5.11401C31.5979 5.11401 26.7168 10.0016 26.7168 16.0032C26.7168 22.0048 31.6044 26.8924 37.606 26.8924C41.1606 26.8924 44.3288 25.1795 46.3186 22.5329L43.4337 19.7188C42.2038 21.6378 40.053 22.9192 37.606 22.9192Z" />
+        </brand:BrandLogoVectorElement.Geometry>
+      </brand:BrandLogoVectorElement>
+
+      <brand:BrandLogoVectorElement LayoutBounds="50.92,4.92,13.15,22.15">
+        <brand:BrandLogoVectorElement.Geometry>
+          <PathGeometry FillRule="EvenOdd" Figures="M61.4512 13.9619H52.6612V5.71936H48.6816V26.4095H52.6612V17.9415H61.4512V26.4095H65.4243V5.71936H61.4512V13.9619Z" />
+        </brand:BrandLogoVectorElement.Geometry>
+      </brand:BrandLogoVectorElement>
+
+      <brand:BrandLogoVectorElement LayoutBounds="70.69,4.92,16.62,22.15">
+        <brand:BrandLogoVectorElement.Geometry>
+          <PathGeometry FillRule="EvenOdd" Figures="M78.896 5.10754C72.888 5.10754 68.0068 9.99512 68.0068 15.9967C68.0068 21.9983 72.8944 26.8859 78.896 26.8859C84.8976 26.8859 89.7852 21.9983 89.7852 15.9967C89.7852 9.99512 84.9041 5.10754 78.896 5.10754ZM78.896 22.9192C75.0838 22.9192 71.98 19.8154 71.98 16.0032C71.98 12.191 75.0838 9.08715 78.896 9.08715C82.7082 9.08715 85.812 12.191 85.812 16.0032C85.812 19.8154 82.7082 22.9192 78.896 22.9192Z" />
+        </brand:BrandLogoVectorElement.Geometry>
+      </brand:BrandLogoVectorElement>
+
+      <brand:BrandLogoVectorElement LayoutBounds="93.62,4.92,11.77,22.15">
+        <brand:BrandLogoVectorElement.Geometry>
+          <PathGeometry FillRule="EvenOdd" Figures="M102.523 14.5673C102.523 14.5673 99.9274 13.7688 98.2145 12.9574C97.358 12.5517 96.8622 11.7274 96.9395 10.8517C97.0296 9.89862 97.7702 9.12588 98.8778 8.8361C100.938 8.29519 103.115 10.1498 103.656 10.652L106.154 7.76071C104.332 5.90613 101.937 5.3137 100.23 5.14627C99.9403 5.12051 99.6569 5.1012 99.3672 5.1012C97.8474 5.1012 96.3728 5.50045 95.1364 6.25387C93.2754 7.38722 92.3095 8.97133 92.2773 10.9611C92.2064 15.1468 95.0269 16.1063 97.2936 16.8855C97.6607 17.0078 98.002 17.1302 98.324 17.2525C98.7103 17.4071 99.0645 17.5359 99.3994 17.6582C101.112 18.2893 102.149 18.6757 102.458 20.0601C102.6 20.7041 102.432 21.3416 101.988 21.8503C101.267 22.6746 99.9725 23.0674 98.4206 22.9386C96.141 22.7454 94.5762 21.2579 94.1447 20.8007L91.6655 23.3443C95.2523 26.9118 98.9872 26.989 100.436 26.8538C102.651 26.6478 106.914 25.0443 107.21 20.4787C107.494 16.0805 102.548 14.5801 102.503 14.5608L102.523 14.5673Z" />
+        </brand:BrandLogoVectorElement.Geometry>
+      </brand:BrandLogoVectorElement>
+
+      <brand:BrandLogoVectorElement LayoutBounds="110.92,4.92,13.15,22.15">
+        <brand:BrandLogoVectorElement.Geometry>
+          <PathGeometry FillRule="EvenOdd" Figures="M109.58 26.4095H124.32V22.359H113.56V17.948H121.796V13.9684H113.56V9.69897H124.32V5.71936H109.58V26.4095Z" />
+        </brand:BrandLogoVectorElement.Geometry>
+      </brand:BrandLogoVectorElement>
+    </brand:BrandLogoVectorPreset.Elements>
+  </brand:BrandLogoVectorPreset>
+</ResourceDictionary>

@@ -1,0 +1,410 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Window x:Class="ClickSyncMouseTester.Views.Shell.MousePerformanceChartWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:ClickSyncMouseTester.Controls" xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework" Width="1600" Height="1040" MinWidth="1320" MinHeight="980" Icon="/Assets/Icons/AppIcon.ico" WindowStyle="None" ResizeMode="CanResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner" Background="{DynamicResource WindowBackgroundBrush}" SnapsToDevicePixels="True" UseLayoutRounding="True" FontFamily="{DynamicResource Font.Body}" TextOptions.TextRenderingMode="{StaticResource TextRenderingMode.ClearType}" TextOptions.TextFormattingMode="{StaticResource TextFormattingMode.UI}" TextOptions.TextHintingMode="{StaticResource TextHintingMode.UI}" xmlns:shell1="clr-namespace:ClickSyncMouseTester.Views.Shell" Title="{Binding WindowTitleText}">
+  <shell:WindowChrome.WindowChrome>
+    <shell:WindowChrome CaptionHeight="{StaticResource Layout.Chrome.CaptionHeight}" ResizeBorderThickness="{StaticResource Layout.Chrome.ResizeBorderThickness}" CornerRadius="{StaticResource Layout.Window.CornerRadius}" GlassFrameThickness="0" UseAeroCaptionButtons="False" />
+  </shell:WindowChrome.WindowChrome>
+  <FrameworkElement.Resources>
+    <ResourceDictionary>
+      <SolidColorBrush x:Key="MousePerformanceChartOuterBorderBrush" Color="#E4B3B3" />
+      <Style x:Key="MousePerformanceChartToolbarTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource KeyDetectionThresholdTextBoxStyle}">
+        <Setter Property="Width" Value="116" />
+        <Setter Property="Height" Value="44" />
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="Background" Value="#00FFFFFF" />
+        <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="TextBoxBase.CaretBrush" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="InputMethod.IsInputMethodEnabled" Value="False" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="TextBox.TextAlignment" Value="Center" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="{x:Type TextBox}">
+              <Grid SnapsToDevicePixels="True">
+                <Border Name="EditorialInputSurface" Background="{TemplateBinding Control.Background}">
+                  <ScrollViewer Name="PART_ContentHost" Margin="0,8,0,7" VerticalAlignment="Center" />
+                </Border>
+                <Rectangle Name="EditorialInputTopRule" Height="1" VerticalAlignment="Top" Fill="{TemplateBinding Control.BorderBrush}" Opacity="0.18" />
+                <Rectangle Name="EditorialInputBottomRule" Height="1" VerticalAlignment="Bottom" Fill="{TemplateBinding Control.BorderBrush}" Opacity="0.82" />
+              </Grid>
+              <ControlTemplate.Triggers>
+                <Trigger Property="UIElement.IsMouseOver" Value="True">
+                  <Setter TargetName="EditorialInputSurface" Property="Border.Background" Value="#08FFFFFF" />
+                  <Setter TargetName="EditorialInputBottomRule" Value="{DynamicResource TextStrongBrush}" Property="Shape.Fill" />
+                  <Setter TargetName="EditorialInputBottomRule" Property="UIElement.Opacity" Value="1" />
+                </Trigger>
+                <Trigger Property="UIElement.IsKeyboardFocused" Value="True">
+                  <Setter TargetName="EditorialInputSurface" Value="{DynamicResource GhostHoverBrush}" Property="Border.Background" />
+                  <Setter TargetName="EditorialInputBottomRule" Value="{DynamicResource TextStrongBrush}" Property="Shape.Fill" />
+                  <Setter TargetName="EditorialInputBottomRule" Property="UIElement.Opacity" Value="1" />
+                  <Setter TargetName="EditorialInputTopRule" Property="UIElement.Opacity" Value="0.32" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                  <Setter TargetName="EditorialInputSurface" Property="UIElement.Opacity" Value="0.36" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+      <Style x:Key="MousePerformanceChartWindowTitleStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+      </Style>
+      <Style x:Key="MousePerformanceChartWindowHintStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource HintTextStyle}">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+      </Style>
+      <Style x:Key="MousePerformanceChartToolbarLabelStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MicroLabelStyle}">
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+      </Style>
+      <Style x:Key="MousePerformanceChartToolbarSupplementStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource HintTextStyle}">
+        <Setter Property="FontSize" Value="10.5" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextBlock.LineHeight" Value="15" />
+        <Setter Property="MaxHeight" Value="30" />
+        <Setter Property="TextBlock.LineStackingStrategy" Value="BlockLineHeight" />
+        <Setter Property="ClipToBounds" Value="True" />
+      </Style>
+      <Style x:Key="MousePerformanceChartToolbarCheckBoxStyle" TargetType="{x:Type CheckBox}">
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="Background" Value="#00FFFFFF" />
+        <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="MinWidth" Value="84" />
+        <Setter Property="Height" Value="44" />
+        <Setter Property="Padding" Value="0,0,0,2" />
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FrameworkElement.Cursor" Value="Hand" />
+        <Setter Property="FrameworkElement.FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="{x:Type CheckBox}">
+              <Grid SnapsToDevicePixels="True">
+                <Border Name="EditorialToggleSurface" Background="{TemplateBinding Control.Background}" />
+                <Rectangle Name="EditorialToggleTopRule" Height="1" VerticalAlignment="Top" Fill="{TemplateBinding Control.BorderBrush}" Opacity="0.18" />
+                <Rectangle Name="EditorialToggleBottomRule" Height="1" VerticalAlignment="Bottom" Fill="{TemplateBinding Control.BorderBrush}" Opacity="0.82" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,2">
+                  <Border Name="EditorialToggleMarker" Width="10" Height="10" Margin="0,0,8,0" BorderBrush="{TemplateBinding Control.BorderBrush}" BorderThickness="1" Background="#00FFFFFF" />
+                  <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="True" />
+                </StackPanel>
+              </Grid>
+              <ControlTemplate.Triggers>
+                <Trigger Property="UIElement.IsMouseOver" Value="True">
+                  <Setter TargetName="EditorialToggleSurface" Property="Border.Background" Value="#08FFFFFF" />
+                  <Setter TargetName="EditorialToggleBottomRule" Value="{DynamicResource TextStrongBrush}" Property="Shape.Fill" />
+                  <Setter TargetName="EditorialToggleBottomRule" Property="UIElement.Opacity" Value="1" />
+                </Trigger>
+                <Trigger Property="UIElement.IsKeyboardFocused" Value="True">
+                  <Setter TargetName="EditorialToggleSurface" Value="{DynamicResource GhostHoverBrush}" Property="Border.Background" />
+                  <Setter TargetName="EditorialToggleBottomRule" Value="{DynamicResource TextStrongBrush}" Property="Shape.Fill" />
+                  <Setter TargetName="EditorialToggleBottomRule" Property="UIElement.Opacity" Value="1" />
+                  <Setter TargetName="EditorialToggleTopRule" Property="UIElement.Opacity" Value="0.32" />
+                </Trigger>
+                <Trigger Property="ToggleButton.IsChecked" Value="True">
+                  <Setter TargetName="EditorialToggleMarker" Value="{DynamicResource VoltGreenBrush}" Property="Border.Background" />
+                  <Setter TargetName="EditorialToggleMarker" Value="{DynamicResource VoltGreenBrush}" Property="Border.BorderBrush" />
+                  <Setter TargetName="EditorialToggleBottomRule" Value="{DynamicResource VoltGreenBrush}" Property="Shape.Fill" />
+                  <Setter TargetName="EditorialToggleBottomRule" Property="UIElement.Opacity" Value="1" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                  <Setter TargetName="EditorialToggleSurface" Property="UIElement.Opacity" Value="0.36" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+      <Style x:Key="MousePerformanceChartLegendTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource HintTextStyle}">
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+      </Style>
+      <Style x:Key="MousePerformanceChartLegendToggleStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource MousePerformanceChartToolbarCheckBoxStyle}">
+        <Setter Property="MinWidth" Value="58" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+      </Style>
+      <Style x:Key="MousePerformanceChartTitleBarEditorialButtonStyle" TargetType="{x:Type Button}">
+        <Setter Property="MinWidth" Value="116" />
+        <Setter Property="Height" Value="38" />
+        <Setter Property="Padding" Value="18,0" />
+        <Setter Property="Background" Value="#00FFFFFF" />
+        <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FrameworkElement.Cursor" Value="Hand" />
+        <Setter Property="FrameworkElement.FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="{x:Type Button}">
+              <Grid SnapsToDevicePixels="True">
+                <Border Name="EditorialButtonSurface" Background="{TemplateBinding Control.Background}" />
+                <Rectangle Name="EditorialButtonTopRule" Height="1" VerticalAlignment="Top" Fill="{TemplateBinding Control.BorderBrush}" Opacity="0.18" />
+                <Rectangle Name="EditorialButtonBottomRule" Height="1" VerticalAlignment="Bottom" Fill="{TemplateBinding Control.BorderBrush}" Opacity="0.46" />
+                <StackPanel Name="EditorialButtonContentHost" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Control.Padding}">
+                  <ContentPresenter Name="EditorialButtonContent" HorizontalAlignment="Center" RecognizesAccessKey="True" />
+                  <Rectangle Name="EditorialButtonHoverMark" Width="{Binding ActualWidth, ElementName=EditorialButtonContent}" MinWidth="28" MaxWidth="58" Height="2" RadiusX="1" RadiusY="1" Margin="0,3,0,0" HorizontalAlignment="Center" Fill="{DynamicResource VoltGreenBrush}" Opacity="0" />
+                </StackPanel>
+              </Grid>
+              <ControlTemplate.Triggers>
+                <Trigger Property="UIElement.IsMouseOver" Value="True">
+                  <Setter TargetName="EditorialButtonSurface" Property="Border.Background" Value="#10FFFFFF" />
+                  <Setter TargetName="EditorialButtonBottomRule" Property="UIElement.Opacity" Value="0.62" />
+                  <Setter TargetName="EditorialButtonHoverMark" Property="UIElement.Opacity" Value="1" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                  <Setter TargetName="EditorialButtonSurface" Value="{DynamicResource GhostHoverBrush}" Property="Border.Background" />
+                  <Setter TargetName="EditorialButtonBottomRule" Property="UIElement.Opacity" Value="0.7" />
+                  <Setter TargetName="EditorialButtonHoverMark" Value="{DynamicResource VoltGreenHoverBrush}" Property="Shape.Fill" />
+                  <Setter TargetName="EditorialButtonHoverMark" Property="UIElement.Opacity" Value="1" />
+                </Trigger>
+                <Trigger Property="UIElement.IsKeyboardFocused" Value="True">
+                  <Setter TargetName="EditorialButtonSurface" Value="{DynamicResource GhostHoverBrush}" Property="Border.Background" />
+                  <Setter TargetName="EditorialButtonBottomRule" Property="UIElement.Opacity" Value="0.7" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                  <Setter TargetName="EditorialButtonSurface" Property="UIElement.Opacity" Value="0.34" />
+                  <Setter TargetName="EditorialButtonContent" Property="UIElement.Opacity" Value="0.46" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+    </ResourceDictionary>
+  </FrameworkElement.Resources>
+  <Grid Name="WindowPresentationSurface" Background="{DynamicResource WindowBackgroundBrush}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="{StaticResource Layout.Chrome.RowHeight}" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <Border Grid.RowSpan="2" Margin="{StaticResource Layout.OuterFrame.Margin}" BorderBrush="{StaticResource MousePerformanceChartOuterBorderBrush}" BorderThickness="{StaticResource Thickness.WindowOuterBorder.All}" CornerRadius="{StaticResource Layout.Window.CornerRadius}" SnapsToDevicePixels="True" IsHitTestVisible="False" />
+    <Border Grid.Row="0" Background="{DynamicResource GlassTitleBarBackgroundBrush}" BorderBrush="{StaticResource MousePerformanceChartOuterBorderBrush}" BorderThickness="1,1,1,0" CornerRadius="{StaticResource Layout.Window.TopCornerRadius}">
+      <Grid>
+        <Border BorderBrush="{DynamicResource GlassTitleBarBorderBrush}" BorderThickness="0,0,0,1" CornerRadius="{StaticResource Layout.Window.TopCornerRadius}" />
+        <Grid Margin="{StaticResource Layout.Chrome.ContentMargin}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel VerticalAlignment="Center" Margin="18,0,18,0">
+            <TextBlock Style="{StaticResource MousePerformanceChartWindowTitleStyle}" Text="{Binding WindowTitleText}" />
+          </StackPanel>
+          <Button Grid.Column="1" MinWidth="112" Margin="0,0,8,0" Content="{DynamicResource MousePerformance.Chart.Action.Import}" Style="{StaticResource MousePerformanceChartTitleBarEditorialButtonStyle}" shell:WindowChrome.IsHitTestVisibleInChrome="True" IsEnabled="{Binding CanImportComparisonSession}" Click="ImportDataButton_Click" />
+          <Button Grid.Column="2" MinWidth="112" Margin="0,0,8,0" Content="{DynamicResource MousePerformance.Chart.Action.Export}" Style="{StaticResource MousePerformanceChartTitleBarEditorialButtonStyle}" shell:WindowChrome.IsHitTestVisibleInChrome="True" IsEnabled="{Binding CanExportBaselineSession}" Click="ExportDataButton_Click" />
+          <Button Grid.Column="3" MinWidth="112" Margin="0,0,8,0" Content="{DynamicResource MousePerformance.Chart.Action.SavePng}" Style="{StaticResource MousePerformanceChartTitleBarEditorialButtonStyle}" shell:WindowChrome.IsHitTestVisibleInChrome="True" IsEnabled="{Binding CanSavePng}" Click="SavePngButton_Click" />
+          <Button Grid.Column="4" Style="{StaticResource TitleBarButtonStyle}" shell:WindowChrome.IsHitTestVisibleInChrome="True" Click="MinimizeButton_Click">
+            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="{StaticResource Layout.Chrome.GlyphFontSize}" TextOptions.TextFormattingMode="{StaticResource TextFormattingMode.UI}" Text="" />
+          </Button>
+          <Button Name="MaximizeRestoreButton" Grid.Column="5" Style="{StaticResource TitleBarButtonStyle}" shell:WindowChrome.IsHitTestVisibleInChrome="True" Click="MaximizeRestoreButton_Click">
+            <TextBlock Name="MaximizeRestoreGlyph" FontFamily="Segoe MDL2 Assets" FontSize="{StaticResource Layout.Chrome.GlyphFontSize}" TextOptions.TextFormattingMode="{StaticResource TextFormattingMode.UI}" Text="">
+            </TextBlock>
+          </Button>
+          <Button Grid.Column="6" Style="{StaticResource TitleBarCloseButtonStyle}" shell:WindowChrome.IsHitTestVisibleInChrome="True" Click="CloseButton_Click">
+            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="{StaticResource Layout.Chrome.GlyphFontSize}" TextOptions.TextFormattingMode="{StaticResource TextFormattingMode.UI}" Text="" />
+          </Button>
+        </Grid>
+      </Grid>
+    </Border>
+    <Grid Row="1" Margin="14,12,14,12">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+      <Grid Row="0" Margin="0,0,0,8">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="30" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="0" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid Row="0">
+          <TextBlock Style="{StaticResource MousePerformanceChartToolbarSupplementStyle}" VerticalAlignment="Center" Text="{Binding ToolbarSupplementText}" ToolTip="{Binding ToolbarSupplementText}" />
+        </Grid>
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding LegendItems}">
+          <FrameworkElement.Style>
+            <Style TargetType="{x:Type ItemsControl}">
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Style.Triggers>
+                <DataTrigger Value="True" Binding="{Binding HasLegendItems}">
+                  <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </FrameworkElement.Style>
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Border Margin="0,0,12,0" Padding="0,0,10,0">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,8,0" VerticalAlignment="Center">
+                    <FrameworkElement.Style>
+                      <Style TargetType="{x:Type StackPanel}">
+                        <Setter Property="UIElement.Opacity" Value="1" />
+                        <Style.Triggers>
+                          <DataTrigger Value="False" Binding="{Binding IsVisible}">
+                            <Setter Property="UIElement.Opacity" Value="0.42" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </FrameworkElement.Style>
+                    <Rectangle Width="10" Height="10" RadiusX="2" RadiusY="2" Margin="0,0,4,0" Fill="{Binding PrimaryBrush}" />
+                    <Rectangle Width="10" Height="10" RadiusX="2" RadiusY="2" Margin="0,0,4,0" Fill="{Binding SecondaryBrush}" />
+                    <Rectangle Width="10" Height="10" RadiusX="2" RadiusY="2" Fill="{Binding AccentBrush}" />
+                  </StackPanel>
+                  <TextBlock Grid.Column="1" Margin="0,0,8,0" Text="{Binding Text}">
+                    <FrameworkElement.Style>
+                      <Style BasedOn="{StaticResource MousePerformanceChartLegendTextStyle}" TargetType="{x:Type TextBlock}">
+                        <Setter Property="UIElement.Opacity" Value="1" />
+                        <Style.Triggers>
+                          <DataTrigger Value="False" Binding="{Binding IsVisible}">
+                            <Setter Property="UIElement.Opacity" Value="0.46" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </FrameworkElement.Style>
+                  </TextBlock>
+                  <CheckBox Grid.Column="2" Content="{DynamicResource MousePerformance.Chart.Legend.Visibility}" Style="{StaticResource MousePerformanceChartLegendToggleStyle}" IsChecked="{Binding IsVisible, Mode=TwoWay}" IsEnabled="{Binding CanToggleVisibility}" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Grid Row="3" IsSharedSizeScope="True">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <Grid Column="0">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" SharedSizeGroup="ChartToolbarLabelRow" />
+              <RowDefinition Height="4" SharedSizeGroup="ChartToolbarGapRow" />
+              <RowDefinition Height="Auto" SharedSizeGroup="ChartToolbarControlRow" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="324" />
+              <ColumnDefinition Width="24" />
+              <ColumnDefinition Width="220" />
+              <ColumnDefinition Width="24" />
+              <ColumnDefinition Width="116" />
+              <ColumnDefinition Width="12" />
+              <ColumnDefinition Width="116" />
+              <ColumnDefinition Width="24" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="14" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="14" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource MousePerformance.Chart.Control.PlotType}" Style="{StaticResource MousePerformanceChartToolbarLabelStyle}" />
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="{DynamicResource MousePerformance.Chart.Control.TimeBasis}" Style="{StaticResource MousePerformanceChartToolbarLabelStyle}" HorizontalAlignment="Center" TextAlignment="Center" />
+            <TextBlock Grid.Row="0" Grid.Column="4" Text="{DynamicResource MousePerformance.Chart.Control.RangeStart}" Style="{StaticResource MousePerformanceChartToolbarLabelStyle}" HorizontalAlignment="Center" TextAlignment="Center" />
+            <TextBlock Grid.Row="0" Grid.Column="6" Text="{DynamicResource MousePerformance.Chart.Control.RangeEnd}" Style="{StaticResource MousePerformanceChartToolbarLabelStyle}" HorizontalAlignment="Center" TextAlignment="Center" />
+            <TextBlock Grid.Row="0" Grid.Column="13" Margin="24,0,0,0" Text="{DynamicResource MousePerformance.Chart.Control.GapTarget}">
+              <FrameworkElement.Style>
+                <Style BasedOn="{StaticResource MousePerformanceChartToolbarLabelStyle}" TargetType="{x:Type TextBlock}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                  <Style.Triggers>
+                    <DataTrigger Value="True" Binding="{Binding IsGapAnalysisSelectionVisible}">
+                      <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </FrameworkElement.Style>
+            </TextBlock>
+            <ComboBox Grid.Row="2" Grid.Column="0" Width="324" SelectedValuePath="PlotType" Style="{StaticResource AvantGardeComboBoxStyle}" ItemsSource="{Binding PlotTypeOptions}" SelectedValue="{Binding SelectedPlotType}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Style="{StaticResource DeviceComboItemTextStyle}" Text="{Binding DisplayName}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ComboBox>
+            <ComboBox Grid.Row="2" Grid.Column="2" Width="220" SelectedValuePath="TimeBasis" Style="{StaticResource AvantGardeComboBoxStyle}" IsEnabled="{Binding IsTimeBasisSelectionEnabled}" ItemsSource="{Binding TimeBasisOptions}" SelectedValue="{Binding SelectedTimeBasis}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Style="{StaticResource DeviceComboItemTextStyle}" Text="{Binding DisplayName}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ComboBox>
+            <TextBox Grid.Row="2" Grid.Column="4" Width="116" Style="{StaticResource MousePerformanceChartToolbarTextBoxStyle}" Text="{Binding RangeStartText, UpdateSourceTrigger=PropertyChanged}" LostFocus="RangeTextBox_LostFocus" PreviewKeyDown="RangeTextBox_PreviewKeyDown" />
+            <TextBox Grid.Row="2" Grid.Column="6" Width="116" Style="{StaticResource MousePerformanceChartToolbarTextBoxStyle}" Text="{Binding RangeEndText, UpdateSourceTrigger=PropertyChanged}" LostFocus="RangeTextBox_LostFocus" PreviewKeyDown="RangeTextBox_PreviewKeyDown" />
+            <CheckBox Grid.Row="2" Grid.Column="8" Content="{DynamicResource MousePerformance.Chart.Control.Stem}" Style="{StaticResource MousePerformanceChartToolbarCheckBoxStyle}" IsChecked="{Binding ShowStem}" IsEnabled="{Binding CanToggleStem}" />
+            <CheckBox Grid.Row="2" Grid.Column="10" Content="{DynamicResource MousePerformance.Chart.Control.Lines}" Style="{StaticResource MousePerformanceChartToolbarCheckBoxStyle}" IsChecked="{Binding ShowLines}" IsEnabled="{Binding CanToggleLines}" />
+            <CheckBox Grid.Row="2" Grid.Column="12" Content="{DynamicResource MousePerformance.Chart.Control.Gap}" Style="{StaticResource MousePerformanceChartToolbarCheckBoxStyle}" IsChecked="{Binding ShowGapOverlay}" IsEnabled="{Binding CanUseGapOverlay}" />
+            <ComboBox Grid.Row="2" Grid.Column="13" Width="168" Margin="24,0,0,0" SelectedValuePath="DatasetSlot" ItemsSource="{Binding GapAnalysisTargetOptions}" SelectedValue="{Binding SelectedGapAnalysisDatasetSlot}">
+              <FrameworkElement.Style>
+                <Style BasedOn="{StaticResource AvantGardeComboBoxStyle}" TargetType="{x:Type ComboBox}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                  <Style.Triggers>
+                    <DataTrigger Value="True" Binding="{Binding IsGapAnalysisSelectionVisible}">
+                      <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </FrameworkElement.Style>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Style="{StaticResource DeviceComboItemTextStyle}" Text="{Binding DisplayName}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ComboBox>
+            <TextBlock Grid.Row="2" Grid.Column="14" MaxWidth="320" Margin="14,0,0,0" Text="{Binding ToolbarDiagnosticsText}" ToolTip="{Binding ToolbarDiagnosticsText}">
+              <FrameworkElement.Style>
+                <Style BasedOn="{StaticResource MousePerformanceChartLegendTextStyle}" TargetType="{x:Type TextBlock}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                  <Setter Property="VerticalAlignment" Value="Center" />
+                  <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                  <Style.Triggers>
+                    <DataTrigger Value="True" Binding="{Binding HasToolbarDiagnostics}">
+                      <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </FrameworkElement.Style>
+            </TextBlock>
+          </Grid>
+        </Grid>
+      </Grid>
+      <controls:MousePerformanceChartControl x:Name="ChartControl" GpuRendererAvailabilityChanged="ChartControl_GpuRendererAvailabilityChanged" VisibleGapCountChanged="ChartControl_VisibleGapCountChanged" Grid.Row="1" Margin="0,8,0,0" GapAnalysisDatasetSlot="{Binding SelectedGapAnalysisDatasetSlot}" ShowGapOverlay="{Binding ShowGapOverlay}" RenderFrame="{Binding RenderFrame}">
+      </controls:MousePerformanceChartControl>
+    </Grid>
+  </Grid>
+</Window>

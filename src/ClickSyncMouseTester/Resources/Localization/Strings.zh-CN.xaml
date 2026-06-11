@@ -1,0 +1,541 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+  <system:String x:Key="Window.Title" xmlns:system="clr-namespace:System;assembly=System.Private.CoreLib">单鼠标回报率检测</system:String>
+  <String x:Key="Header.Meta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">RAW INPUT / 单设备 / 回报观测</String>
+  <String x:Key="Header.WindowHistory" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">300 毫秒窗口 / 3 秒历史</String>
+  <String x:Key="Header.ThemeLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MODE</String>
+  <String x:Key="Header.LanguageLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">LANG</String>
+  <String x:Key="Navigation.Menu.Open" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">打开页面目录</String>
+  <String x:Key="Navigation.Menu.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">PAGE DIRECTORY</String>
+  <String x:Key="Navigation.Menu.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">切换工作页面</String>
+  <String x:Key="Navigation.Menu.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">这里仅用于切换工作页。当前已接入核心检测页面，后续能力会继续在各页面内展开。</String>
+  <String x:Key="Navigation.Menu.CloseHint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">ESC / 点击空白区域关闭</String>
+  <String x:Key="Navigation.Page.PollingDashboard" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">回报率检测</String>
+  <String x:Key="Navigation.Page.PollingDashboard.Summary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前主工作页，实时显示 Raw Input 回报率、历史曲线和采集控制。</String>
+  <String x:Key="Navigation.Page.PollingDashboard.MenuMeta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">REPORT RATE TEST</String>
+  <String x:Key="Navigation.Page.KeyDetection" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">按键双击检测</String>
+  <String x:Key="Navigation.Page.KeyDetection.Summary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">实时检测鼠标按键、滚轮与自定义键位的按下时序、双击阈值和状态变化。</String>
+  <String x:Key="Navigation.Page.KeyDetection.MenuMeta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">BUTTON / WHEEL / KEY CHECK</String>
+  <String x:Key="Navigation.Page.SensitivityMatching" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">鼠标灵敏度复制</String>
+  <String x:Key="Navigation.Page.SensitivityMatching.Summary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">使用两只鼠标完成三轮 Raw Input 测量，生成推荐目标 DPI 与调整倍率。</String>
+  <String x:Key="Navigation.Page.SensitivityMatching.MenuMeta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">SENSITIVITY MATCH TOOL</String>
+  <String x:Key="Navigation.Page.AngleCalibration" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">传感器角度校准</String>
+  <String x:Key="Navigation.Page.AngleCalibration.Summary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">测量鼠标水平滑动轨迹，生成推荐角度并观察稳定度与轨迹质量。</String>
+  <String x:Key="Navigation.Page.AngleCalibration.MenuMeta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">ANGLE CALIBRATION</String>
+  <String x:Key="Navigation.Page.MousePerformance" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">鼠标性能分析</String>
+  <String x:Key="Navigation.Page.MousePerformance.Summary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">锁定采集指定设备的原始输入数据，查看计数、路径与实时图表。</String>
+  <String x:Key="Navigation.Page.MousePerformance.MenuMeta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MOUSE PERFORMANCE ANALYSIS</String>
+  <String x:Key="MousePerformance.Header.Eyebrow" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">RAW INPUT / 单设备 / 鼠标性能分析</String>
+  <String x:Key="MousePerformance.Header.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">鼠标性能分析</String>
+  <String x:Key="MousePerformance.Header.Description" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">选择目标鼠标后点击“开始采集”或按 S 进入锁定采集。锁定期间会持续记录当前设备的鼠标数据包，再按 S、Esc 或右键结束本次采集段并保留会话，点击“图表”打开独立图表窗口。</String>
+  <String x:Key="MousePerformance.Device.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">目标设备</String>
+  <String x:Key="MousePerformance.Device.SelectedTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前设备</String>
+  <String x:Key="MousePerformance.Device.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">锁定后只会记录当前所选鼠标的原始输入数据。</String>
+  <String x:Key="MousePerformance.Cpi.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">鼠标DPI</String>
+  <String x:Key="MousePerformance.Cpi.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">输入一个大于 0 的 CPI。无效输入会回退到最近一次有效值。</String>
+  <String x:Key="MousePerformance.Action.StartCapture" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">开始采集(按下“S”)</String>
+  <String x:Key="MousePerformance.Action.ResumeCapture" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">继续采集(按下“S”)</String>
+  <String x:Key="MousePerformance.Action.PauseCapture" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">暂停采集(按下“S”)</String>
+  <String x:Key="MousePerformance.Action.Reset" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">重置</String>
+  <String x:Key="MousePerformance.Action.Import" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">导入</String>
+  <String x:Key="MousePerformance.Action.DeleteImportedData" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">删除导入数据</String>
+  <String x:Key="MousePerformance.Action.Plot" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">图表</String>
+  <String x:Key="MousePerformance.Export.FileNameFallback" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">鼠标测量数据</String>
+  <String x:Key="MousePerformance.Exchange.Filter.Json" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">JSON 文件 (*.json)|*.json</String>
+  <String x:Key="MousePerformance.Import.Error.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">导入失败</String>
+  <String x:Key="MousePerformance.Import.Error.Format" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">无法导入鼠标测量文件。{0}</String>
+  <String x:Key="MousePerformance.Export.Error.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">导出失败</String>
+  <String x:Key="MousePerformance.Export.Error.Format" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">无法导出鼠标测量文件。{0}</String>
+  <String x:Key="MousePerformance.Summary.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">实时摘要</String>
+  <String x:Key="MousePerformance.Summary.EventCount" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">报告数</String>
+  <String x:Key="MousePerformance.Summary.SumX" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">X 净位移</String>
+  <String x:Key="MousePerformance.Summary.SumY" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Y 净位移</String>
+  <String x:Key="MousePerformance.Summary.Path" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">运动路径</String>
+  <String x:Key="MousePerformance.Summary.Speed" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">速度</String>
+  <String x:Key="MousePerformance.Summary.SpeedUnit" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">m/s</String>
+  <String x:Key="MousePerformance.Summary.Caption" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">会话提示</String>
+  <String x:Key="MousePerformance.Quality.Placeholder" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">报告 -- / 零位移 -- / 控制 -- / 丢包 -- / 质量 -- / 队列 --</String>
+  <String x:Key="MousePerformance.Quality.Format.RawReport.WithQueue" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">报告 {0} / 零位移 {1} / 控制 {2} / 丢包 {3} / 质量 {4} / 队列 {5}</String>
+  <String x:Key="MousePerformance.Quality.Level.None" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">未评估</String>
+  <String x:Key="MousePerformance.Quality.Level.Good" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">良好</String>
+  <String x:Key="MousePerformance.Quality.Level.Degraded" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">降级</String>
+  <String x:Key="MousePerformance.Quality.Timing.Placeholder" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">--</String>
+  <String x:Key="MousePerformance.Quality.Timing.Strict" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">严格保真</String>
+  <String x:Key="MousePerformance.Quality.Timing.StrictWithSameTick" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">严格保真，同 tick {0}</String>
+  <String x:Key="MousePerformance.Quality.Timing.Degraded" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">保真降级</String>
+  <String x:Key="MousePerformance.Quality.Timing.DegradedWithSameTick" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">保真降级，同 tick {0}</String>
+  <String x:Key="MousePerformance.Quality.Queue.Placeholder" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">--</String>
+  <String x:Key="MousePerformance.Quality.Queue.Format" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">{0}/{1}</String>
+  <String x:Key="MousePerformance.Footer.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">点击“开始采集”或按 S 开始；采集中再次按 S、Esc、右键或切出窗口会结束本次采集段并保留会话；点击“重置”清空会话。</String>
+  <String x:Key="MousePerformance.Status.Ready.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">准备就绪</String>
+  <String x:Key="MousePerformance.Status.Ready.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">选择一个鼠标，然后点击“开始采集”或按 S 进入锁定采集。</String>
+  <String x:Key="MousePerformance.Status.Ready.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">锁定期间会持续记录当前设备的原始输入数据包；S 是开始/结束采集段的快捷键。</String>
+  <String x:Key="MousePerformance.Status.NeedDevice.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">需要选择设备</String>
+  <String x:Key="MousePerformance.Status.NeedDevice.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">请先从列表中选择一个要分析的鼠标。</String>
+  <String x:Key="MousePerformance.Status.NeedDevice.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">只有选中的设备会进入本页统计与图表。</String>
+  <String x:Key="MousePerformance.Status.Collecting.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">采集中</String>
+  <String x:Key="MousePerformance.Status.Collecting.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前会话正在持续追加所选设备的 Raw Input 鼠标数据包。再次按 S、按 Esc 或右键可结束本次采集段。</String>
+  <String x:Key="MousePerformance.Status.Collecting.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">结束采集段只会暂停并保留数据；重置才会清空当前会话。</String>
+  <String x:Key="MousePerformance.Status.Paused.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已暂停</String>
+  <String x:Key="MousePerformance.Status.Paused.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">本次采集段已结束，当前会话数据已保留。点击“继续采集”或按 S 可继续追加。</String>
+  <String x:Key="MousePerformance.Status.Paused.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">继续采集会追加到同一会话；点击“重置”会清空当前会话并回到初始状态。</String>
+  <String x:Key="MousePerformance.Status.NoDevice.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">未检测到设备</String>
+  <String x:Key="MousePerformance.Status.NoDevice.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前没有可用鼠标设备，无法开始采集。</String>
+  <String x:Key="MousePerformance.Status.NoDevice.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">重新连接鼠标后，设备列表会自动刷新。</String>
+  <String x:Key="MousePerformance.Status.DeviceDisconnected.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">设备已断开</String>
+  <String x:Key="MousePerformance.Status.DeviceDisconnected.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前会话设备已断开，已有数据已保留。</String>
+  <String x:Key="MousePerformance.Status.DeviceDisconnected.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">重新选择设备并点击“开始采集”或按 S，将开始新会话。</String>
+  <String x:Key="MousePerformance.Status.Imported.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">导入浏览</String>
+  <String x:Key="MousePerformance.Status.Imported.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前页面正在浏览导入的鼠标测量数据。</String>
+  <String x:Key="MousePerformance.Status.Imported.Message.Single" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前页面正在浏览导入的鼠标测量数据，当前已导入{0}。</String>
+  <String x:Key="MousePerformance.Status.Imported.Message.Multi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前页面正在对比导入的鼠标测量数据，当前已导入{0}。</String>
+  <String x:Key="MousePerformance.Status.LiveCompare.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已导入对比鼠标测量数据，当前已导入{0}，点击图表可查看。</String>
+  <String x:Key="MousePerformance.Status.Imported.MouseLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">鼠标{0}“{1}”</String>
+  <String x:Key="MousePerformance.Status.Imported.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">导入浏览模式为只读。点击“删除导入数据”可清空导入数据并返回实时待机模式。</String>
+  <String x:Key="MousePerformance.Chart.WindowTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">鼠标性能图表</String>
+  <String x:Key="MousePerformance.Chart.Action.Import" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">导入</String>
+  <String x:Key="MousePerformance.Chart.Action.Export" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">导出</String>
+  <String x:Key="MousePerformance.Chart.Action.SavePng" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">保存 PNG</String>
+  <String x:Key="MousePerformance.Chart.Action.Close" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">关闭</String>
+  <String x:Key="MousePerformance.Chart.Import.CompareLimit.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">替换对比鼠标</String>
+  <String x:Key="MousePerformance.Chart.Import.CompareLimit.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前图表最多支持 3 个鼠标同图对比。继续导入将替换最早导入的对比鼠标，是否继续？</String>
+  <String x:Key="MousePerformance.Chart.Import.Duplicate.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">重复导入</String>
+  <String x:Key="MousePerformance.Chart.Import.Duplicate.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前会话中已存在相同的鼠标测量数据，无需重复导入。</String>
+  <String x:Key="MousePerformance.Chart.Legend.LiveBaseline" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">基准鼠标：{0}</String>
+  <String x:Key="MousePerformance.Chart.Legend.Imported" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">导入鼠标{0}：{1}</String>
+  <String x:Key="MousePerformance.Chart.Legend.Visibility" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">显示</String>
+  <String x:Key="MousePerformance.Chart.CompactLabel.LiveBaseline" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">基准</String>
+  <String x:Key="MousePerformance.Chart.CompactLabel.Imported" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">{0}</String>
+  <String x:Key="MousePerformance.Chart.Filter.Png" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">PNG 文件 (*.png)|*.png</String>
+  <String x:Key="MousePerformance.Chart.Export.GpuError.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">图表导出失败</String>
+  <String x:Key="MousePerformance.Chart.Control.PlotType" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">图型</String>
+  <String x:Key="MousePerformance.Chart.Control.TimeBasis" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">时间基准</String>
+  <String x:Key="MousePerformance.Chart.Control.Gap" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">长上报间隔</String>
+  <String x:Key="MousePerformance.Chart.Control.GapTarget" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">分析对象</String>
+  <String x:Key="MousePerformance.Chart.Control.RangeStart" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">起点</String>
+  <String x:Key="MousePerformance.Chart.Control.RangeEnd" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">终点</String>
+  <String x:Key="MousePerformance.Chart.Control.Stem" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">垂线</String>
+  <String x:Key="MousePerformance.Chart.Control.Lines" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">连线</String>
+  <String x:Key="MousePerformance.Chart.GapTarget.LiveBaseline" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">基准鼠标</String>
+  <String x:Key="MousePerformance.Chart.GapTarget.Imported" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">鼠标{0}</String>
+  <String x:Key="MousePerformance.Chart.Option.TimeBasis.RawCapture" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">原始采集时间</String>
+  <String x:Key="MousePerformance.Chart.Option.TimeBasis.LogicalSession" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">逻辑会话时间</String>
+  <String x:Key="MousePerformance.Chart.Plot.XCountVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">X 轴位移计数-时间</String>
+  <String x:Key="MousePerformance.Chart.Plot.YCountVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Y 轴位移计数-时间</String>
+  <String x:Key="MousePerformance.Chart.Plot.XYCountVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">X/Y 位移计数-时间</String>
+  <String x:Key="MousePerformance.Chart.Plot.IntervalVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">上报间隔-时间</String>
+  <String x:Key="MousePerformance.Chart.Plot.FrequencyVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">上报频率-时间</String>
+  <String x:Key="MousePerformance.Chart.Plot.XVelocityVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">X 轴速度-时间</String>
+  <String x:Key="MousePerformance.Chart.Plot.YVelocityVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Y 轴速度-时间</String>
+  <String x:Key="MousePerformance.Chart.Plot.XYVelocityVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">X/Y 速度-时间</String>
+  <String x:Key="MousePerformance.Chart.Plot.XSumVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">X 轴累计位移-时间</String>
+  <String x:Key="MousePerformance.Chart.Plot.YSumVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Y 轴累计位移-时间</String>
+  <String x:Key="MousePerformance.Chart.Plot.XYSumVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">X/Y 累计位移-时间</String>
+  <String x:Key="MousePerformance.Chart.Plot.PathSpeedVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">路径速度-时间</String>
+  <String x:Key="MousePerformance.Chart.Plot.IntervalHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">上报间隔直方图</String>
+  <String x:Key="MousePerformance.Chart.Plot.DeltaXHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">DeltaX 分布直方图</String>
+  <String x:Key="MousePerformance.Chart.Plot.DeltaYHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">DeltaY 分布直方图</String>
+  <String x:Key="MousePerformance.Chart.Plot.DeltaMagnitudeHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Delta 模长分布直方图</String>
+  <String x:Key="MousePerformance.Chart.Plot.XVsY" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">X-Y 轨迹</String>
+  <String x:Key="MousePerformance.Chart.Description.XCountVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">每个点代表一次 Raw Input 上报的 X 轴 DeltaX。适合观察横向微抖、跳点，以及快速甩动时是否出现异常大脉冲。</String>
+  <String x:Key="MousePerformance.Chart.Description.YCountVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">每个点代表一次 Raw Input 上报的 Y 轴 DeltaY。适合观察纵向噪声、离群点，以及垂直移动时是否有不自然突刺。</String>
+  <String x:Key="MousePerformance.Chart.Description.XYCountVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">同时查看每次上报的 DeltaX / DeltaY。适合比较双轴是否均衡，定位单轴噪声、偏轴或解耦异常。</String>
+  <String x:Key="MousePerformance.Chart.Description.IntervalVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">每个点为当前上报与上一包之间的时间差。尖峰越多，越可能存在回报抖动、丢包或系统调度卡顿。</String>
+  <String x:Key="MousePerformance.Chart.Description.FrequencyVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">以每次 Raw Input 上报为时间锚点，绘制局部窗口上报频率的连续估计曲线。它保留全量上报位置，同时削弱 USB 间隔抖动造成的瞬时跳变。</String>
+  <String x:Key="MousePerformance.Chart.Description.XVelocityVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">以每次 Raw Input 上报为锚点，用局部窗口累计 DeltaX / 窗口时间 / CPI 估计横向速度。适合判断低速到高速是否平顺、线性。</String>
+  <String x:Key="MousePerformance.Chart.Description.YVelocityVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">以每次 Raw Input 上报为锚点，用局部窗口累计 DeltaY / 窗口时间 / CPI 估计纵向速度。适合观察单轴高速下是否衰减或波动。</String>
+  <String x:Key="MousePerformance.Chart.Description.XYVelocityVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">以同一批 Raw Input 上报为锚点，同时绘制 X/Y 局部窗口速度估计。适合比较双轴速度一致性和高速稳定性。</String>
+  <String x:Key="MousePerformance.Chart.Description.PathSpeedVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">以每次 Raw Input 上报为锚点，用局部窗口累计路径长度 / 窗口时间 / CPI 估计整体路径速度。路径长度使用窗口内每包 sqrt(DeltaX² + DeltaY²) 的总和。</String>
+  <String x:Key="MousePerformance.Chart.Description.IntervalHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">使用选区内全部有效上报间隔构建分布。适合判断标称回报率附近的集中程度、长尾和主机侧间隔抖动。</String>
+  <String x:Key="MousePerformance.Chart.Description.DeltaXHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">使用选区内全部 Raw Input 上报的 DeltaX 构建有符号分布，包含 0 值。适合观察横向量化、偏置和微动输出。</String>
+  <String x:Key="MousePerformance.Chart.Description.DeltaYHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">使用选区内全部 Raw Input 上报的 DeltaY 构建有符号分布，包含 0 值。适合观察纵向量化、偏置和微动输出。</String>
+  <String x:Key="MousePerformance.Chart.Description.DeltaMagnitudeHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">使用选区内全部 Raw Input 上报的 Delta 模长构建非负分布。适合观察微动丢失、量化台阶和小位移输出比例。</String>
+  <String x:Key="MousePerformance.Chart.Description.VelocityStats" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">速度统计 平均 {0} m/s | P50 {1} | P95 {2} | P99 {3} | P999 {4} | 标准差 {5} | MAD {6} | IQR {7}</String>
+  <String x:Key="MousePerformance.Chart.Description.IntervalStats" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">间隔统计 平均 {0} | P50 {1} | P95 {2} | P99 {3} | P999 {4} | 标准差 {5} | MAD {6} | IQR {7}</String>
+  <String x:Key="MousePerformance.Chart.Description.FrequencyStats" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">频率统计 平均 {0} Hz | P50 {1} | P95 {2} | P99 {3} | 标准差 {4}</String>
+  <String x:Key="MousePerformance.Chart.Description.CountDispersion" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">残差离散度 MAD {0} | IQR {1}</String>
+  <String x:Key="MousePerformance.Chart.Description.XSumVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">对 DeltaX 做累计，曲线斜率反映持续横向输出。斜率突变、平台或意外回折常提示丢步、修正或回报不连续。</String>
+  <String x:Key="MousePerformance.Chart.Description.YSumVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">对 DeltaY 做累计，曲线斜率反映持续纵向输出。适合发现纵向移动中的停滞、补偿或异常回折。</String>
+  <String x:Key="MousePerformance.Chart.Description.XYSumVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">对 DeltaX / DeltaY 分别累计。适合看双轴累计输出是否平顺、同步，以及长距离移动中是否出现单轴偏移。</String>
+  <String x:Key="MousePerformance.Chart.Description.XVsY" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">按累计 X 与累计 Y 绘制轨迹。最适合观察直线修正、角度修正、蛇形轨迹、偏轴和画圆不圆等传感器特征。</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.TrendLine" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">散点代表用于当前图表的运动样本；灰色为趋势估计线，用于判断整体稳定度和走势。</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.ScatterOnly" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前图表以全量有效上报点展示原始样本，不绘制连线或垂线。</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.RawConnected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前图表锁定显示原始累计连线；每个有效点都会参与绘制，不抽样、不丢点。</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.ContinuousEstimate" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前图表显示全量有效上报锚点上的连续估计曲线：每个有效锚点都会参与绘制，不抽样、不丢点；统计值与这条曲线使用同一口径。</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.Trajectory" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">轨迹图始终显示选区内的原始累计路径，不参与趋势线平滑，最适合观察偏轴、修正和路径几何形态。</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.Distribution" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前图表是全量样本分布视角：所有选区样本都会参与分布计算，横轴不表示时间，因此不显示长间隔覆盖层。</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.HostObserved" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">本页时间轴反映的是主机侧 Raw Input 到达行为，而不是设备内部硬件时钟；它适合判断整条输入链路的稳定性。</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.RobustStats" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MAD 与 IQR 表示稳健离散度，能避免少量尖峰主导稳定性判断。</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.TimeBasis.RawCapture" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">使用原始采集时间，不压缩暂停，也不做时间补偿。</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.TimeBasis.LogicalSession" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">使用逻辑会话时间，会压缩暂停后的断档，更适合连续观察会话走势。</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.GapOverlay" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">长上报间隔为主机侧观察到的相邻 Raw Input 报告之间明显变长的时间段，可能来自无线/USB 链路不稳、系统调度延迟或采集处理延迟。</String>
+  <String x:Key="MousePerformance.Chart.Diagnostics.Summary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">长间隔 {0} 段 / 平均 {1} ms</String>
+  <String x:Key="MousePerformance.Chart.Diagnostics.Summary.WithTarget" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">长间隔 {1} 段 / 平均 {2} ms</String>
+  <String x:Key="MousePerformance.Chart.Axis.Time" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">时间 (ms)</String>
+  <String x:Key="MousePerformance.Chart.Axis.Time.RawCapture" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">原始采集时间 (ms)</String>
+  <String x:Key="MousePerformance.Chart.Axis.Time.LogicalSession" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">逻辑会话时间 (ms)</String>
+  <String x:Key="MousePerformance.Chart.Axis.XCounts" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">X 轴位移计数</String>
+  <String x:Key="MousePerformance.Chart.Axis.YCounts" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Y 轴位移计数</String>
+  <String x:Key="MousePerformance.Chart.Axis.XYCounts" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">位移计数 [主轴 / 副轴]</String>
+  <String x:Key="MousePerformance.Chart.Axis.Interval" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">上报间隔 (ms)</String>
+  <String x:Key="MousePerformance.Chart.Axis.Frequency" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">上报频率 (Hz)</String>
+  <String x:Key="MousePerformance.Chart.Axis.XVelocity" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">X 轴速度 (m/s)</String>
+  <String x:Key="MousePerformance.Chart.Axis.YVelocity" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Y 轴速度 (m/s)</String>
+  <String x:Key="MousePerformance.Chart.Axis.XYVelocity" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">速度 (m/s) [主轴 / 副轴]</String>
+  <String x:Key="MousePerformance.Chart.Axis.PathSpeed" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">路径速度 (m/s)</String>
+  <String x:Key="MousePerformance.Chart.Axis.DeltaX" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">DeltaX 计数</String>
+  <String x:Key="MousePerformance.Chart.Axis.DeltaY" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">DeltaY 计数</String>
+  <String x:Key="MousePerformance.Chart.Axis.DeltaMagnitude" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Delta 模长计数</String>
+  <String x:Key="MousePerformance.Chart.Axis.HistogramPercent" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">上报占比 (%)</String>
+  <String x:Key="MousePerformance.Chart.Axis.XSum" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">X 轴累计位移计数</String>
+  <String x:Key="MousePerformance.Chart.Axis.YSum" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Y 轴累计位移计数</String>
+  <String x:Key="MousePerformance.Chart.Axis.XYSum" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">累计位移计数 [主轴 / 副轴]</String>
+  <String x:Key="MousePerformance.Chart.Subtitle.NoCpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">CPI 不可用</String>
+  <String x:Key="MousePerformance.Chart.Subtitle.WithCpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">CPI {0}</String>
+  <String x:Key="MousePerformance.Chart.Unavailable.NoData" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前会话还没有可绘制的数据。</String>
+  <String x:Key="MousePerformance.Chart.Unavailable.InsufficientMotion" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前会话的可用运动样本不足，无法生成该类派生图。</String>
+  <String x:Key="MousePerformance.Chart.Unavailable.InvalidCpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">速度图需要有效的 CPI。</String>
+  <String x:Key="MousePerformance.Chart.Unavailable.Generic" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前图型暂时不可用。</String>
+  <String x:Key="MousePerformance.Chart.Unavailable.GpuRenderer" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前 GPU 图表渲染器不可用。</String>
+  <String x:Key="MousePerformance.Chart.Unavailable.GpuRenderer.WithDetail" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前 GPU 图表渲染器不可用。Direct3D 11: {0}</String>
+  <String x:Key="MousePerformance.Chart.Export.GpuError" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">无法导出 GPU 图表。</String>
+  <String x:Key="MousePerformance.Chart.Export.GpuError.WithDetail" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">无法导出 GPU 图表。Direct3D 11: {0}</String>
+  <String x:Key="MousePerformance.Chart.Loading.Frame" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">正在构建图表分析缓存...</String>
+  <String x:Key="AngleCalibration.PageTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">鼠标传感器角度校准</String>
+  <String x:Key="AngleCalibration.Instructions.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">使用方法</String>
+  <String x:Key="AngleCalibration.Instructions.Step1" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">1. 点击下方测量区域开始，并锁定光标。</String>
+  <String x:Key="AngleCalibration.Instructions.Step2" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">2. 自然摆姿左右来回滑动不少于 30 次，尽量维持你认定的“水平”。</String>
+  <String x:Key="AngleCalibration.Instructions.Step3" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">3. 右键暂停后可查看推荐角度；继续点击测量区域可在同一会话内继续测量。</String>
+  <String x:Key="AngleCalibration.Instructions.Step4" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">4. 也可以在手动调整握姿或垫面后反复测量，直到推荐角度稳定在理想范围内。</String>
+  <String x:Key="AngleCalibration.Button.Reset" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">重置</String>
+  <String x:Key="AngleCalibration.Button.CopyAngle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">复制角度</String>
+  <String x:Key="AngleCalibration.Result.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">推荐角度</String>
+  <String x:Key="AngleCalibration.Measurement.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">测量区域</String>
+  <String x:Key="AngleCalibration.Measurement.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">点击区域开始采样；右键或 Esc 暂停，继续测量会提升结果精度。</String>
+  <String x:Key="AngleCalibration.Stats.Swipes" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">往返:</String>
+  <String x:Key="AngleCalibration.Stats.Samples" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">样本:</String>
+  <String x:Key="AngleCalibration.Stats.Stability" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">稳定:</String>
+  <String x:Key="AngleCalibration.Hint.Ready" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">点击测量区域开始并锁定光标；锁定后移动任意鼠标开始测量。</String>
+  <String x:Key="AngleCalibration.Hint.AwaitingInput" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已锁定：等待任意鼠标产生第一条位移来开始测量。右键暂停。</String>
+  <String x:Key="AngleCalibration.Hint.Measuring" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">测量中：移动当前测量鼠标左右来回滑动至少 30 次。右键暂停。</String>
+  <String x:Key="AngleCalibration.Hint.Paused" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已暂停：点击测量区域继续，随后移动任意鼠标恢复测量。</String>
+  <String x:Key="AngleCalibration.Hint.ResultReady.Active" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">推荐角已可用：继续滑动当前测量鼠标可提高准确度；右键暂停。</String>
+  <String x:Key="AngleCalibration.Hint.ResultReady.Paused" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">推荐角已可用：点击测量区域继续，随后移动任意鼠标恢复测量。</String>
+  <String x:Key="AngleCalibration.Hint.NoDevice" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">未检测到可用鼠标，连接任意鼠标后再开始传感器角度校准。</String>
+  <String x:Key="AngleCalibration.Hint.DeviceDisconnected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前测量鼠标已断开；点击测量区域后移动任意鼠标可开始新一轮测量。</String>
+  <String x:Key="AngleCalibration.Quality.InsufficientProgress" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">轨迹样本仍偏少：继续完成更多往返，结果会更稳。</String>
+  <String x:Key="AngleCalibration.Quality.Imbalance" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">左右幅度还不够均衡：尽量让两侧摆动更对称。</String>
+  <String x:Key="AngleCalibration.Quality.HighDispersion" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">轨迹离散较大：尽量保持轨迹更直、更稳定。</String>
+  <String x:Key="AngleCalibration.Quality.Outliers" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">异常轨迹较多：减少抖动和急转折后再继续测量。</String>
+  <String x:Key="AngleCalibration.Quality.QueueOverflow" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">采集队列曾溢出并丢弃 {0} 个包；当前结果可能被工具侧压力影响，建议重置后重测。</String>
+  <String x:Key="AngleCalibration.Quality.Fair" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">轨迹质量一般：继续补充更多稳定往返，结果会更可靠。</String>
+  <String x:Key="AngleCalibration.Quality.Good" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">轨迹质量良好：继续保持当前节奏即可。</String>
+  <String x:Key="AngleCalibration.Quality.Excellent" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">轨迹质量优秀：再测几次可以进一步确认结果。</String>
+  <String x:Key="Capture.Stage.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">采集区域</String>
+  <String x:Key="Capture.Stage.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">开始后请在此区域内持续快速画圈 3-5 秒。</String>
+  <String x:Key="Capture.Head.Measuring" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">measuring</String>
+  <String x:Key="Capture.Head.Polling" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">REPORT</String>
+  <String x:Key="Capture.Head.Rate" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Raw Input Report Rate</String>
+  <String x:Key="Capture.Output.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前输出</String>
+  <String x:Key="Unit.Hertz" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Hz</String>
+  <String x:Key="Metrics.Peak" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">峰值速率</String>
+  <String x:Key="Metrics.EmptyPacketRate" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">空包率</String>
+  <String x:Key="Metrics.DropCount" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">采集丢弃</String>
+  <String x:Key="Session.DeviceLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前目标设备</String>
+  <String x:Key="Session.NotesLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">会话说明</String>
+  <String x:Key="Control.Rail.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">控制区</String>
+  <String x:Key="Control.Rail.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">先选择目标设备，再进入锁定采集。</String>
+  <String x:Key="Control.Language.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">界面语言</String>
+  <String x:Key="Control.TargetDevice.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">目标设备</String>
+  <String x:Key="Control.ReportMode.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">统计模式</String>
+  <String x:Key="Control.ReportMode.RawPacket" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Raw Packet</String>
+  <String x:Key="Control.ReportMode.MotionReport" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Motion Report</String>
+  <String x:Key="Control.ReportMode.Description.RawPacket" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">统计所选鼠标的全部 Raw Input 鼠标包，包括零位移、按键和滚轮。</String>
+  <String x:Key="Control.ReportMode.Description.MotionReport" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">仅统计 DeltaX / DeltaY 非零的运动报告。</String>
+  <String x:Key="Language.Toggle.ToEnglish" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">ENGLISH</String>
+  <String x:Key="Language.Toggle.ToChinese" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">简体中文</String>
+  <String x:Key="Theme.Toggle.ToLight" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">切换到亮色模式</String>
+  <String x:Key="Theme.Toggle.ToDark" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">切换到暗色模式</String>
+  <String x:Key="Theme.Toggle.KeyLight" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">LIGHT</String>
+  <String x:Key="Theme.Toggle.KeyDark" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">DARK</String>
+  <String x:Key="Button.RefreshDevices" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">重新扫描设备</String>
+  <String x:Key="Button.Stop" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">结束</String>
+  <String x:Key="History.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">历史 / 最近 3 秒</String>
+  <String x:Key="History.Trace" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">trace</String>
+  <String x:Key="History.Field" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">FIELD</String>
+  <String x:Key="History.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">历史区以更具社论感的轨迹方式呈现最近 3 秒回报率变化。</String>
+  <String x:Key="History.Badge" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">300 毫秒窗口</String>
+  <String x:Key="Footer.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">ESC / 右键可解除锁定，仅统计所选设备。</String>
+  <String x:Key="Footer.Meta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">RAW INPUT / 回报率分析</String>
+  <String x:Key="Status.Ready.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">准备就绪</String>
+  <String x:Key="Status.Ready.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">选择需要检测的鼠标，然后点击开始测试进入锁定状态。</String>
+  <String x:Key="Status.Ready.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">测试建议：开始后在采集区持续快速画圈 3-5 秒；低速移动可能低估高回报率设备。</String>
+  <String x:Key="Status.Measuring.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">测量中</String>
+  <String x:Key="Status.Measuring.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">正在采集所选鼠标的 Raw Input 包</String>
+  <String x:Key="Status.Measuring.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">请持续快速画圈 3-5 秒，让样本保持充足；按 Esc 或右键退出锁定。</String>
+  <String x:Key="Status.DeviceDisconnected.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">设备已断开</String>
+  <String x:Key="Status.DeviceDisconnected.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前选中的鼠标已断开连接，请重新选择设备后再继续测试。</String>
+  <String x:Key="Status.DeviceDisconnected.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">列表会自动刷新，重新开始时会创建新的会话。</String>
+  <String x:Key="Status.Paused.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已暂停</String>
+  <String x:Key="Status.Paused.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前结果已保留。点击开始测试继续，点击结束清空本次会话。</String>
+  <String x:Key="Status.Paused.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">暂停时不会继续采样，界面会保留退出锁定时的读数和曲线。</String>
+  <String x:Key="Status.NeedDevice.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">需要选择设备</String>
+  <String x:Key="Status.NeedDevice.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">请先从设备列表中选择一个需要检测的鼠标。</String>
+  <String x:Key="Status.NeedDevice.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">只有选中的设备会进入本页的回报率统计。</String>
+  <String x:Key="Status.NoDevices.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">未检测到设备</String>
+  <String x:Key="Status.NoDevices.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前没有可用的原生鼠标设备，请重新插拔设备后刷新列表。</String>
+  <String x:Key="Status.NoDevices.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Raw Input 列表会随插拔自动更新。</String>
+  <String x:Key="Status.Cleared.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">会话已清空</String>
+  <String x:Key="Status.Cleared.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">本次测量结果已清空，可以重新选择设备并开始新的测试。</String>
+  <String x:Key="Status.Cleared.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">点击开始测试后会重新创建 300ms 统计窗口和 3 秒曲线历史。</String>
+  <String x:Key="Status.Refresh.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">设备列表已刷新</String>
+  <String x:Key="Status.Refresh.Message.None" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已重新扫描当前 Raw Input 设备，但仍未发现可用鼠标。</String>
+  <String x:Key="Status.Refresh.Message.Count" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已重新扫描当前 Raw Input 设备，发现 {0} 个可用鼠标。</String>
+  <String x:Key="Status.Refresh.Hint.NoSelection" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">请从列表中选择目标设备，然后开始测试。</String>
+  <String x:Key="Status.Refresh.Hint.Selected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前选中设备：{0}</String>
+  <String x:Key="StartButton.Running" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">测试中...</String>
+  <String x:Key="StartButton.Start" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">开始测试</String>
+  <String x:Key="StartButton.Continue" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">继续测试</String>
+  <String x:Key="StartButton.NewSession" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">开始新会话</String>
+  <String x:Key="Device.None.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">未选择鼠标</String>
+  <String x:Key="Device.None.Meta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">从上方列表中选择一个原生 Raw Input 设备。</String>
+  <String x:Key="Device.Detail.Buttons" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">{0} 键</String>
+  <String x:Key="Device.Detail.Virtual" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">虚拟设备</String>
+  <String x:Key="Device.Detail.RawInput" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Raw Input 设备</String>
+  <String x:Key="Device.Detail.Endpoint.Motion" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">运动端点</String>
+  <String x:Key="Device.Detail.Endpoint.ControlOnly" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">控制端点</String>
+  <String x:Key="Device.Detail.Endpoint.Inactive" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">未活动端点</String>
+  <String x:Key="Device.Detail.Endpoint.Unknown" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Raw Input 端点</String>
+  <String x:Key="Dialog.LockFailed.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">无法进入锁定状态，请确认窗口处于前台并重试。</String>
+  <String x:Key="Dialog.LockFailed.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">开始测试失败</String>
+  <String x:Key="Dialog.LockFailed.Detail.ActivateWindow" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">原因：窗口未能切换到前台。</String>
+  <String x:Key="Dialog.LockFailed.Detail.MissingCaptureSurface" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">原因：当前页面的测量区域尚未准备好。</String>
+  <String x:Key="Dialog.LockFailed.Detail.SetCursorPos" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">原因：系统拒绝移动光标到锁定区域。</String>
+  <String x:Key="Dialog.LockFailed.Detail.SetClipCursor" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">原因：系统拒绝限制光标活动范围。</String>
+  <String x:Key="Dialog.LockFailed.Detail.Unknown" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">原因：发生了未预期的锁定错误，请查看调试输出。</String>
+  <String x:Key="Dialog.Common.Confirm" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">确定</String>
+  <String x:Key="Dialog.Common.Cancel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">取消</String>
+  <String x:Key="MousePerformance.Chart.Import.CompareLimit.Confirm" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">继续导入</String>
+  <String x:Key="KeyDetection.Mouse.Left" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">左键</String>
+  <String x:Key="KeyDetection.Mouse.Middle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">中键</String>
+  <String x:Key="KeyDetection.Mouse.Right" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">右键</String>
+  <String x:Key="KeyDetection.Mouse.Forward" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">前进</String>
+  <String x:Key="KeyDetection.Mouse.Back" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">后退</String>
+  <String x:Key="KeyDetection.Metric.DoubleClicks" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">双击次数</String>
+  <String x:Key="KeyDetection.Metric.DownCount" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">按下计数</String>
+  <String x:Key="KeyDetection.Metric.UpCount" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">抬起计数</String>
+  <String x:Key="KeyDetection.Metric.DownToDown" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">按下→按下</String>
+  <String x:Key="KeyDetection.Metric.DownToUp" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">按下→抬起</String>
+  <String x:Key="KeyDetection.Metric.Min" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">最小</String>
+  <String x:Key="KeyDetection.Metric.Avg" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">平均</String>
+  <String x:Key="KeyDetection.MouseThreshold.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">鼠标双击阈值</String>
+  <String x:Key="KeyDetection.MouseThreshold.Description" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">建议 60~120ms，越小越严格，越大越容易判为双击。</String>
+  <String x:Key="KeyDetection.MouseThreshold.InputLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">阈值 (ms)</String>
+  <String x:Key="KeyDetection.Action.ResetStatistics" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">重置统计</String>
+  <String x:Key="KeyDetection.Scroll.Up" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">上滚</String>
+  <String x:Key="KeyDetection.Scroll.Down" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">下滚</String>
+  <String x:Key="KeyDetection.CustomKey.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">自定义键位检测</String>
+  <String x:Key="KeyDetection.CustomKey.Description" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">点击“录入”后按一次键，即可开始检测：按下/抬起计数、双击次数、连按间隔、按住时长等。</String>
+  <String x:Key="KeyDetection.CustomKey.Selection.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前</String>
+  <String x:Key="KeyDetection.CustomKey.Selection.Placeholder" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">--</String>
+  <String x:Key="KeyDetection.CustomKey.Selection.Empty" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前：--</String>
+  <String x:Key="KeyDetection.CustomKey.Selection.Value" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前：{0}</String>
+  <String x:Key="KeyDetection.CustomKey.ThresholdTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">双击阈值</String>
+  <String x:Key="KeyDetection.CustomKey.ThresholdHint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">仅用于自定义按键</String>
+  <String x:Key="KeyDetection.CustomKey.ThresholdInputLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">ms</String>
+  <String x:Key="KeyDetection.CustomKey.Button.Pick" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">录入</String>
+  <String x:Key="KeyDetection.CustomKey.Button.Exit" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">退出</String>
+  <String x:Key="KeyDetection.CustomKey.Button.Reset" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">重置</String>
+  <String x:Key="KeyDetection.CustomKey.Status.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">状态</String>
+  <String x:Key="KeyDetection.CustomKey.Status.Idle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">状态：--</String>
+  <String x:Key="KeyDetection.CustomKey.Status.Picking" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">状态：录入中（按一次键；ESC 取消）</String>
+  <String x:Key="KeyDetection.CustomKey.Status.PickCanceled" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">状态：已取消录入</String>
+  <String x:Key="KeyDetection.CustomKey.Status.PickExited" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">状态：已退出录入</String>
+  <String x:Key="KeyDetection.CustomKey.Status.Selected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">状态：已选择 {0}</String>
+  <String x:Key="KeyDetection.CustomKey.Status.Down" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">状态：按下（{0}）</String>
+  <String x:Key="KeyDetection.CustomKey.Status.Up" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">状态：抬起（{0}）</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.Idle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">--</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.Picking" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">录入中（按一次键；ESC 取消）</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.PickCanceled" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已取消录入</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.PickExited" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已退出录入</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.Selected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已选择 {0}</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.Down" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">按下（{0}）</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.Up" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">抬起（{0}）</String>
+  <String x:Key="SensitivityMatch.PageTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">灵敏度匹配</String>
+  <String x:Key="SensitivityMatch.Header.Eyebrow" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">RAW INPUT / 双鼠标 / 灵敏度匹配</String>
+  <String x:Key="SensitivityMatch.Header.RequirementsLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">条件</String>
+  <String x:Key="SensitivityMatch.Header.Requirements" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">需两只在线鼠标；测量只读 Raw Input。</String>
+  <String x:Key="SensitivityMatch.Step.Intro" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">01 简介</String>
+  <String x:Key="SensitivityMatch.Step.Setup" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">02 绑定</String>
+  <String x:Key="SensitivityMatch.Step.Measure" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">03 测量</String>
+  <String x:Key="SensitivityMatch.Intro.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">复制灵敏度</String>
+  <String x:Key="SensitivityMatch.Intro.Description" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">调整一款鼠标使其灵敏度与另一款鼠标一致</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.Opening.Word1" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MAKE</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.Opening.Word2" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">TWO</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.Opening.Word3" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MICE</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.Opening.Word4" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MATCH</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.TopLeftPrimary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MATCH</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.LeftSideLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">SOURCE</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.CenterConnector" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">&amp;</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.RightSideLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">TARGET</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.BottomRightLine1" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">SAME</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.BottomRightLine2" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MOUSE</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.BottomRightLine3" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">FEEL</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.TopLeftPrimary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">SOURCE</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.LeftSideLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">INPUT</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.CenterConnector" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">&amp;</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.RightSideLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">TARGET</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.BottomRightLine1" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">BIND</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.BottomRightLine2" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">SET</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.BottomRightLine3" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">DPI</String>
+  <String x:Key="SensitivityMatch.Intro.OutputTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">输出</String>
+  <String x:Key="SensitivityMatch.Intro.OutputDescription" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">推荐目标 DPI 与调整倍率。</String>
+  <String x:Key="SensitivityMatch.Intro.FlowBind" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">绑定双鼠标</String>
+  <String x:Key="SensitivityMatch.Intro.FlowMeasure" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">三轮同步滑动</String>
+  <String x:Key="SensitivityMatch.Intro.FlowResult" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">得到推荐目标设备DPI设置</String>
+  <String x:Key="SensitivityMatch.Intro.Card.DeviceTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">设备</String>
+  <String x:Key="SensitivityMatch.Intro.Card.DeviceDescription" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">需两只在线鼠标。</String>
+  <String x:Key="SensitivityMatch.Intro.Card.SurfaceTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">建议</String>
+  <String x:Key="SensitivityMatch.Intro.Card.SurfaceDescription" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">尽量保持同方向、同节奏。</String>
+  <String x:Key="SensitivityMatch.Intro.Card.MethodTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">方式</String>
+  <String x:Key="SensitivityMatch.Intro.Card.MethodDescription" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">轻移鼠标绑定，每轮手动开始。</String>
+  <String x:Key="SensitivityMatch.Setup.DeviceCountLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">在线设备</String>
+  <String x:Key="SensitivityMatch.Setup.DeviceCount" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">在线 {0} 只</String>
+  <String x:Key="SensitivityMatch.Setup.ParametersTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">绑定与 DPI</String>
+  <String x:Key="SensitivityMatch.Setup.SourceDpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">源鼠标 DPI</String>
+  <String x:Key="SensitivityMatch.Setup.SourceDpiHint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">输入要复制灵敏度的 DPI。</String>
+  <String x:Key="SensitivityMatch.Setup.TargetDpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">目标鼠标 DPI</String>
+  <String x:Key="SensitivityMatch.Setup.TargetDpiHint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">输入目标鼠标当前 DPI。</String>
+  <String x:Key="SensitivityMatch.Setup.BindHintTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">绑定说明</String>
+  <String x:Key="SensitivityMatch.Setup.BindHintBody" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">轻移对应鼠标完成绑定；改 DPI 或重绑会清空已测结果。</String>
+  <String x:Key="SensitivityMatch.Binding.Source.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">源鼠标</String>
+  <String x:Key="SensitivityMatch.Binding.Target.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">目标鼠标</String>
+  <String x:Key="SensitivityMatch.Binding.Source.Empty" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">未绑定源鼠标</String>
+  <String x:Key="SensitivityMatch.Binding.Target.Empty" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">未绑定目标鼠标</String>
+  <String x:Key="SensitivityMatch.Binding.Source.Waiting" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">等待移动源鼠标</String>
+  <String x:Key="SensitivityMatch.Binding.Target.Waiting" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">等待移动目标鼠标</String>
+  <String x:Key="SensitivityMatch.Binding.Source.Bound" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已绑定</String>
+  <String x:Key="SensitivityMatch.Binding.Target.Bound" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已绑定</String>
+  <String x:Key="SensitivityMatch.Binding.Source.Disconnected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已断开</String>
+  <String x:Key="SensitivityMatch.Binding.Target.Disconnected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已断开</String>
+  <String x:Key="SensitivityMatch.Binding.Unbound" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">未绑定</String>
+  <String x:Key="SensitivityMatch.Binding.EmptyMeta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">绑定后显示设备信息。</String>
+  <String x:Key="SensitivityMatch.Button.StartSetup" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">开始</String>
+  <String x:Key="SensitivityMatch.Button.Back" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">返回</String>
+  <String x:Key="SensitivityMatch.Button.ContinueToMeasure" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">下一步</String>
+  <String x:Key="SensitivityMatch.Button.Bind" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">绑定</String>
+  <String x:Key="SensitivityMatch.Button.Rebind" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">重绑</String>
+  <String x:Key="SensitivityMatch.Button.ClickBindMouse" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">点击绑定鼠标</String>
+  <String x:Key="SensitivityMatch.Button.CancelBindMouse" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">取消绑定鼠标</String>
+  <String x:Key="SensitivityMatch.Button.StartRound" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">开始第 {0} 轮(按下“S”)</String>
+  <String x:Key="SensitivityMatch.Button.Measuring" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">测量中...</String>
+  <String x:Key="SensitivityMatch.Button.Stabilizing" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">收尾校准中...</String>
+  <String x:Key="SensitivityMatch.Button.RetryRound" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">重试本轮</String>
+  <String x:Key="SensitivityMatch.Button.CopyRecommendedDpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">复制 DPI</String>
+  <String x:Key="SensitivityMatch.Button.Remeasure" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">重新测量</String>
+  <String x:Key="SensitivityMatch.Button.RebindAll" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">重新绑定</String>
+  <String x:Key="SensitivityMatch.Measure.ProgressTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前轮</String>
+  <String x:Key="SensitivityMatch.Measure.ProgressHint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">并排放好两只鼠标，同方向一起滑动。</String>
+  <String x:Key="SensitivityMatch.Measure.SourceLane" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">源鼠标</String>
+  <String x:Key="SensitivityMatch.Measure.TargetLane" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">目标鼠标</String>
+  <String x:Key="SensitivityMatch.Measure.RoundsTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">三轮记录</String>
+  <String x:Key="SensitivityMatch.Measure.TipsTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">提示</String>
+  <String x:Key="SensitivityMatch.Measure.Tip1" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">同方向、同节奏滑动。</String>
+  <String x:Key="SensitivityMatch.Measure.Tip2" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">轨迹尽量保持直线。</String>
+  <String x:Key="SensitivityMatch.Measure.Tip3" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">切页会取消当前未完成轮次。</String>
+  <String x:Key="SensitivityMatch.Measure.Progress.Pending" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">等待开始</String>
+  <String x:Key="SensitivityMatch.Measure.Progress.Value" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">总进度 {0}%</String>
+  <String x:Key="SensitivityMatch.Measure.SourceProgress.Pending" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">源鼠标待开始</String>
+  <String x:Key="SensitivityMatch.Measure.SourceProgress.Value" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">源鼠标 {0}%</String>
+  <String x:Key="SensitivityMatch.Measure.TargetProgress.Pending" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">目标鼠标待开始</String>
+  <String x:Key="SensitivityMatch.Measure.TargetProgress.Value" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">目标鼠标 {0}%</String>
+  <String x:Key="SensitivityMatch.Measure.RoundTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">第 {0} 轮</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Pending" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">未开始</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Ready" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">点击开始本轮。</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Progress" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">{0}%</String>
+  <String x:Key="SensitivityMatch.Measure.Round.ProgressDetail" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">源 {0}% / 目标 {1}%</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Result" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">推荐目标设备DPI设置 {0}</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Failed" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">失败</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Status.Pending" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">待开始</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Status.Ready" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">可开始</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Status.Active" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">进行中</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Status.Finishing" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">收尾中</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Status.Completed" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已完成</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Status.Failed" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">失败</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.Timeout" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">本轮超时，请重试。</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.TooFast" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">移动过快，请放慢一点。</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.InsufficientPackets" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">位移数据太少，请拉长距离。</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.Curved" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">轨迹过弯。</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.DirectionMismatch" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">两只鼠标移动角度差距较大。</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.PathShapeMismatch" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">两只鼠标的轨迹形态不一致。</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.Unsynchronized" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">两只鼠标不同步。</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.Unknown" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">本轮未通过校验。</String>
+  <String x:Key="SensitivityMatch.Measure.Hero.Ready" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">准备开始</String>
+  <String x:Key="SensitivityMatch.Measure.Hero.Failed" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">本轮失败</String>
+  <String x:Key="SensitivityMatch.Measure.Hero.Expired" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">过期</String>
+  <String x:Key="SensitivityMatch.Result.RecommendedDpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">推荐目标设备DPI设置</String>
+  <String x:Key="SensitivityMatch.Result.Scale" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">调整倍率</String>
+  <String x:Key="SensitivityMatch.Result.Consistency" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">稳定性</String>
+  <String x:Key="SensitivityMatch.Result.RoundsTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">三轮明细</String>
+  <String x:Key="SensitivityMatch.Result.NoteTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">使用</String>
+  <String x:Key="SensitivityMatch.Result.NoteBody" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">把目标 DPI 调到推荐值，或按倍率换算。</String>
+  <String x:Key="SensitivityMatch.Result.Pending" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">待完成</String>
+  <String x:Key="SensitivityMatch.Result.Expired" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">结果已过期，重新绑定后再使用。</String>
+  <String x:Key="SensitivityMatch.Result.Consistency.Excellent" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">极佳</String>
+  <String x:Key="SensitivityMatch.Result.Consistency.Good" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">良好</String>
+  <String x:Key="SensitivityMatch.Result.Consistency.Fair" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">一般</String>
+  <String x:Key="SensitivityMatch.Result.Consistency.Poor" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">较差</String>
+  <String x:Key="SensitivityMatch.Result.Hint.Excellent" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">三轮很接近，可直接参考。</String>
+  <String x:Key="SensitivityMatch.Result.Hint.Good" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">结果已经比较稳。</String>
+  <String x:Key="SensitivityMatch.Result.Hint.Fair" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">结果可参考，建议再测一次。</String>
+  <String x:Key="SensitivityMatch.Result.Hint.Poor" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">波动偏大，建议重测。</String>
+  <String x:Key="SensitivityMatch.Status.Intro.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">准备</String>
+  <String x:Key="SensitivityMatch.Status.Intro.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">确认两只鼠标在线后开始设置。</String>
+  <String x:Key="SensitivityMatch.Status.Intro.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">本页只做测量与推荐，不会改设备设置。</String>
+  <String x:Key="SensitivityMatch.Status.NeedDevices.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">设备不足</String>
+  <String x:Key="SensitivityMatch.Status.NeedDevices.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">至少需要两只可活动鼠标。</String>
+  <String x:Key="SensitivityMatch.Status.NeedDevices.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">设备不足时不能绑定或测量。</String>
+  <String x:Key="SensitivityMatch.Status.Binding.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">等待绑定</String>
+  <String x:Key="SensitivityMatch.Status.Binding.SourceMessage" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">移动源鼠标完成绑定。</String>
+  <String x:Key="SensitivityMatch.Status.Binding.TargetMessage" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">移动目标鼠标完成绑定。</String>
+  <String x:Key="SensitivityMatch.Status.Binding.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">轻微移动即可，10 秒超时。</String>
+  <String x:Key="SensitivityMatch.Status.BindingTimeout.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">绑定超时</String>
+  <String x:Key="SensitivityMatch.Status.BindingTimeout.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">10 秒内没有检测到位移。</String>
+  <String x:Key="SensitivityMatch.Status.BindingTimeout.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">确认移动的是待绑定鼠标。</String>
+  <String x:Key="SensitivityMatch.Status.BindingConflict.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">绑定冲突</String>
+  <String x:Key="SensitivityMatch.Status.BindingConflict.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">源鼠标和目标鼠标不能是同一只。</String>
+  <String x:Key="SensitivityMatch.Status.BindingConflict.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">请换另一只鼠标重试。</String>
+  <String x:Key="SensitivityMatch.Status.NeedDpi.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">输入 DPI</String>
+  <String x:Key="SensitivityMatch.Status.NeedDpi.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">请输入源 DPI 和目标 DPI。</String>
+  <String x:Key="SensitivityMatch.Status.NeedDpi.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">两个值都必须是 {0} 到 {1} 的整数。</String>
+  <String x:Key="SensitivityMatch.Status.NeedBinding.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">等待绑定</String>
+  <String x:Key="SensitivityMatch.Status.NeedBinding.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">继续前需要先绑定两只鼠标。</String>
+  <String x:Key="SensitivityMatch.Status.NeedBinding.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">点击绑定后轻移对应鼠标即可。</String>
+  <String x:Key="SensitivityMatch.Status.BindingDisconnected.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">设备已断开</String>
+  <String x:Key="SensitivityMatch.Status.BindingDisconnected.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已绑定鼠标断开，请重新绑定。</String>
+  <String x:Key="SensitivityMatch.Status.BindingDisconnected.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">未完成轮次会作废，旧结果仅保留参考。</String>
+  <String x:Key="SensitivityMatch.Status.SetupReady.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">参数和双鼠标绑定都已就绪。</String>
+  <String x:Key="SensitivityMatch.Status.SetupReady.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">进入测量后，每一轮都需要手动开始。</String>
+  <String x:Key="SensitivityMatch.Status.MeasureReady.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">等待本轮</String>
+  <String x:Key="SensitivityMatch.Status.MeasureReady.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">第 {0} 轮已就绪。</String>
+  <String x:Key="SensitivityMatch.Status.MeasureReady.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">并排放好两只鼠标，再一起向前滑动。</String>
+  <String x:Key="SensitivityMatch.Status.Measuring.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">测量中</String>
+  <String x:Key="SensitivityMatch.Status.Measuring.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">第 {0} 轮测量中。</String>
+  <String x:Key="SensitivityMatch.Status.Measuring.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">保持同方向、同节奏，直到两侧都满进度。</String>
+  <String x:Key="SensitivityMatch.Status.Stabilizing.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">收尾校准中</String>
+  <String x:Key="SensitivityMatch.Status.Stabilizing.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">第 {0} 轮收尾校准中。</String>
+  <String x:Key="SensitivityMatch.Status.Stabilizing.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">保持两只鼠标短暂停稳，等待最终倍率收敛。</String>
+  <String x:Key="SensitivityMatch.Status.RoundFailed.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">本轮失败</String>
+  <String x:Key="SensitivityMatch.Status.RoundFailed.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">这次失败不会影响已完成轮次。</String>
+  <String x:Key="SensitivityMatch.Status.MeasureExpired.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">结果过期</String>
+  <String x:Key="SensitivityMatch.Status.MeasureExpired.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">已绑定设备发生变化，当前结果仅供参考。</String>
+  <String x:Key="SensitivityMatch.Status.MeasureExpired.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">重新绑定任一槽位后，旧结果会清空。</String>
+  <String x:Key="SensitivityMatch.Status.ResultPending.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">结果未完成</String>
+  <String x:Key="SensitivityMatch.Status.ResultPending.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">只有三轮都有效时才会出结果。</String>
+  <String x:Key="SensitivityMatch.Status.ResultPending.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">返回测量并补齐 3 轮有效结果。</String>
+  <String x:Key="SensitivityMatch.Status.ResultReady.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">结果可用</String>
+  <String x:Key="SensitivityMatch.Status.ResultReady.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">三轮完成，可以复制推荐目标设备DPI设置。</String>
+  <String x:Key="SensitivityMatch.Status.ResultExpired.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">结果过期</String>
+  <String x:Key="SensitivityMatch.Status.ResultExpired.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">绑定设备已变化，建议重新绑定后重测。</String>
+  <String x:Key="SensitivityMatch.Status.ResultExpired.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">当前显示仅供参考，不建议直接采用。</String>
+</ResourceDictionary>

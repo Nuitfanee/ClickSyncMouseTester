@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>ClickSyncMouseTester.ChartGpu</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="SharpGen.Runtime" Version="2.4.2-beta" />
+    <PackageReference Include="Vortice.D3DCompiler" Version="3.8.3" />
+    <PackageReference Include="Vortice.Direct3D11" Version="3.8.3" />
+    <PackageReference Include="Vortice.DXGI" Version="3.8.3" />
+    <PackageReference Include="Vortice.Mathematics" Version="2.1.0" />
+  </ItemGroup>
+</Project>

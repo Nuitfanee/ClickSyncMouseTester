@@ -1,0 +1,541 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+  <system:String x:Key="Window.Title" xmlns:system="clr-namespace:System;assembly=System.Private.CoreLib">Single Mouse Report Rate</system:String>
+  <String x:Key="Header.Meta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">RAW INPUT / SINGLE DEVICE / REPORT OBSERVATION</String>
+  <String x:Key="Header.WindowHistory" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">300 MS WINDOW / 3S HISTORY</String>
+  <String x:Key="Header.ThemeLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MODE</String>
+  <String x:Key="Header.LanguageLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">LANG</String>
+  <String x:Key="Navigation.Menu.Open" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Open page directory</String>
+  <String x:Key="Navigation.Menu.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">PAGE DIRECTORY</String>
+  <String x:Key="Navigation.Menu.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Switch workspaces</String>
+  <String x:Key="Navigation.Menu.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Use this layer to switch pages. The core workflows are already wired in, and more capability will expand inside each page.</String>
+  <String x:Key="Navigation.Menu.CloseHint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">ESC / click the blank area to close</String>
+  <String x:Key="Navigation.Page.PollingDashboard" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Report Rate</String>
+  <String x:Key="Navigation.Page.PollingDashboard.Summary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The primary workspace with live Raw Input report-rate metrics, history trace, and capture controls.</String>
+  <String x:Key="Navigation.Page.PollingDashboard.MenuMeta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">RAW INPUT REPORT MONITOR</String>
+  <String x:Key="Navigation.Page.KeyDetection" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Key Detection</String>
+  <String x:Key="Navigation.Page.KeyDetection.Summary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Inspect live mouse buttons, wheel activity, and a custom key with timing, double-click thresholds, and state changes.</String>
+  <String x:Key="Navigation.Page.KeyDetection.MenuMeta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">BUTTON / WHEEL / KEY TIMING</String>
+  <String x:Key="Navigation.Page.SensitivityMatching" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Sensitivity Match</String>
+  <String x:Key="Navigation.Page.SensitivityMatching.Summary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Bind two mice, complete three Raw Input rounds, and generate a recommended target DPI and scale.</String>
+  <String x:Key="Navigation.Page.SensitivityMatching.MenuMeta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MATCH TWO MOUSE FEELS</String>
+  <String x:Key="Navigation.Page.AngleCalibration" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Angle Calibration</String>
+  <String x:Key="Navigation.Page.AngleCalibration.Summary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Measure horizontal swipe traces, generate a recommended angle, and inspect stability and trace quality.</String>
+  <String x:Key="Navigation.Page.AngleCalibration.MenuMeta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MEASURE SWIPE ANGLE</String>
+  <String x:Key="Navigation.Page.MousePerformance" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Mouse Performance</String>
+  <String x:Key="Navigation.Page.MousePerformance.Summary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Lock onto one device, collect Raw Input packets, and inspect counts, path, and live plots.</String>
+  <String x:Key="Navigation.Page.MousePerformance.MenuMeta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MOUSE PERFORMANCE ANALYSIS</String>
+  <String x:Key="MousePerformance.Header.Eyebrow" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">RAW INPUT / SINGLE DEVICE / MOUSE PERFORMANCE</String>
+  <String x:Key="MousePerformance.Header.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Mouse Performance</String>
+  <String x:Key="MousePerformance.Header.Description" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Choose a mouse, then click Start Capture or press S to enter locked capture. Raw Input packets keep accumulating until S, Esc, or right click ends the current capture segment and preserves the session. Plot opens the dedicated chart window.</String>
+  <String x:Key="MousePerformance.Device.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Target Device</String>
+  <String x:Key="MousePerformance.Device.SelectedTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Current Device</String>
+  <String x:Key="MousePerformance.Device.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Only Raw Input from the selected mouse is recorded while locked.</String>
+  <String x:Key="MousePerformance.Cpi.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Manual CPI</String>
+  <String x:Key="MousePerformance.Cpi.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Enter a value greater than 0. Invalid input falls back to the most recent valid CPI.</String>
+  <String x:Key="MousePerformance.Action.StartCapture" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Start Capture (press S)</String>
+  <String x:Key="MousePerformance.Action.ResumeCapture" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Resume Capture (press S)</String>
+  <String x:Key="MousePerformance.Action.PauseCapture" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Pause Capture (press S)</String>
+  <String x:Key="MousePerformance.Action.Reset" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reset</String>
+  <String x:Key="MousePerformance.Action.Import" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Import</String>
+  <String x:Key="MousePerformance.Action.DeleteImportedData" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Remove Imported Data</String>
+  <String x:Key="MousePerformance.Action.Plot" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Plot</String>
+  <String x:Key="MousePerformance.Export.FileNameFallback" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">mouse-performance-session</String>
+  <String x:Key="MousePerformance.Exchange.Filter.Json" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">JSON Files (*.json)|*.json</String>
+  <String x:Key="MousePerformance.Import.Error.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Import Failed</String>
+  <String x:Key="MousePerformance.Import.Error.Format" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The mouse measurement file could not be imported. {0}</String>
+  <String x:Key="MousePerformance.Export.Error.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Export Failed</String>
+  <String x:Key="MousePerformance.Export.Error.Format" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The mouse measurement file could not be exported. {0}</String>
+  <String x:Key="MousePerformance.Summary.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Live Summary</String>
+  <String x:Key="MousePerformance.Summary.EventCount" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reports</String>
+  <String x:Key="MousePerformance.Summary.SumX" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Net X</String>
+  <String x:Key="MousePerformance.Summary.SumY" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Net Y</String>
+  <String x:Key="MousePerformance.Summary.Path" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Motion Path</String>
+  <String x:Key="MousePerformance.Summary.Speed" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Speed</String>
+  <String x:Key="MousePerformance.Summary.SpeedUnit" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">m/s</String>
+  <String x:Key="MousePerformance.Summary.Caption" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Session Notes</String>
+  <String x:Key="MousePerformance.Quality.Placeholder" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reports -- / Zero-motion -- / Control -- / Dropped -- / Quality -- / Queue --</String>
+  <String x:Key="MousePerformance.Quality.Format.RawReport.WithQueue" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reports {0} / Zero-motion {1} / Control {2} / Dropped {3} / Quality {4} / Queue {5}</String>
+  <String x:Key="MousePerformance.Quality.Level.None" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Not rated</String>
+  <String x:Key="MousePerformance.Quality.Level.Good" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Good</String>
+  <String x:Key="MousePerformance.Quality.Level.Degraded" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Degraded</String>
+  <String x:Key="MousePerformance.Quality.Timing.Placeholder" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">--</String>
+  <String x:Key="MousePerformance.Quality.Timing.Strict" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Strict</String>
+  <String x:Key="MousePerformance.Quality.Timing.StrictWithSameTick" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Strict, same-tick {0}</String>
+  <String x:Key="MousePerformance.Quality.Timing.Degraded" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Degraded</String>
+  <String x:Key="MousePerformance.Quality.Timing.DegradedWithSameTick" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Degraded, same-tick {0}</String>
+  <String x:Key="MousePerformance.Quality.Queue.Placeholder" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">--</String>
+  <String x:Key="MousePerformance.Quality.Queue.Format" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">{0}/{1}</String>
+  <String x:Key="MousePerformance.Footer.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Click Start Capture or press S to begin. While collecting, S, Esc, right click, or focus loss ends the current capture segment and preserves the session. Reset clears it.</String>
+  <String x:Key="MousePerformance.Status.Ready.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Ready</String>
+  <String x:Key="MousePerformance.Status.Ready.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Pick a mouse, then click Start Capture or press S to begin locked capture.</String>
+  <String x:Key="MousePerformance.Status.Ready.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The selected device is sampled continuously while locked. S starts and ends capture segments.</String>
+  <String x:Key="MousePerformance.Status.NeedDevice.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Select a device</String>
+  <String x:Key="MousePerformance.Status.NeedDevice.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Choose a mouse from the device list before collecting.</String>
+  <String x:Key="MousePerformance.Status.NeedDevice.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Only the selected device contributes to this page and the chart window.</String>
+  <String x:Key="MousePerformance.Status.Collecting.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Collecting</String>
+  <String x:Key="MousePerformance.Status.Collecting.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Raw Input packets from the selected mouse are being appended to the current session. Press S, press Esc, or right-click to end this capture segment.</String>
+  <String x:Key="MousePerformance.Status.Collecting.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Ending a capture segment pauses and keeps the data. Reset is the action that clears the session.</String>
+  <String x:Key="MousePerformance.Status.Paused.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Paused</String>
+  <String x:Key="MousePerformance.Status.Paused.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The capture segment has ended and the session data is preserved. Click Resume Capture or press S to keep appending.</String>
+  <String x:Key="MousePerformance.Status.Paused.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Resuming appends to the same session. Reset clears the current session and returns to the initial state.</String>
+  <String x:Key="MousePerformance.Status.NoDevice.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">No device detected</String>
+  <String x:Key="MousePerformance.Status.NoDevice.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">No mouse device is currently available, so collection cannot start.</String>
+  <String x:Key="MousePerformance.Status.NoDevice.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reconnect a mouse and the device list will refresh automatically.</String>
+  <String x:Key="MousePerformance.Status.DeviceDisconnected.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Device disconnected</String>
+  <String x:Key="MousePerformance.Status.DeviceDisconnected.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The session device disconnected, and the collected data has been preserved.</String>
+  <String x:Key="MousePerformance.Status.DeviceDisconnected.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Choose a device again, then click Start Capture or press S to start a new session.</String>
+  <String x:Key="MousePerformance.Status.Imported.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Imported View</String>
+  <String x:Key="MousePerformance.Status.Imported.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The page is currently browsing imported mouse measurement data.</String>
+  <String x:Key="MousePerformance.Status.Imported.Message.Single" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The page is currently browsing imported mouse measurement data. Imported: {0}.</String>
+  <String x:Key="MousePerformance.Status.Imported.Message.Multi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The page is currently comparing imported mouse measurement data. Imported: {0}.</String>
+  <String x:Key="MousePerformance.Status.LiveCompare.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Comparison mouse measurement data has been imported. Imported: {0}. Open the chart to review them.</String>
+  <String x:Key="MousePerformance.Status.Imported.MouseLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Mouse {0} “{1}”</String>
+  <String x:Key="MousePerformance.Status.Imported.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Imported view mode is read-only. Click "Remove Imported Data" to clear imported data and return to the live idle state.</String>
+  <String x:Key="MousePerformance.Chart.WindowTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Mouse Performance Chart</String>
+  <String x:Key="MousePerformance.Chart.Action.Import" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Import</String>
+  <String x:Key="MousePerformance.Chart.Action.Export" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Export</String>
+  <String x:Key="MousePerformance.Chart.Action.SavePng" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Save PNG</String>
+  <String x:Key="MousePerformance.Chart.Action.Close" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Close</String>
+  <String x:Key="MousePerformance.Chart.Import.CompareLimit.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Replace Compare Mouse</String>
+  <String x:Key="MousePerformance.Chart.Import.CompareLimit.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">This chart supports up to three mice at once. Importing another file will replace the oldest compare mouse. Continue?</String>
+  <String x:Key="MousePerformance.Chart.Import.Duplicate.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Duplicate Import</String>
+  <String x:Key="MousePerformance.Chart.Import.Duplicate.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The same mouse measurement data is already in the current session.</String>
+  <String x:Key="MousePerformance.Chart.Legend.LiveBaseline" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Baseline Mouse: {0}</String>
+  <String x:Key="MousePerformance.Chart.Legend.Imported" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Imported Mouse {0}: {1}</String>
+  <String x:Key="MousePerformance.Chart.Legend.Visibility" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Show</String>
+  <String x:Key="MousePerformance.Chart.CompactLabel.LiveBaseline" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Baseline</String>
+  <String x:Key="MousePerformance.Chart.CompactLabel.Imported" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">{0}</String>
+  <String x:Key="MousePerformance.Chart.Filter.Png" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">PNG Files (*.png)|*.png</String>
+  <String x:Key="MousePerformance.Chart.Export.GpuError.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Chart Export Failed</String>
+  <String x:Key="MousePerformance.Chart.Control.PlotType" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Plot Type</String>
+  <String x:Key="MousePerformance.Chart.Control.TimeBasis" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Time Basis</String>
+  <String x:Key="MousePerformance.Chart.Control.Gap" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Long Report Intervals</String>
+  <String x:Key="MousePerformance.Chart.Control.GapTarget" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Analysis Target</String>
+  <String x:Key="MousePerformance.Chart.Control.RangeStart" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Start</String>
+  <String x:Key="MousePerformance.Chart.Control.RangeEnd" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">End</String>
+  <String x:Key="MousePerformance.Chart.Control.Stem" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Stem</String>
+  <String x:Key="MousePerformance.Chart.Control.Lines" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Lines</String>
+  <String x:Key="MousePerformance.Chart.GapTarget.LiveBaseline" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Baseline Mouse</String>
+  <String x:Key="MousePerformance.Chart.GapTarget.Imported" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Mouse {0}</String>
+  <String x:Key="MousePerformance.Chart.Option.TimeBasis.RawCapture" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Raw Capture Time</String>
+  <String x:Key="MousePerformance.Chart.Option.TimeBasis.LogicalSession" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Logical Session Time</String>
+  <String x:Key="MousePerformance.Chart.Plot.XCountVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">xCount vs Time</String>
+  <String x:Key="MousePerformance.Chart.Plot.YCountVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">yCount vs Time</String>
+  <String x:Key="MousePerformance.Chart.Plot.XYCountVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">xyCount vs Time</String>
+  <String x:Key="MousePerformance.Chart.Plot.IntervalVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Interval vs Time</String>
+  <String x:Key="MousePerformance.Chart.Plot.FrequencyVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Frequency vs Time</String>
+  <String x:Key="MousePerformance.Chart.Plot.XVelocityVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">xVelocity vs Time</String>
+  <String x:Key="MousePerformance.Chart.Plot.YVelocityVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">yVelocity vs Time</String>
+  <String x:Key="MousePerformance.Chart.Plot.XYVelocityVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">xyVelocity vs Time</String>
+  <String x:Key="MousePerformance.Chart.Plot.XSumVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">xSum vs Time</String>
+  <String x:Key="MousePerformance.Chart.Plot.YSumVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">ySum vs Time</String>
+  <String x:Key="MousePerformance.Chart.Plot.XYSumVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">xySum vs Time</String>
+  <String x:Key="MousePerformance.Chart.Plot.PathSpeedVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Path Speed vs Time</String>
+  <String x:Key="MousePerformance.Chart.Plot.IntervalHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Interval Histogram</String>
+  <String x:Key="MousePerformance.Chart.Plot.DeltaXHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">DeltaX Histogram</String>
+  <String x:Key="MousePerformance.Chart.Plot.DeltaYHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">DeltaY Histogram</String>
+  <String x:Key="MousePerformance.Chart.Plot.DeltaMagnitudeHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Delta Magnitude Histogram</String>
+  <String x:Key="MousePerformance.Chart.Plot.XVsY" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">X vs Y</String>
+  <String x:Key="MousePerformance.Chart.Description.XCountVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Each point is the raw DeltaX from one Raw Input report. Use it to spot horizontal micro-jitter, jumpy outliers, or abnormal spikes during fast swipes.</String>
+  <String x:Key="MousePerformance.Chart.Description.YCountVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Each point is the raw DeltaY from one Raw Input report. Use it to spot vertical noise, outliers, or unnatural spikes during upward and downward motion.</String>
+  <String x:Key="MousePerformance.Chart.Description.XYCountVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Shows DeltaX and DeltaY together for every report. Useful for comparing axis balance and finding single-axis noise, bias, or decoupling problems.</String>
+  <String x:Key="MousePerformance.Chart.Description.IntervalVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Each point is the gap from the previous report. Frequent spikes usually indicate report jitter, dropped packets, wireless instability, or scheduler stalls.</String>
+  <String x:Key="MousePerformance.Chart.Description.FrequencyVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Continuous local-window report-rate estimate anchored at every Raw Input report. It preserves every report position while reducing misleading jumps caused by USB interval jitter.</String>
+  <String x:Key="MousePerformance.Chart.Description.XVelocityVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Horizontal speed estimated from local-window cumulative DeltaX / window time / CPI at every Raw Input report anchor. Use it to judge smoothness and low-to-high speed linearity.</String>
+  <String x:Key="MousePerformance.Chart.Description.YVelocityVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Vertical speed estimated from local-window cumulative DeltaY / window time / CPI at every Raw Input report anchor. Use it to judge single-axis stability at higher speed.</String>
+  <String x:Key="MousePerformance.Chart.Description.XYVelocityVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">X and Y local-window speed estimates anchored to the same Raw Input report events. Useful for comparing axis consistency and high-speed stability.</String>
+  <String x:Key="MousePerformance.Chart.Description.PathSpeedVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Overall path speed estimated at every Raw Input report anchor from local-window path length / window time / CPI. Path length sums sqrt(DeltaX² + DeltaY²) for reports inside the window.</String>
+  <String x:Key="MousePerformance.Chart.Description.IntervalHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Distribution built from every valid report interval in the selected range. Use it to judge clustering near the nominal rate, long tails, and host-observed interval jitter.</String>
+  <String x:Key="MousePerformance.Chart.Description.DeltaXHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Signed distribution built from every Raw Input DeltaX report in the selected range, including zero values. Useful for horizontal quantization, bias, and micro-motion output.</String>
+  <String x:Key="MousePerformance.Chart.Description.DeltaYHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Signed distribution built from every Raw Input DeltaY report in the selected range, including zero values. Useful for vertical quantization, bias, and micro-motion output.</String>
+  <String x:Key="MousePerformance.Chart.Description.DeltaMagnitudeHistogram" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Non-negative distribution built from every Raw Input delta magnitude in the selected range. Useful for micro-motion loss, quantization steps, and small-motion output ratio.</String>
+  <String x:Key="MousePerformance.Chart.Description.VelocityStats" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Speed Stats Avg {0} m/s | P50 {1} | P95 {2} | P99 {3} | P999 {4} | StdDev {5} | MAD {6} | IQR {7}</String>
+  <String x:Key="MousePerformance.Chart.Description.IntervalStats" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Interval Stats Avg {0} | P50 {1} | P95 {2} | P99 {3} | P999 {4} | StdDev {5} | MAD {6} | IQR {7}</String>
+  <String x:Key="MousePerformance.Chart.Description.FrequencyStats" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Frequency Stats Avg {0} Hz | P50 {1} | P95 {2} | P99 {3} | StdDev {4}</String>
+  <String x:Key="MousePerformance.Chart.Description.CountDispersion" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Residual Dispersion MAD {0} | IQR {1}</String>
+  <String x:Key="MousePerformance.Chart.Description.XSumVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Cumulative DeltaX over time. The slope reflects sustained horizontal output, while abrupt slope changes, flats, or reversals can reveal skipping or correction.</String>
+  <String x:Key="MousePerformance.Chart.Description.YSumVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Cumulative DeltaY over time. Useful for finding vertical stalls, compensation, or unexpected reversals during longer motion.</String>
+  <String x:Key="MousePerformance.Chart.Description.XYSumVsTime" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Cumulative DeltaX and DeltaY together. Useful for checking whether long movement remains smooth, synchronized, and free from single-axis drift.</String>
+  <String x:Key="MousePerformance.Chart.Description.XVsY" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Trajectory built from cumulative X and Y position. This is the best view for spotting angle snapping, line correction, wobble, axis bias, or imperfect circles.</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.TrendLine" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Scatter points are the motion samples used by the current plot; the gray line is a trend estimate used to judge overall stability and direction.</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.ScatterOnly" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">This plot shows all valid report points as raw samples, without connected lines or stems.</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.RawConnected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">This plot locks the raw cumulative connected line on: every valid point is drawn, with no sampling or dropped points.</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.ContinuousEstimate" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">This plot shows a continuous estimate anchored to all valid report anchors: every valid anchor is drawn, with no sampling or dropped points. Statistics use the same basis as the curve.</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.Trajectory" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The trajectory view always shows the raw cumulative path inside the selected range. It is never smoothed, so shape defects and correction are easier to judge.</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.Distribution" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">This plot is a full-sample distribution view: every selected sample contributes to the distribution. The horizontal axis is not time, so gap overlay is disabled.</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.HostObserved" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The time axis reflects host-observed Raw Input arrival behavior, not a device-side hardware clock. It is best used to judge the stability of the full input path.</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.RobustStats" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MAD and IQR describe robust dispersion, so isolated spikes do not dominate the stability reading.</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.TimeBasis.RawCapture" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Uses raw capture time with no pause compression or time compensation.</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.TimeBasis.LogicalSession" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The X axis uses logical session time. Pause gaps are compressed so the session remains visually continuous.</String>
+  <String x:Key="MousePerformance.Chart.Description.Semantics.GapOverlay" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Long report intervals are host-observed spans where neighboring Raw Input reports are clearly farther apart, and can come from wireless/USB instability, system scheduling delays, or capture processing delays.</String>
+  <String x:Key="MousePerformance.Chart.Diagnostics.Summary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Long intervals {0} / Avg {1} ms</String>
+  <String x:Key="MousePerformance.Chart.Diagnostics.Summary.WithTarget" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Long intervals {1} / Avg {2} ms</String>
+  <String x:Key="MousePerformance.Chart.Axis.Time" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Time (ms)</String>
+  <String x:Key="MousePerformance.Chart.Axis.Time.RawCapture" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Raw Capture Time (ms)</String>
+  <String x:Key="MousePerformance.Chart.Axis.Time.LogicalSession" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Logical Session Time (ms)</String>
+  <String x:Key="MousePerformance.Chart.Axis.XCounts" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">xCounts</String>
+  <String x:Key="MousePerformance.Chart.Axis.YCounts" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">yCounts</String>
+  <String x:Key="MousePerformance.Chart.Axis.XYCounts" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Counts [primary / secondary axis]</String>
+  <String x:Key="MousePerformance.Chart.Axis.Interval" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Update Time (ms)</String>
+  <String x:Key="MousePerformance.Chart.Axis.Frequency" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Frequency (Hz)</String>
+  <String x:Key="MousePerformance.Chart.Axis.XVelocity" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">xVelocity (m/s)</String>
+  <String x:Key="MousePerformance.Chart.Axis.YVelocity" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">yVelocity (m/s)</String>
+  <String x:Key="MousePerformance.Chart.Axis.XYVelocity" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Velocity (m/s) [primary / secondary axis]</String>
+  <String x:Key="MousePerformance.Chart.Axis.PathSpeed" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Path Speed (m/s)</String>
+  <String x:Key="MousePerformance.Chart.Axis.DeltaX" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">DeltaX Counts</String>
+  <String x:Key="MousePerformance.Chart.Axis.DeltaY" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">DeltaY Counts</String>
+  <String x:Key="MousePerformance.Chart.Axis.DeltaMagnitude" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Delta Magnitude Counts</String>
+  <String x:Key="MousePerformance.Chart.Axis.HistogramPercent" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reports (%)</String>
+  <String x:Key="MousePerformance.Chart.Axis.XSum" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Cumulative xCounts</String>
+  <String x:Key="MousePerformance.Chart.Axis.YSum" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Cumulative yCounts</String>
+  <String x:Key="MousePerformance.Chart.Axis.XYSum" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Cumulative Counts [primary / secondary axis]</String>
+  <String x:Key="MousePerformance.Chart.Subtitle.NoCpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">CPI unavailable</String>
+  <String x:Key="MousePerformance.Chart.Subtitle.WithCpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">CPI {0}</String>
+  <String x:Key="MousePerformance.Chart.Unavailable.NoData" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The current session does not have plottable data yet.</String>
+  <String x:Key="MousePerformance.Chart.Unavailable.InsufficientMotion" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The current session does not have enough usable motion samples for this derived plot yet.</String>
+  <String x:Key="MousePerformance.Chart.Unavailable.InvalidCpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Velocity plots require a valid CPI value.</String>
+  <String x:Key="MousePerformance.Chart.Unavailable.Generic" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The current plot is not available.</String>
+  <String x:Key="MousePerformance.Chart.Unavailable.GpuRenderer" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The GPU chart renderer is unavailable.</String>
+  <String x:Key="MousePerformance.Chart.Unavailable.GpuRenderer.WithDetail" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The GPU chart renderer is unavailable. Direct3D 11: {0}</String>
+  <String x:Key="MousePerformance.Chart.Export.GpuError" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The GPU chart could not be exported.</String>
+  <String x:Key="MousePerformance.Chart.Export.GpuError.WithDetail" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The GPU chart could not be exported. Direct3D 11: {0}</String>
+  <String x:Key="MousePerformance.Chart.Loading.Frame" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Building chart analysis cache...</String>
+  <String x:Key="AngleCalibration.PageTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Mouse Angle Calibration</String>
+  <String x:Key="AngleCalibration.Instructions.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">How To Use</String>
+  <String x:Key="AngleCalibration.Instructions.Step1" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">1. Click the measurement field below to start and lock the cursor.</String>
+  <String x:Key="AngleCalibration.Instructions.Step2" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">2. Swipe left and right naturally at least 30 times while keeping what you consider level.</String>
+  <String x:Key="AngleCalibration.Instructions.Step3" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">3. Right click pauses the session so you can inspect the recommended angle; click the field again to continue the same session.</String>
+  <String x:Key="AngleCalibration.Instructions.Step4" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">4. Repeat after adjusting grip or pad angle until the recommendation stays within your preferred range.</String>
+  <String x:Key="AngleCalibration.Button.Reset" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reset</String>
+  <String x:Key="AngleCalibration.Button.CopyAngle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Copy Angle</String>
+  <String x:Key="AngleCalibration.Result.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Recommended Angle</String>
+  <String x:Key="AngleCalibration.Measurement.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Measurement Field</String>
+  <String x:Key="AngleCalibration.Measurement.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Click to start sampling; right click or Esc pauses, and continuing improves confidence.</String>
+  <String x:Key="AngleCalibration.Stats.Swipes" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Swipes:</String>
+  <String x:Key="AngleCalibration.Stats.Samples" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Samples:</String>
+  <String x:Key="AngleCalibration.Stats.Stability" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Stability:</String>
+  <String x:Key="AngleCalibration.Hint.Ready" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Click the measurement field to lock the cursor, then move any mouse to begin measuring.</String>
+  <String x:Key="AngleCalibration.Hint.AwaitingInput" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Locked and waiting for the first movement from any mouse to begin measuring. Right click pauses.</String>
+  <String x:Key="AngleCalibration.Hint.Measuring" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Measuring: move the current measurement mouse left and right at least 30 times. Right click pauses.</String>
+  <String x:Key="AngleCalibration.Hint.Paused" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Paused: click the measurement field again, then move any mouse to resume.</String>
+  <String x:Key="AngleCalibration.Hint.ResultReady.Active" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The recommended angle is ready. Keep swiping the current measurement mouse for better accuracy; right click pauses.</String>
+  <String x:Key="AngleCalibration.Hint.ResultReady.Paused" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The recommended angle is ready. Click the measurement field again, then move any mouse to resume.</String>
+  <String x:Key="AngleCalibration.Hint.NoDevice" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">No mouse is currently available, so angle calibration cannot start.</String>
+  <String x:Key="AngleCalibration.Hint.DeviceDisconnected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The current measurement mouse was disconnected. Click the field again and move any mouse to start a new pass.</String>
+  <String x:Key="AngleCalibration.Quality.InsufficientProgress" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The trace is still building up. Keep swiping a bit longer for a steadier result.</String>
+  <String x:Key="AngleCalibration.Quality.Imbalance" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Left and right passes are uneven. Try to keep both sides more symmetrical.</String>
+  <String x:Key="AngleCalibration.Quality.HighDispersion" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The trace is spreading too much. Try to keep the path straighter and steadier.</String>
+  <String x:Key="AngleCalibration.Quality.Outliers" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Too many outlier strokes were detected. Reduce jitter and sharp corrections before continuing.</String>
+  <String x:Key="AngleCalibration.Quality.QueueOverflow" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The capture queue overflowed and dropped {0} packets. This result may be distorted by tool-side pressure, so reset and measure again.</String>
+  <String x:Key="AngleCalibration.Quality.Fair" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Trace quality is fair. Add a few more steady passes to make the result more reliable.</String>
+  <String x:Key="AngleCalibration.Quality.Good" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Trace quality looks good. Keep the same rhythm for a stronger result.</String>
+  <String x:Key="AngleCalibration.Quality.Excellent" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Trace quality is excellent. A few more passes can help confirm the result.</String>
+  <String x:Key="Capture.Stage.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">CAPTURE STAGE</String>
+  <String x:Key="Capture.Stage.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">After starting, draw fast circles continuously in this field for 3-5 seconds.</String>
+  <String x:Key="Capture.Head.Measuring" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">measuring</String>
+  <String x:Key="Capture.Head.Polling" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">REPORT</String>
+  <String x:Key="Capture.Head.Rate" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Raw Input Report Rate</String>
+  <String x:Key="Capture.Output.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">CURRENT OUTPUT</String>
+  <String x:Key="Unit.Hertz" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Hz</String>
+  <String x:Key="Metrics.Peak" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">PEAK RATE</String>
+  <String x:Key="Metrics.EmptyPacketRate" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">EMPTY PACKET RATE</String>
+  <String x:Key="Metrics.DropCount" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">CAPTURE DROPS</String>
+  <String x:Key="Session.DeviceLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">TARGET / ACTIVE DEVICE</String>
+  <String x:Key="Session.NotesLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">SESSION NOTES</String>
+  <String x:Key="Control.Rail.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">CONTROL RAIL</String>
+  <String x:Key="Control.Rail.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Choose one device, then lock the capture stage.</String>
+  <String x:Key="Control.Language.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">LANGUAGE</String>
+  <String x:Key="Control.TargetDevice.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">TARGET DEVICE</String>
+  <String x:Key="Control.ReportMode.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">REPORT MODE</String>
+  <String x:Key="Control.ReportMode.RawPacket" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">RAW PACKET</String>
+  <String x:Key="Control.ReportMode.MotionReport" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MOTION REPORT</String>
+  <String x:Key="Control.ReportMode.Description.RawPacket" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Counts every mouse Raw Input packet from the selected device, including zero-delta, button, and wheel reports.</String>
+  <String x:Key="Control.ReportMode.Description.MotionReport" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Counts only motion reports with non-zero DeltaX or DeltaY.</String>
+  <String x:Key="Language.Toggle.ToEnglish" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">ENGLISH</String>
+  <String x:Key="Language.Toggle.ToChinese" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">简体中文</String>
+  <String x:Key="Theme.Toggle.ToLight" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Switch to light mode</String>
+  <String x:Key="Theme.Toggle.ToDark" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Switch to dark mode</String>
+  <String x:Key="Theme.Toggle.KeyLight" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">LIGHT</String>
+  <String x:Key="Theme.Toggle.KeyDark" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">DARK</String>
+  <String x:Key="Button.RefreshDevices" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">RESCAN DEVICES</String>
+  <String x:Key="Button.Stop" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">STOP</String>
+  <String x:Key="History.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">HISTORY / LAST 3 SECONDS</String>
+  <String x:Key="History.Trace" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">trace</String>
+  <String x:Key="History.Field" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">FIELD</String>
+  <String x:Key="History.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The history panel is treated as a live editorial trace instead of a conventional chart.</String>
+  <String x:Key="History.Badge" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">300 MS WINDOW</String>
+  <String x:Key="Footer.Help" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">ESC / RIGHT CLICK RELEASES LOCK. ONLY THE SELECTED DEVICE CONTRIBUTES TO THIS PAGE.</String>
+  <String x:Key="Footer.Meta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">RAW INPUT / REPORT-RATE ANALYSIS</String>
+  <String x:Key="Status.Ready.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Ready</String>
+  <String x:Key="Status.Ready.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Choose the mouse to test, then click Start to enter the locked capture state.</String>
+  <String x:Key="Status.Ready.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Test tip: after starting, draw fast circles continuously in the capture area for 3-5 seconds; very slow movement can underestimate high-report-rate devices.</String>
+  <String x:Key="Status.Measuring.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Measuring</String>
+  <String x:Key="Status.Measuring.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Collecting Raw Input packets from the selected mouse.</String>
+  <String x:Key="Status.Measuring.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Draw fast circles continuously for 3-5 seconds to keep enough Raw Input samples; press Esc or right click to release the lock.</String>
+  <String x:Key="Status.DeviceDisconnected.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Device disconnected</String>
+  <String x:Key="Status.DeviceDisconnected.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The selected mouse has been disconnected. Choose a device again before continuing.</String>
+  <String x:Key="Status.DeviceDisconnected.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The device list refreshes automatically, and restarting creates a new session.</String>
+  <String x:Key="Status.Paused.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Paused</String>
+  <String x:Key="Status.Paused.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The current result is preserved. Click Start to continue or Stop to clear this session.</String>
+  <String x:Key="Status.Paused.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Sampling stops while paused, but the last readings and the curve remain visible.</String>
+  <String x:Key="Status.NeedDevice.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Select a device</String>
+  <String x:Key="Status.NeedDevice.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Choose a mouse from the device list before starting.</String>
+  <String x:Key="Status.NeedDevice.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Only the selected device contributes to the report-rate statistics on this page.</String>
+  <String x:Key="Status.NoDevices.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">No device detected</String>
+  <String x:Key="Status.NoDevices.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">No native mouse device is currently available. Reconnect the device and refresh the list.</String>
+  <String x:Key="Status.NoDevices.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The Raw Input device list updates automatically when hardware changes.</String>
+  <String x:Key="Status.Cleared.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Session cleared</String>
+  <String x:Key="Status.Cleared.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The current measurement session has been cleared. Select a device and start a new test whenever you are ready.</String>
+  <String x:Key="Status.Cleared.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Starting again creates a fresh 300ms statistics window and a new 3-second history trace.</String>
+  <String x:Key="Status.Refresh.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Device list refreshed</String>
+  <String x:Key="Status.Refresh.Message.None" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Raw Input devices were rescanned, but no mouse is currently available.</String>
+  <String x:Key="Status.Refresh.Message.Count" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Raw Input devices were rescanned and {0} mouse device(s) are available.</String>
+  <String x:Key="Status.Refresh.Hint.NoSelection" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Pick a target device from the list and then start the test.</String>
+  <String x:Key="Status.Refresh.Hint.Selected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Currently selected device: {0}</String>
+  <String x:Key="StartButton.Running" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Testing...</String>
+  <String x:Key="StartButton.Start" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Start Test</String>
+  <String x:Key="StartButton.Continue" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Continue Test</String>
+  <String x:Key="StartButton.NewSession" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">New Session</String>
+  <String x:Key="Device.None.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">No mouse selected</String>
+  <String x:Key="Device.None.Meta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Choose a native Raw Input device from the list above.</String>
+  <String x:Key="Device.Detail.Buttons" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">{0} buttons</String>
+  <String x:Key="Device.Detail.Virtual" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Virtual device</String>
+  <String x:Key="Device.Detail.RawInput" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Raw Input device</String>
+  <String x:Key="Device.Detail.Endpoint.Motion" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Motion endpoint</String>
+  <String x:Key="Device.Detail.Endpoint.ControlOnly" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Control endpoint</String>
+  <String x:Key="Device.Detail.Endpoint.Inactive" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Inactive endpoint</String>
+  <String x:Key="Device.Detail.Endpoint.Unknown" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Raw Input endpoint</String>
+  <String x:Key="Dialog.LockFailed.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The window could not enter the locked capture state. Make sure the window is foreground and try again.</String>
+  <String x:Key="Dialog.LockFailed.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Start test failed</String>
+  <String x:Key="Dialog.LockFailed.Detail.ActivateWindow" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reason: the window could not be activated in the foreground.</String>
+  <String x:Key="Dialog.LockFailed.Detail.MissingCaptureSurface" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reason: the current page capture surface is not ready yet.</String>
+  <String x:Key="Dialog.LockFailed.Detail.SetCursorPos" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reason: Windows rejected moving the cursor to the lock position.</String>
+  <String x:Key="Dialog.LockFailed.Detail.SetClipCursor" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reason: Windows rejected clipping the cursor to the lock region.</String>
+  <String x:Key="Dialog.LockFailed.Detail.Unknown" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reason: an unexpected lock error occurred. Check the debug output for details.</String>
+  <String x:Key="Dialog.Common.Confirm" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">OK</String>
+  <String x:Key="Dialog.Common.Cancel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Cancel</String>
+  <String x:Key="MousePerformance.Chart.Import.CompareLimit.Confirm" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Import</String>
+  <String x:Key="KeyDetection.Mouse.Left" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Left Button</String>
+  <String x:Key="KeyDetection.Mouse.Middle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Middle Button</String>
+  <String x:Key="KeyDetection.Mouse.Right" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Right Button</String>
+  <String x:Key="KeyDetection.Mouse.Forward" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Forward</String>
+  <String x:Key="KeyDetection.Mouse.Back" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Back</String>
+  <String x:Key="KeyDetection.Metric.DoubleClicks" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Double Clicks</String>
+  <String x:Key="KeyDetection.Metric.DownCount" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Down Count</String>
+  <String x:Key="KeyDetection.Metric.UpCount" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Up Count</String>
+  <String x:Key="KeyDetection.Metric.DownToDown" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Down -&gt; Down</String>
+  <String x:Key="KeyDetection.Metric.DownToUp" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Down -&gt; Up</String>
+  <String x:Key="KeyDetection.Metric.Min" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Min</String>
+  <String x:Key="KeyDetection.Metric.Avg" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Avg</String>
+  <String x:Key="KeyDetection.MouseThreshold.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Mouse Double-Click Threshold</String>
+  <String x:Key="KeyDetection.MouseThreshold.Description" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Recommended 60-120ms. Lower is stricter; higher is easier to treat as a double-click.</String>
+  <String x:Key="KeyDetection.MouseThreshold.InputLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Threshold (ms)</String>
+  <String x:Key="KeyDetection.Action.ResetStatistics" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reset Stats</String>
+  <String x:Key="KeyDetection.Scroll.Up" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Wheel Up</String>
+  <String x:Key="KeyDetection.Scroll.Down" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Wheel Down</String>
+  <String x:Key="KeyDetection.CustomKey.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Custom Key Detection</String>
+  <String x:Key="KeyDetection.CustomKey.Description" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Click Pick and press one key once to start tracking down/up counts, double clicks, repeated intervals, and hold duration.</String>
+  <String x:Key="KeyDetection.CustomKey.Selection.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Current</String>
+  <String x:Key="KeyDetection.CustomKey.Selection.Placeholder" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">--</String>
+  <String x:Key="KeyDetection.CustomKey.Selection.Empty" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Current: --</String>
+  <String x:Key="KeyDetection.CustomKey.Selection.Value" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Current: {0}</String>
+  <String x:Key="KeyDetection.CustomKey.ThresholdTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Double-Click Threshold</String>
+  <String x:Key="KeyDetection.CustomKey.ThresholdHint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Custom-key only</String>
+  <String x:Key="KeyDetection.CustomKey.ThresholdInputLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">ms</String>
+  <String x:Key="KeyDetection.CustomKey.Button.Pick" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Pick</String>
+  <String x:Key="KeyDetection.CustomKey.Button.Exit" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Exit</String>
+  <String x:Key="KeyDetection.CustomKey.Button.Reset" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Reset</String>
+  <String x:Key="KeyDetection.CustomKey.Status.Label" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Status</String>
+  <String x:Key="KeyDetection.CustomKey.Status.Idle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Status: --</String>
+  <String x:Key="KeyDetection.CustomKey.Status.Picking" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Status: Picking (press a key once; ESC cancels)</String>
+  <String x:Key="KeyDetection.CustomKey.Status.PickCanceled" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Status: Pick canceled</String>
+  <String x:Key="KeyDetection.CustomKey.Status.PickExited" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Status: Exited picking</String>
+  <String x:Key="KeyDetection.CustomKey.Status.Selected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Status: Selected {0}</String>
+  <String x:Key="KeyDetection.CustomKey.Status.Down" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Status: Down ({0})</String>
+  <String x:Key="KeyDetection.CustomKey.Status.Up" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Status: Up ({0})</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.Idle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">--</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.Picking" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Picking (press a key once; ESC cancels)</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.PickCanceled" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Pick canceled</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.PickExited" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Exited picking</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.Selected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Selected {0}</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.Down" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Down ({0})</String>
+  <String x:Key="KeyDetection.CustomKey.StatusValue.Up" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Up ({0})</String>
+  <String x:Key="SensitivityMatch.PageTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Sensitivity Match</String>
+  <String x:Key="SensitivityMatch.Header.Eyebrow" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">RAW INPUT / DUAL MOUSE / SENSITIVITY MATCH</String>
+  <String x:Key="SensitivityMatch.Header.RequirementsLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Requirements</String>
+  <String x:Key="SensitivityMatch.Header.Requirements" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Two active mice required. Raw Input only.</String>
+  <String x:Key="SensitivityMatch.Step.Intro" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">01 Intro</String>
+  <String x:Key="SensitivityMatch.Step.Setup" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">02 Bind</String>
+  <String x:Key="SensitivityMatch.Step.Measure" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">03 Measure</String>
+  <String x:Key="SensitivityMatch.Intro.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Copy Sensitivity</String>
+  <String x:Key="SensitivityMatch.Intro.Description" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Adjust one mouse so it feels closer to another mouse.</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.Opening.Word1" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MAKE</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.Opening.Word2" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">TWO</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.Opening.Word3" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MICE</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.Opening.Word4" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MATCH</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.TopLeftPrimary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MATCH</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.LeftSideLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">SOURCE</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.CenterConnector" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">&amp;</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.RightSideLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">TARGET</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.BottomRightLine1" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">SAME</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.BottomRightLine2" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">MOUSE</String>
+  <String x:Key="SensitivityMatch.Intro.Hero.BottomRightLine3" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">FEEL</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.TopLeftPrimary" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">SOURCE</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.LeftSideLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">INPUT</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.CenterConnector" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">&amp;</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.RightSideLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">TARGET</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.BottomRightLine1" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">BIND</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.BottomRightLine2" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">SET</String>
+  <String x:Key="SensitivityMatch.Setup.Hero.BottomRightLine3" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">DPI</String>
+  <String x:Key="SensitivityMatch.Intro.OutputTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Output</String>
+  <String x:Key="SensitivityMatch.Intro.OutputDescription" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Recommended target DPI and scale.</String>
+  <String x:Key="SensitivityMatch.Intro.FlowBind" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Bind two mice</String>
+  <String x:Key="SensitivityMatch.Intro.FlowMeasure" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Run three synced passes</String>
+  <String x:Key="SensitivityMatch.Intro.FlowResult" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Get a recommended DPI</String>
+  <String x:Key="SensitivityMatch.Intro.Card.DeviceTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Devices</String>
+  <String x:Key="SensitivityMatch.Intro.Card.DeviceDescription" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Two mice must be online.</String>
+  <String x:Key="SensitivityMatch.Intro.Card.SurfaceTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Advice</String>
+  <String x:Key="SensitivityMatch.Intro.Card.SurfaceDescription" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Keep the same direction and rhythm.</String>
+  <String x:Key="SensitivityMatch.Intro.Card.MethodTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Method</String>
+  <String x:Key="SensitivityMatch.Intro.Card.MethodDescription" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Move to bind, then start each round manually.</String>
+  <String x:Key="SensitivityMatch.Setup.DeviceCountLabel" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Online Devices</String>
+  <String x:Key="SensitivityMatch.Setup.DeviceCount" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">{0} online</String>
+  <String x:Key="SensitivityMatch.Setup.ParametersTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Binding and DPI</String>
+  <String x:Key="SensitivityMatch.Setup.SourceDpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Source DPI</String>
+  <String x:Key="SensitivityMatch.Setup.SourceDpiHint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Enter the DPI you want to copy.</String>
+  <String x:Key="SensitivityMatch.Setup.TargetDpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Target DPI</String>
+  <String x:Key="SensitivityMatch.Setup.TargetDpiHint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Enter the target mouse's current DPI.</String>
+  <String x:Key="SensitivityMatch.Setup.BindHintTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Binding Notes</String>
+  <String x:Key="SensitivityMatch.Setup.BindHintBody" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Move the intended mouse slightly to bind it. Any DPI edit or rebind clears older results.</String>
+  <String x:Key="SensitivityMatch.Binding.Source.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Source Mouse</String>
+  <String x:Key="SensitivityMatch.Binding.Target.Title" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Target Mouse</String>
+  <String x:Key="SensitivityMatch.Binding.Source.Empty" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Source mouse not bound</String>
+  <String x:Key="SensitivityMatch.Binding.Target.Empty" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Target mouse not bound</String>
+  <String x:Key="SensitivityMatch.Binding.Source.Waiting" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Waiting for source movement</String>
+  <String x:Key="SensitivityMatch.Binding.Target.Waiting" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Waiting for target movement</String>
+  <String x:Key="SensitivityMatch.Binding.Source.Bound" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Bound</String>
+  <String x:Key="SensitivityMatch.Binding.Target.Bound" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Bound</String>
+  <String x:Key="SensitivityMatch.Binding.Source.Disconnected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Disconnected</String>
+  <String x:Key="SensitivityMatch.Binding.Target.Disconnected" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Disconnected</String>
+  <String x:Key="SensitivityMatch.Binding.Unbound" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Not bound</String>
+  <String x:Key="SensitivityMatch.Binding.EmptyMeta" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Device details appear after binding.</String>
+  <String x:Key="SensitivityMatch.Button.StartSetup" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Start</String>
+  <String x:Key="SensitivityMatch.Button.Back" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Back</String>
+  <String x:Key="SensitivityMatch.Button.ContinueToMeasure" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Next</String>
+  <String x:Key="SensitivityMatch.Button.Bind" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Bind</String>
+  <String x:Key="SensitivityMatch.Button.Rebind" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Rebind</String>
+  <String x:Key="SensitivityMatch.Button.ClickBindMouse" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Click to Bind Mouse</String>
+  <String x:Key="SensitivityMatch.Button.CancelBindMouse" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Unbind Mouse</String>
+  <String x:Key="SensitivityMatch.Button.StartRound" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Start Round {0} (press S)</String>
+  <String x:Key="SensitivityMatch.Button.Measuring" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Measuring...</String>
+  <String x:Key="SensitivityMatch.Button.Stabilizing" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Stabilizing...</String>
+  <String x:Key="SensitivityMatch.Button.RetryRound" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Retry Round</String>
+  <String x:Key="SensitivityMatch.Button.CopyRecommendedDpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Copy DPI</String>
+  <String x:Key="SensitivityMatch.Button.Remeasure" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Measure Again</String>
+  <String x:Key="SensitivityMatch.Button.RebindAll" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Rebind</String>
+  <String x:Key="SensitivityMatch.Measure.ProgressTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Current Round</String>
+  <String x:Key="SensitivityMatch.Measure.ProgressHint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Place both mice side by side and move them in the same direction.</String>
+  <String x:Key="SensitivityMatch.Measure.SourceLane" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Source Mouse</String>
+  <String x:Key="SensitivityMatch.Measure.TargetLane" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Target Mouse</String>
+  <String x:Key="SensitivityMatch.Measure.RoundsTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Three Rounds</String>
+  <String x:Key="SensitivityMatch.Measure.TipsTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Tips</String>
+  <String x:Key="SensitivityMatch.Measure.Tip1" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Keep the same direction and rhythm.</String>
+  <String x:Key="SensitivityMatch.Measure.Tip2" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Keep the path as straight as possible.</String>
+  <String x:Key="SensitivityMatch.Measure.Tip3" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Leaving the page cancels the unfinished round.</String>
+  <String x:Key="SensitivityMatch.Measure.Progress.Pending" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Waiting to start</String>
+  <String x:Key="SensitivityMatch.Measure.Progress.Value" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Overall {0}%</String>
+  <String x:Key="SensitivityMatch.Measure.SourceProgress.Pending" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Source pending</String>
+  <String x:Key="SensitivityMatch.Measure.SourceProgress.Value" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Source {0}%</String>
+  <String x:Key="SensitivityMatch.Measure.TargetProgress.Pending" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Target pending</String>
+  <String x:Key="SensitivityMatch.Measure.TargetProgress.Value" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Target {0}%</String>
+  <String x:Key="SensitivityMatch.Measure.RoundTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Round {0}</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Pending" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Not started</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Ready" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Click to start this round.</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Progress" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">{0}%</String>
+  <String x:Key="SensitivityMatch.Measure.Round.ProgressDetail" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Source {0}% / Target {1}%</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Result" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Recommended DPI {0}</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Failed" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Failed</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Status.Pending" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Pending</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Status.Ready" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Ready</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Status.Active" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Active</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Status.Finishing" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Finishing</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Status.Completed" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Done</String>
+  <String x:Key="SensitivityMatch.Measure.Round.Status.Failed" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Failed</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.Timeout" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The round timed out. Try again.</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.TooFast" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The movement was too fast.</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.InsufficientPackets" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Not enough movement data.</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.Curved" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The path was too curved.</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.DirectionMismatch" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The mice moved in different directions.</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.PathShapeMismatch" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The two motion traces did not match.</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.Unsynchronized" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The two mice were not synchronized.</String>
+  <String x:Key="SensitivityMatch.Measure.Fail.Unknown" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The round did not pass validation.</String>
+  <String x:Key="SensitivityMatch.Measure.Hero.Ready" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Ready</String>
+  <String x:Key="SensitivityMatch.Measure.Hero.Failed" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Round Failed</String>
+  <String x:Key="SensitivityMatch.Measure.Hero.Expired" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Stale</String>
+  <String x:Key="SensitivityMatch.Result.RecommendedDpi" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Recommended DPI</String>
+  <String x:Key="SensitivityMatch.Result.Scale" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Scale</String>
+  <String x:Key="SensitivityMatch.Result.Consistency" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Stability</String>
+  <String x:Key="SensitivityMatch.Result.RoundsTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Round Details</String>
+  <String x:Key="SensitivityMatch.Result.NoteTitle" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Use</String>
+  <String x:Key="SensitivityMatch.Result.NoteBody" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Set the target DPI to the recommendation, or apply the scale.</String>
+  <String x:Key="SensitivityMatch.Result.Pending" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Pending</String>
+  <String x:Key="SensitivityMatch.Result.Expired" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">This result is stale. Rebind before using it.</String>
+  <String x:Key="SensitivityMatch.Result.Consistency.Excellent" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Excellent</String>
+  <String x:Key="SensitivityMatch.Result.Consistency.Good" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Good</String>
+  <String x:Key="SensitivityMatch.Result.Consistency.Fair" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Fair</String>
+  <String x:Key="SensitivityMatch.Result.Consistency.Poor" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Poor</String>
+  <String x:Key="SensitivityMatch.Result.Hint.Excellent" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The three rounds are very close.</String>
+  <String x:Key="SensitivityMatch.Result.Hint.Good" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The result is already stable.</String>
+  <String x:Key="SensitivityMatch.Result.Hint.Fair" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Usable, but another pass is recommended.</String>
+  <String x:Key="SensitivityMatch.Result.Hint.Poor" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Variation is high. Measure again.</String>
+  <String x:Key="SensitivityMatch.Status.Intro.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Ready</String>
+  <String x:Key="SensitivityMatch.Status.Intro.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Confirm two mice are online before setup.</String>
+  <String x:Key="SensitivityMatch.Status.Intro.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">This page only measures and recommends. It does not change device settings.</String>
+  <String x:Key="SensitivityMatch.Status.NeedDevices.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Need Devices</String>
+  <String x:Key="SensitivityMatch.Status.NeedDevices.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">At least two active mice are required.</String>
+  <String x:Key="SensitivityMatch.Status.NeedDevices.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Binding and measurement stay unavailable until both are online.</String>
+  <String x:Key="SensitivityMatch.Status.Binding.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Binding</String>
+  <String x:Key="SensitivityMatch.Status.Binding.SourceMessage" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Move the source mouse to bind it.</String>
+  <String x:Key="SensitivityMatch.Status.Binding.TargetMessage" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Move the target mouse to bind it.</String>
+  <String x:Key="SensitivityMatch.Status.Binding.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">A slight movement is enough. Timeout is 10 seconds.</String>
+  <String x:Key="SensitivityMatch.Status.BindingTimeout.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Bind Timeout</String>
+  <String x:Key="SensitivityMatch.Status.BindingTimeout.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">No movement was detected within 10 seconds.</String>
+  <String x:Key="SensitivityMatch.Status.BindingTimeout.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Make sure you moved the intended mouse.</String>
+  <String x:Key="SensitivityMatch.Status.BindingConflict.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Bind Conflict</String>
+  <String x:Key="SensitivityMatch.Status.BindingConflict.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Source and target cannot be the same mouse.</String>
+  <String x:Key="SensitivityMatch.Status.BindingConflict.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Bind a different mouse and try again.</String>
+  <String x:Key="SensitivityMatch.Status.NeedDpi.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Enter DPI</String>
+  <String x:Key="SensitivityMatch.Status.NeedDpi.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Enter both source DPI and target DPI.</String>
+  <String x:Key="SensitivityMatch.Status.NeedDpi.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Both values must be integers between {0} and {1}.</String>
+  <String x:Key="SensitivityMatch.Status.NeedBinding.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Need Binding</String>
+  <String x:Key="SensitivityMatch.Status.NeedBinding.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Bind both mice before continuing.</String>
+  <String x:Key="SensitivityMatch.Status.NeedBinding.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Click Bind, then move the intended mouse slightly.</String>
+  <String x:Key="SensitivityMatch.Status.BindingDisconnected.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Device Disconnected</String>
+  <String x:Key="SensitivityMatch.Status.BindingDisconnected.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">A bound mouse was disconnected. Rebind it.</String>
+  <String x:Key="SensitivityMatch.Status.BindingDisconnected.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The unfinished round is discarded. Older results remain as reference only.</String>
+  <String x:Key="SensitivityMatch.Status.SetupReady.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Inputs and bindings are ready.</String>
+  <String x:Key="SensitivityMatch.Status.SetupReady.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Each round must still be started manually.</String>
+  <String x:Key="SensitivityMatch.Status.MeasureReady.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Ready</String>
+  <String x:Key="SensitivityMatch.Status.MeasureReady.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Round {0} is ready.</String>
+  <String x:Key="SensitivityMatch.Status.MeasureReady.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Place both mice side by side, then move forward together.</String>
+  <String x:Key="SensitivityMatch.Status.Measuring.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Measuring</String>
+  <String x:Key="SensitivityMatch.Status.Measuring.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Round {0} is in progress.</String>
+  <String x:Key="SensitivityMatch.Status.Measuring.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Keep both mice moving in the same direction and rhythm until both sides fill up.</String>
+  <String x:Key="SensitivityMatch.Status.Stabilizing.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Calibrating</String>
+  <String x:Key="SensitivityMatch.Status.Stabilizing.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Round {0} is being calibrated.</String>
+  <String x:Key="SensitivityMatch.Status.Stabilizing.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Hold both mice steady for a moment while the final scale settles.</String>
+  <String x:Key="SensitivityMatch.Status.RoundFailed.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Round Failed</String>
+  <String x:Key="SensitivityMatch.Status.RoundFailed.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">This failure does not affect completed rounds.</String>
+  <String x:Key="SensitivityMatch.Status.MeasureExpired.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Result Expired</String>
+  <String x:Key="SensitivityMatch.Status.MeasureExpired.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">A bound device changed. The current result is reference-only.</String>
+  <String x:Key="SensitivityMatch.Status.MeasureExpired.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Rebinding either slot clears the older result.</String>
+  <String x:Key="SensitivityMatch.Status.ResultPending.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Result Pending</String>
+  <String x:Key="SensitivityMatch.Status.ResultPending.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">A result appears only after three valid rounds.</String>
+  <String x:Key="SensitivityMatch.Status.ResultPending.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Go back and finish 3 valid rounds.</String>
+  <String x:Key="SensitivityMatch.Status.ResultReady.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Result Ready</String>
+  <String x:Key="SensitivityMatch.Status.ResultReady.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Three rounds are complete. You can copy the DPI now.</String>
+  <String x:Key="SensitivityMatch.Status.ResultExpired.Pill" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">Result Expired</String>
+  <String x:Key="SensitivityMatch.Status.ResultExpired.Message" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The bound device changed. Rebind and measure again.</String>
+  <String x:Key="SensitivityMatch.Status.ResultExpired.Hint" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">The current value is shown for reference only.</String>
+</ResourceDictionary>

@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:windows="clr-namespace:System.Windows;assembly=PresentationCore">
+  <system:Double x:Key="TypeScale.InvariantEnglish.MicroLabel" xmlns:system="clr-namespace:System;assembly=System.Private.CoreLib">11</system:Double>
+  <Double x:Key="TypeScale.InvariantEnglish.HistoryTrace" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">13.5</Double>
+  <Double x:Key="TypeScale.InvariantEnglish.ComboBox" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">14</Double>
+  <Double x:Key="TypeScale.InvariantEnglish.ModeButton" xmlns="clr-namespace:System;assembly=System.Private.CoreLib">11</Double>
+  <x:StaticExtension x:Key="TextWeight.InvariantEnglish.MicroLabel" Member="windows:FontWeights.Medium" />
+  <x:StaticExtension x:Key="TextWeight.InvariantEnglish.HistoryTrace" Member="windows:FontWeights.Medium" />
+  <x:StaticExtension x:Key="TextWeight.InvariantEnglish.ComboBox" Member="windows:FontWeights.Medium" />
+  <x:StaticExtension x:Key="TextWeight.InvariantEnglish.ModeButton" Member="windows:FontWeights.Medium" />
+</ResourceDictionary>

@@ -1,0 +1,745 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UserControl x:Class="ClickSyncMouseTester.Views.Pages.KeyDetectionPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" SnapsToDevicePixels="True" UseLayoutRounding="True" xmlns:pages="clr-namespace:ClickSyncMouseTester.Views.Pages;assembly=ClickSyncMouseTester" Loaded="KeyDetectionPage_Loaded" Unloaded="KeyDetectionPage_Unloaded">
+  <FrameworkElement.Resources>
+    <ResourceDictionary>
+      <Style x:Key="KeyDetectionRoundedPanelBorderStyle" TargetType="{x:Type Border}" BasedOn="{StaticResource KeyDetectionPanelBorderStyle}">
+        <Setter Property="Border.CornerRadius" Value="24" />
+        <Setter Property="Border.Padding" Value="18,14" />
+      </Style>
+      <Style x:Key="KeyDetectionThresholdBarBorderStyle" TargetType="{x:Type Border}" BasedOn="{StaticResource KeyDetectionRoundedPanelBorderStyle}">
+        <Setter Property="Border.CornerRadius" Value="26" />
+        <Setter Property="Border.Padding" Value="18,14" />
+      </Style>
+      <Style x:Key="KeyDetectionRoundedInsetSurfaceBorderStyle" TargetType="{x:Type Border}" BasedOn="{StaticResource KeyDetectionInsetSurfaceBorderStyle}">
+        <Setter Property="Border.CornerRadius" Value="16" />
+        <Setter Property="Border.Padding" Value="14,12" />
+        <Setter Property="Background" Value="{DynamicResource GlassPopupBackgroundBrush}" />
+      </Style>
+      <Style x:Key="KeyDetectionMetricTileBorderStyle" TargetType="{x:Type Border}" BasedOn="{StaticResource KeyDetectionRoundedInsetSurfaceBorderStyle}">
+        <Setter Property="MinHeight" Value="76" />
+        <Setter Property="Border.Padding" Value="18,14,18,10" />
+      </Style>
+      <Style x:Key="KeyDetectionTimingSurfaceBorderStyle" TargetType="{x:Type Border}" BasedOn="{StaticResource KeyDetectionMetricTileBorderStyle}">
+        <Setter Property="MinHeight" Value="80" />
+        <Setter Property="Border.Padding" Value="18,14,18,10" />
+      </Style>
+      <Style x:Key="KeyDetectionRoundedButtonCardBorderStyle" TargetType="{x:Type Border}" BasedOn="{StaticResource KeyDetectionButtonCardBorderStyle}">
+        <Setter Property="Border.CornerRadius" Value="22" />
+        <Setter Property="BorderThickness" Value="1.4" />
+        <Setter Property="Border.Padding" Value="20,16,20,18" />
+        <Setter Property="MinHeight" Value="346" />
+      </Style>
+      <Style x:Key="KeyDetectionPillBorderStyle" TargetType="{x:Type Border}" BasedOn="{StaticResource KeyDetectionRoundedInsetSurfaceBorderStyle}">
+        <Setter Property="BorderThickness" Value="1.35" />
+        <Setter Property="Border.Padding" Value="14,12" />
+        <Setter Property="Border.CornerRadius" Value="18" />
+        <Setter Property="MinHeight" Value="56" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+      </Style>
+      <Style x:Key="KeyDetectionStatusPillBorderStyle" TargetType="{x:Type Border}" BasedOn="{StaticResource KeyDetectionPillBorderStyle}">
+        <Style.Triggers>
+          <DataTrigger Value="True" Binding="{Binding IsCustomKeyDown}">
+            <Setter Property="BorderBrush" Value="{DynamicResource VoltGreenBrush}" />
+            <Setter Property="Background" Value="{DynamicResource GhostHoverBrush}" />
+          </DataTrigger>
+        </Style.Triggers>
+      </Style>
+      <Style x:Key="KeyDetectionHeroStatusTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Body}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="TextBlock.LineHeight" Value="22" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+      </Style>
+      <Style x:Key="KeyDetectionInfoTagBorderStyle" TargetType="{x:Type Border}">
+        <Setter Property="Border.Padding" Value="10,5" />
+        <Setter Property="Border.CornerRadius" Value="10" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Background" Value="{DynamicResource GhostHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+        <Setter Property="BorderThickness" Value="1.25" />
+        <Setter Property="UIElement.SnapsToDevicePixels" Value="True" />
+        <Setter Property="FrameworkElement.UseLayoutRounding" Value="True" />
+        <Setter Property="RenderOptions.ClearTypeHint" Value="{StaticResource ClearTypeHint.Enabled}" />
+      </Style>
+      <Style x:Key="KeyDetectionInfoTagTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MicroLabelStyle}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+      </Style>
+      <Style x:Key="KeyDetectionInfoValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionHeroStatusTextStyle}">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="TextBlock.LineHeight" Value="20" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+      </Style>
+      <Style x:Key="KeyDetectionRaisedThresholdTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource KeyDetectionThresholdTextBoxStyle}">
+        <Setter Property="Height" Value="36" />
+        <Setter Property="Padding" Value="10,0" />
+        <Setter Property="Foreground" Value="#111111" />
+        <Setter Property="Background" Value="#C5C5C5" />
+        <Setter Property="BorderBrush" Value="#CFCFCF" />
+        <Setter Property="BorderThickness" Value="1.3" />
+        <Setter Property="TextBoxBase.CaretBrush" Value="#111111" />
+        <Setter Property="TextBox.TextAlignment" Value="Center" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="{x:Type TextBox}">
+              <Grid ClipToBounds="False" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" UseLayoutRounding="True">
+                <Border Name="ShadowPlate" Margin="5,5,0,0" Background="#ECECEC" CornerRadius="8" IsHitTestVisible="False" Opacity="1" />
+                <Border Name="InputSurface" Margin="0,0,5,5" Background="{TemplateBinding Control.Background}" BorderBrush="{TemplateBinding Control.BorderBrush}" BorderThickness="{TemplateBinding Control.BorderThickness}" CornerRadius="8" SnapsToDevicePixels="True" UseLayoutRounding="True">
+                  <ScrollViewer Name="PART_ContentHost" Margin="{TemplateBinding Control.Padding}" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" RenderOptions.ClearTypeHint="{StaticResource ClearTypeHint.Enabled}" />
+                </Border>
+              </Grid>
+              <ControlTemplate.Triggers>
+                <Trigger Property="UIElement.IsKeyboardFocusWithin" Value="True">
+                  <Setter TargetName="InputSurface" Property="Border.BorderBrush" Value="#D4D4D4" />
+                  <TriggerBase.EnterActions>
+                    <BeginStoryboard>
+                      <Storyboard FillBehavior="HoldEnd">
+                        <DoubleAnimation Storyboard.TargetName="ShadowPlate" From="1" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.12" EasingFunction="{StaticResource MotionOutEase}" />
+                      </Storyboard>
+                    </BeginStoryboard>
+                  </TriggerBase.EnterActions>
+                  <TriggerBase.ExitActions>
+                    <BeginStoryboard>
+                      <Storyboard FillBehavior="HoldEnd">
+                        <DoubleAnimation Storyboard.TargetName="ShadowPlate" From="0" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.16" EasingFunction="{StaticResource MotionOutEase}" />
+                      </Storyboard>
+                    </BeginStoryboard>
+                  </TriggerBase.ExitActions>
+                </Trigger>
+                <Trigger Property="UIElement.IsMouseOver" Value="True">
+                  <Setter TargetName="InputSurface" Property="Border.BorderBrush" Value="#DEDEDE" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                  <Setter TargetName="InputSurface" Property="UIElement.Opacity" Value="0.52" />
+                  <Setter TargetName="ShadowPlate" Property="UIElement.Opacity" Value="0.36" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+      <Style x:Key="KeyDetectionWheelRailBorderStyle" TargetType="{x:Type Border}" BasedOn="{StaticResource KeyDetectionRoundedInsetSurfaceBorderStyle}">
+        <Setter Property="Border.CornerRadius" Value="32" />
+        <Setter Property="Border.Padding" Value="10" />
+      </Style>
+      <Style x:Key="KeyDetectionWheelPulseZoneStyle" TargetType="{x:Type Border}">
+        <Setter Property="Border.Padding" Value="10,12" />
+        <Setter Property="Border.CornerRadius" Value="22" />
+        <Setter Property="Background" Value="#00FFFFFF" />
+        <Setter Property="BorderBrush" Value="#00FFFFFF" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="UIElement.SnapsToDevicePixels" Value="True" />
+        <Setter Property="FrameworkElement.UseLayoutRounding" Value="True" />
+        <Setter Property="RenderOptions.ClearTypeHint" Value="{StaticResource ClearTypeHint.Enabled}" />
+        <Setter Property="UIElement.RenderTransformOrigin" Value="0.5,0.5" />
+        <Setter Property="RenderTransform">
+          <Setter.Value>
+            <ScaleTransform ScaleX="1" ScaleY="1" />
+          </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+          <Trigger Property="FrameworkElement.Tag" Value="True">
+            <Setter Property="BorderBrush" Value="{DynamicResource VoltGreenBrush}" />
+            <Setter Property="Background" Value="{DynamicResource GhostHoverBrush}" />
+            <TriggerBase.EnterActions>
+              <BeginStoryboard>
+                <Storyboard AutoReverse="True">
+                  <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.025" Duration="0:0:0.08" EasingFunction="{StaticResource MotionOutEase}" />
+                  <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.025" Duration="0:0:0.08" EasingFunction="{StaticResource MotionOutEase}" />
+                </Storyboard>
+              </BeginStoryboard>
+            </TriggerBase.EnterActions>
+          </Trigger>
+        </Style.Triggers>
+      </Style>
+      <Style x:Key="KeyDetectionPillGhostButtonStyle" TargetType="{x:Type Button}">
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="Background" Value="#00FFFFFF" />
+        <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}" />
+        <Setter Property="BorderThickness" Value="1.35" />
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Meta}" />
+        <Setter Property="FontWeight" Value="{DynamicResource TextWeight.SecondaryButton}" />
+        <Setter Property="FontSize" Value="{DynamicResource TypeScale.SecondaryButton}" />
+        <Setter Property="Padding" Value="18,8" />
+        <Setter Property="MinHeight" Value="42" />
+        <Setter Property="FrameworkElement.Cursor" Value="Hand" />
+        <Setter Property="FrameworkElement.FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="{StaticResource TextRenderingMode.ClearType}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+        <Setter Property="TextOptions.TextHintingMode" Value="{StaticResource TextHintingMode.UI}" />
+        <Setter Property="UIElement.SnapsToDevicePixels" Value="True" />
+        <Setter Property="FrameworkElement.UseLayoutRounding" Value="True" />
+        <Setter Property="RenderOptions.ClearTypeHint" Value="{StaticResource ClearTypeHint.Enabled}" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="{x:Type Button}">
+              <Border Name="ButtonBorder" Background="{TemplateBinding Control.Background}" BorderBrush="{TemplateBinding Control.BorderBrush}" BorderThickness="{TemplateBinding Control.BorderThickness}" CornerRadius="16" Padding="{TemplateBinding Control.Padding}" Opacity="0.92" RenderTransformOrigin="0.5,0.5" SnapsToDevicePixels="True" UseLayoutRounding="True">
+                <UIElement.RenderTransform>
+                  <ScaleTransform ScaleX="1" ScaleY="1" />
+                </UIElement.RenderTransform>
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.ClearTypeHint="{StaticResource ClearTypeHint.Enabled}" />
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="UIElement.IsMouseOver" Value="True">
+                  <Setter TargetName="ButtonBorder" Value="{DynamicResource GhostHoverBrush}" Property="Border.Background" />
+                  <Setter TargetName="ButtonBorder" Value="{DynamicResource TextStrongBrush}" Property="Border.BorderBrush" />
+                  <Setter TargetName="ButtonBorder" Property="UIElement.Opacity" Value="1" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                  <Setter TargetName="ButtonBorder" Property="UIElement.Opacity" Value="0.76" />
+                  <Setter TargetName="ButtonBorder" Property="UIElement.RenderTransform">
+                    <Setter.Value>
+                      <ScaleTransform ScaleX="{StaticResource MotionPressScale.Secondary}" ScaleY="{StaticResource MotionPressScale.Secondary}" />
+                    </Setter.Value>
+                  </Setter>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                  <Setter TargetName="ButtonBorder" Property="UIElement.Opacity" Value="0.3" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+      <Style x:Key="KeyDetectionCompactPanelTitleTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionSectionTitleTextStyle}">
+        <Setter Property="FontSize" Value="18" />
+      </Style>
+      <Style x:Key="KeyDetectionCompactSectionTitleTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionSectionTitleTextStyle}">
+        <Setter Property="FontSize" Value="16" />
+      </Style>
+      <Style x:Key="KeyDetectionCardCenteredTitleTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionCardTitleTextStyle}">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
+      </Style>
+      <Style x:Key="KeyDetectionCardSectionDividerStyle" TargetType="{x:Type Border}">
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Background" Value="{DynamicResource HairlineBrush}" />
+        <Setter Property="UIElement.Opacity" Value="0.72" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+      </Style>
+      <Style x:Key="KeyDetectionCardSummaryLabelTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionEyebrowTextStyle}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource VoltGreenBrush}" />
+        <Setter Property="UIElement.Opacity" Value="1" />
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
+      </Style>
+      <Style x:Key="KeyDetectionDoubleClickSummaryLabelTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionCardSummaryLabelTextStyle}">
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource VoltGreenBrush}" />
+        <Setter Property="UIElement.Opacity" Value="1" />
+      </Style>
+      <Style x:Key="KeyDetectionCardHeroValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionCardValueTextStyle}">
+        <Setter Property="FontSize" Value="36" />
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
+      </Style>
+      <Style x:Key="KeyDetectionCardRowLabelTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.Body}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+      </Style>
+      <Style x:Key="KeyDetectionCardRowValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        <Setter Property="Typography.NumeralStyle" Value="Lining" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+      </Style>
+      <Style x:Key="KeyDetectionCardTimingValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionTimingValueTextStyle}">
+        <Setter Property="FontSize" Value="15" />
+      </Style>
+      <Style x:Key="KeyDetectionExpandedTimingValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionTimingValueTextStyle}">
+        <Setter Property="FontSize" Value="18" />
+      </Style>
+      <Style x:Key="KeyDetectionSubMetricValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontFamily" Value="{DynamicResource Font.DisplaySans}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Foreground" Value="{DynamicResource TextStrongBrush}" />
+        <Setter Property="UIElement.Opacity" Value="0.82" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        <Setter Property="Typography.NumeralStyle" Value="Lining" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="{StaticResource TextFormattingMode.UI}" />
+      </Style>
+      <Style x:Key="KeyDetectionCompactMetricValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionCountValueTextStyle}">
+        <Setter Property="FontSize" Value="20" />
+      </Style>
+      <Style x:Key="KeyDetectionMetricHeaderTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionCardRowLabelTextStyle}">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="TextBlock.LineHeight" Value="19" />
+        <Setter Property="Margin" Value="0,1,0,0" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+      </Style>
+      <Style x:Key="KeyDetectionDoubleClickMetricHeaderTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionMetricHeaderTextStyle}">
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource VoltGreenBrush}" />
+        <Setter Property="UIElement.Opacity" Value="1" />
+      </Style>
+      <Style x:Key="KeyDetectionMetricCenterValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionCompactMetricValueTextStyle}">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextBlock.LineHeight" Value="24" />
+      </Style>
+      <Style x:Key="KeyDetectionMetricInlineValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionCompactMetricValueTextStyle}">
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="TextBlock.TextAlignment" Value="Right" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="TextBlock.LineHeight" Value="24" />
+        <Setter Property="Margin" Value="0,-2,0,0" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+      </Style>
+      <Style x:Key="KeyDetectionMetricInlineTimingValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionExpandedTimingValueTextStyle}">
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="TextBlock.TextAlignment" Value="Right" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="Margin" Value="0,-1,0,0" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+      </Style>
+      <Style x:Key="KeyDetectionMetricNoteTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MicroLabelStyle}">
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+      </Style>
+      <Style x:Key="KeyDetectionMetricFooterLabelTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionEyebrowTextStyle}">
+        <Setter Property="TextWrapping" Value="NoWrap" />
+      </Style>
+      <Style x:Key="KeyDetectionMetricFooterValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionSubMetricValueTextStyle}">
+        <Setter Property="TextWrapping" Value="NoWrap" />
+      </Style>
+      <Style x:Key="KeyDetectionCompactScrollValueTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource KeyDetectionScrollValueTextStyle}">
+        <Setter Property="FontSize" Value="28" />
+      </Style>
+      <DataTemplate x:Key="KeyDetectionButtonCardTemplate">
+        <Grid Margin="0,0,8,8">
+          <Border Name="ButtonCardShadow" CornerRadius="22" Background="{DynamicResource TextStrongBrush}" Opacity="0.18" IsHitTestVisible="False">
+            <UIElement.RenderTransform>
+              <TranslateTransform X="7" Y="7" />
+            </UIElement.RenderTransform>
+          </Border>
+          <Border Name="ButtonCardBorder" RenderTransformOrigin="0.5,0.5" Style="{StaticResource KeyDetectionRoundedButtonCardBorderStyle}">
+            <UIElement.RenderTransform>
+              <TranslateTransform X="0" Y="0" />
+            </UIElement.RenderTransform>
+            <Grid>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="16" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="16" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="14" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="12" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="14" />
+                <RowDefinition Height="*" />
+              </Grid.RowDefinitions>
+              <TextBlock HorizontalAlignment="Center" Style="{StaticResource KeyDetectionCardCenteredTitleTextStyle}" Text="{Binding Title}" />
+              <StackPanel Grid.Row="2" HorizontalAlignment="Center">
+                <TextBlock HorizontalAlignment="Center" Style="{StaticResource KeyDetectionCardHeroValueTextStyle}" Text="{Binding DoubleClickCountText}" />
+                <TextBlock Margin="0,6,0,0" HorizontalAlignment="Center" Text="{DynamicResource KeyDetection.Metric.DoubleClicks}" Style="{StaticResource KeyDetectionDoubleClickSummaryLabelTextStyle}" />
+              </StackPanel>
+              <Border Grid.Row="4" Style="{StaticResource KeyDetectionCardSectionDividerStyle}" />
+              <Grid Row="6">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="10" />
+                  <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Text="{DynamicResource KeyDetection.Metric.DownCount}" Style="{StaticResource KeyDetectionCardRowLabelTextStyle}" />
+                  <TextBlock Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource KeyDetectionCardRowValueTextStyle}" Text="{Binding DownCountText}" />
+                </Grid>
+                <Grid Row="2">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Text="{DynamicResource KeyDetection.Metric.UpCount}" Style="{StaticResource KeyDetectionCardRowLabelTextStyle}" />
+                  <TextBlock Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource KeyDetectionCardRowValueTextStyle}" Text="{Binding UpCountText}" />
+                </Grid>
+              </Grid>
+              <Border Grid.Row="8" Style="{StaticResource KeyDetectionCardSectionDividerStyle}" />
+              <Grid Row="10">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="16" />
+                  <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <StackPanel>
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{DynamicResource KeyDetection.Metric.DownToDown}" Style="{StaticResource KeyDetectionCardRowLabelTextStyle}" />
+                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource KeyDetectionCardTimingValueTextStyle}" Text="{Binding CurrentDownDownText}" />
+                  </Grid>
+                  <StackPanel Margin="0,8,0,0" HorizontalAlignment="Right">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                      <TextBlock Text="{DynamicResource KeyDetection.Metric.Min}" Style="{StaticResource KeyDetectionEyebrowTextStyle}" />
+                      <TextBlock Margin="4,0,0,0" Style="{StaticResource KeyDetectionSubMetricValueTextStyle}" Text="{Binding MinimumDownDownText}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,3,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
+                      <TextBlock Text="{DynamicResource KeyDetection.Metric.Avg}" Style="{StaticResource KeyDetectionEyebrowTextStyle}" />
+                      <TextBlock Margin="4,0,0,0" Style="{StaticResource KeyDetectionSubMetricValueTextStyle}" Text="{Binding AverageDownDownText}" />
+                    </StackPanel>
+                  </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Row="2">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{DynamicResource KeyDetection.Metric.DownToUp}" Style="{StaticResource KeyDetectionCardRowLabelTextStyle}" />
+                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource KeyDetectionCardTimingValueTextStyle}" Text="{Binding CurrentDownUpText}" />
+                  </Grid>
+                  <StackPanel Margin="0,8,0,0" HorizontalAlignment="Right">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                      <TextBlock Text="{DynamicResource KeyDetection.Metric.Min}" Style="{StaticResource KeyDetectionEyebrowTextStyle}" />
+                      <TextBlock Margin="4,0,0,0" Style="{StaticResource KeyDetectionSubMetricValueTextStyle}" Text="{Binding MinimumDownUpText}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,3,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
+                      <TextBlock Text="{DynamicResource KeyDetection.Metric.Avg}" Style="{StaticResource KeyDetectionEyebrowTextStyle}" />
+                      <TextBlock Margin="4,0,0,0" Style="{StaticResource KeyDetectionSubMetricValueTextStyle}" Text="{Binding AverageDownUpText}" />
+                    </StackPanel>
+                  </StackPanel>
+                </StackPanel>
+              </Grid>
+            </Grid>
+          </Border>
+        </Grid>
+        <DataTemplate.Triggers>
+          <DataTrigger Value="True" Binding="{Binding IsPressed}">
+            <TriggerBase.EnterActions>
+              <BeginStoryboard>
+                <Storyboard FillBehavior="HoldEnd">
+                  <DoubleAnimation Storyboard.TargetName="ButtonCardBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" To="7" Duration="0:0:0.08" EasingFunction="{StaticResource MotionOutEase}" />
+                  <DoubleAnimation Storyboard.TargetName="ButtonCardBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="7" Duration="0:0:0.08" EasingFunction="{StaticResource MotionOutEase}" />
+                </Storyboard>
+              </BeginStoryboard>
+            </TriggerBase.EnterActions>
+            <TriggerBase.ExitActions>
+              <BeginStoryboard>
+                <Storyboard FillBehavior="HoldEnd">
+                  <DoubleAnimation Storyboard.TargetName="ButtonCardBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" To="0" Duration="0:0:0.12" EasingFunction="{StaticResource MotionOutEase}" />
+                  <DoubleAnimation Storyboard.TargetName="ButtonCardBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="0" Duration="0:0:0.12" EasingFunction="{StaticResource MotionOutEase}" />
+                </Storyboard>
+              </BeginStoryboard>
+            </TriggerBase.ExitActions>
+          </DataTrigger>
+        </DataTemplate.Triggers>
+      </DataTemplate>
+    </ResourceDictionary>
+  </FrameworkElement.Resources>
+  <Grid Name="RootScrollViewer" Background="{DynamicResource WindowBackgroundBrush}" Focusable="True" PreviewMouseDown="RootScrollViewer_PreviewMouseDown" PreviewMouseWheel="RootScrollViewer_PreviewMouseWheel">
+    <Grid Margin="{StaticResource Layout.KeyDetection.PageMargin}" RenderOptions.ClearTypeHint="{StaticResource ClearTypeHint.Enabled}">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="12" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="12" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+      <Grid Row="0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="14" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="14" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="14" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="14" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <ContentControl HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" ContentTemplate="{StaticResource KeyDetectionButtonCardTemplate}" Content="{Binding ButtonCards[0]}" />
+        <ContentControl Grid.Column="2" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" ContentTemplate="{StaticResource KeyDetectionButtonCardTemplate}" Content="{Binding ButtonCards[1]}" />
+        <ContentControl Grid.Column="4" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" ContentTemplate="{StaticResource KeyDetectionButtonCardTemplate}" Content="{Binding ButtonCards[2]}" />
+        <ContentControl Grid.Column="6" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" ContentTemplate="{StaticResource KeyDetectionButtonCardTemplate}" Content="{Binding ButtonCards[3]}" />
+        <ContentControl Grid.Column="8" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" ContentTemplate="{StaticResource KeyDetectionButtonCardTemplate}" Content="{Binding ButtonCards[4]}" />
+      </Grid>
+      <Border Grid.Row="2" Style="{StaticResource KeyDetectionThresholdBarBorderStyle}">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="24" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <Grid VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="18" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock VerticalAlignment="Center" Text="{DynamicResource KeyDetection.MouseThreshold.Title}" Style="{StaticResource KeyDetectionCompactPanelTitleTextStyle}" />
+            <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="13" Text="{DynamicResource KeyDetection.MouseThreshold.Description}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Style="{StaticResource HintTextStyle}" />
+          </Grid>
+          <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="{DynamicResource KeyDetection.MouseThreshold.InputLabel}" Style="{StaticResource MicroLabelStyle}" />
+            <TextBox Name="MouseThresholdTextBox" Width="78" Style="{StaticResource KeyDetectionRaisedThresholdTextBoxStyle}" Text="{Binding MouseDoubleClickThresholdText, Mode=TwoWay, UpdateSourceTrigger=Explicit}" PreviewKeyDown="ThresholdTextBox_PreviewKeyDown" LostFocus="ThresholdTextBox_LostFocus" GotKeyboardFocus="ThresholdTextBox_GotKeyboardFocus" LostKeyboardFocus="ThresholdTextBox_LostKeyboardFocus" />
+            <Button Margin="12,0,0,0" MinWidth="108" Content="{DynamicResource KeyDetection.Action.ResetStatistics}" Style="{StaticResource KeyDetectionPillGhostButtonStyle}" Command="{Binding ResetStatisticsCommand}" />
+          </StackPanel>
+        </Grid>
+      </Border>
+      <Grid Row="4">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="160" />
+          <ColumnDefinition Width="16" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Border Grid.Column="0" Padding="10" Style="{StaticResource KeyDetectionRoundedPanelBorderStyle}">
+          <Border Style="{StaticResource KeyDetectionWheelRailBorderStyle}">
+            <Grid Margin="0,2">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+              </Grid.RowDefinitions>
+              <Border Style="{StaticResource KeyDetectionWheelPulseZoneStyle}" Tag="{Binding IsScrollUpPulseActive}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <Viewbox Width="18" Height="10" Margin="0,0,0,12" HorizontalAlignment="Center" Stretch="Fill">
+                    <Path Data="M13,0 L26,16 L0,16" Fill="{DynamicResource TextStrongBrush}" Stretch="Fill" />
+                  </Viewbox>
+                  <TextBlock HorizontalAlignment="Center" Style="{StaticResource KeyDetectionCompactScrollValueTextStyle}" Text="{Binding ScrollUpCountText}" />
+                  <TextBlock Margin="0,8,0,0" HorizontalAlignment="Center" Text="{DynamicResource KeyDetection.Scroll.Up}" TextAlignment="Center" Style="{StaticResource MicroLabelStyle}" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Row="1" Width="40" Height="1" HorizontalAlignment="Center" Background="{DynamicResource HairlineBrush}" Opacity="0.52" />
+              <Border Grid.Row="2" Style="{StaticResource KeyDetectionWheelPulseZoneStyle}" Tag="{Binding IsScrollDownPulseActive}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <Viewbox Width="18" Height="10" Margin="0,0,0,12" HorizontalAlignment="Center" Stretch="Fill">
+                    <Path Data="M0,0 L26,0 L13,16" Fill="{DynamicResource TextStrongBrush}" Stretch="Fill" />
+                  </Viewbox>
+                  <TextBlock HorizontalAlignment="Center" Style="{StaticResource KeyDetectionCompactScrollValueTextStyle}" Text="{Binding ScrollDownCountText}" />
+                  <TextBlock Margin="0,8,0,0" HorizontalAlignment="Center" Text="{DynamicResource KeyDetection.Scroll.Down}" TextAlignment="Center" Style="{StaticResource MicroLabelStyle}" />
+                </StackPanel>
+              </Border>
+            </Grid>
+          </Border>
+        </Border>
+        <Border Grid.Column="2" Padding="18,16" Style="{StaticResource KeyDetectionRoundedPanelBorderStyle}">
+          <Grid>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="12" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="12" />
+              <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <StackPanel>
+                <TextBlock Text="{DynamicResource KeyDetection.CustomKey.Title}" Style="{StaticResource KeyDetectionCompactPanelTitleTextStyle}" />
+                <TextBlock Margin="0,4,0,0" MaxWidth="720" Text="{DynamicResource KeyDetection.CustomKey.Description}" TextWrapping="Wrap" Style="{StaticResource HintTextStyle}" />
+              </StackPanel>
+              <Button Grid.Column="2" MinWidth="78" Style="{StaticResource KeyDetectionPillGhostButtonStyle}" Command="{Binding ToggleKeyPickModeCommand}" Content="{Binding CustomKeyPickButtonText}" />
+              <Button Grid.Column="4" MinWidth="78" Content="{DynamicResource KeyDetection.CustomKey.Button.Reset}" Style="{StaticResource KeyDetectionPillGhostButtonStyle}" Command="{Binding ResetCustomKeyCommand}" />
+            </Grid>
+            <Grid Row="2">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.02*" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="1.28*" />
+              </Grid.ColumnDefinitions>
+              <Border Grid.Column="0" Style="{StaticResource KeyDetectionPillBorderStyle}">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Border Style="{StaticResource KeyDetectionInfoTagBorderStyle}">
+                    <TextBlock Text="{DynamicResource KeyDetection.CustomKey.Selection.Label}" Style="{StaticResource KeyDetectionInfoTagTextStyle}" />
+                  </Border>
+                  <TextBlock Grid.Column="2" Style="{StaticResource KeyDetectionInfoValueTextStyle}" Text="{Binding CustomKeySelectionValueText}" />
+                </Grid>
+              </Border>
+              <Border Grid.Column="2" Style="{StaticResource KeyDetectionStatusPillBorderStyle}">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Border Style="{StaticResource KeyDetectionInfoTagBorderStyle}">
+                    <TextBlock Text="{DynamicResource KeyDetection.CustomKey.Status.Label}" Style="{StaticResource KeyDetectionInfoTagTextStyle}" />
+                  </Border>
+                  <TextBlock Grid.Column="2" Style="{StaticResource KeyDetectionInfoValueTextStyle}" Text="{Binding CustomKeyStatusValueText}" />
+                </Grid>
+              </Border>
+            </Grid>
+            <Grid Row="4">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="12" />
+                <RowDefinition Height="*" />
+              </Grid.RowDefinitions>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="14" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="14" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource KeyDetectionMetricTileBorderStyle}">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+                      <TextBlock Text="{DynamicResource KeyDetection.Metric.DownCount}" Style="{StaticResource KeyDetectionMetricHeaderTextStyle}" />
+                      <TextBlock Grid.Column="2" Style="{StaticResource KeyDetectionMetricInlineValueTextStyle}" Text="{Binding CustomKeyDownCountText}" />
+                    </Grid>
+                  </Grid>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource KeyDetectionMetricTileBorderStyle}">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+                      <TextBlock Text="{DynamicResource KeyDetection.Metric.UpCount}" Style="{StaticResource KeyDetectionMetricHeaderTextStyle}" />
+                      <TextBlock Grid.Column="2" Style="{StaticResource KeyDetectionMetricInlineValueTextStyle}" Text="{Binding CustomKeyUpCountText}" />
+                    </Grid>
+                  </Grid>
+                </Border>
+                <Border Grid.Column="4" Style="{StaticResource KeyDetectionMetricTileBorderStyle}">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+                      <TextBlock Text="{DynamicResource KeyDetection.Metric.DoubleClicks}" Style="{StaticResource KeyDetectionDoubleClickMetricHeaderTextStyle}" />
+                      <TextBlock Grid.Column="2" Style="{StaticResource KeyDetectionMetricInlineValueTextStyle}" Text="{Binding CustomKeyDoubleClickCountText}" />
+                    </Grid>
+                  </Grid>
+                </Border>
+              </Grid>
+              <Grid Row="2">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="14" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="14" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource KeyDetectionTimingSurfaceBorderStyle}">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+                      <TextBlock Text="{DynamicResource KeyDetection.CustomKey.ThresholdTitle}" Style="{StaticResource KeyDetectionMetricHeaderTextStyle}" />
+                      <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBox Name="CustomKeyThresholdTextBox" Width="94" Style="{StaticResource KeyDetectionRaisedThresholdTextBoxStyle}" Text="{Binding KeyDoubleClickThresholdText, Mode=TwoWay, UpdateSourceTrigger=Explicit}" PreviewKeyDown="ThresholdTextBox_PreviewKeyDown" LostFocus="ThresholdTextBox_LostFocus" GotKeyboardFocus="ThresholdTextBox_GotKeyboardFocus" LostKeyboardFocus="ThresholdTextBox_LostKeyboardFocus" />
+                        <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="{DynamicResource KeyDetection.CustomKey.ThresholdInputLabel}" Style="{StaticResource KeyDetectionMetricFooterLabelTextStyle}" />
+                      </StackPanel>
+                    </Grid>
+                    <TextBlock Grid.Row="2" Margin="0,6,0,0" Text="{DynamicResource KeyDetection.CustomKey.ThresholdHint}" Style="{StaticResource KeyDetectionMetricNoteTextStyle}" />
+                  </Grid>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource KeyDetectionTimingSurfaceBorderStyle}">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+                      <TextBlock Text="{DynamicResource KeyDetection.Metric.DownToDown}" Style="{StaticResource KeyDetectionMetricHeaderTextStyle}" />
+                      <TextBlock Grid.Column="2" Style="{StaticResource KeyDetectionMetricInlineTimingValueTextStyle}" Text="{Binding CustomKeyCurrentDownDownText}" />
+                    </Grid>
+                    <StackPanel Grid.Row="2" Margin="0,6,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
+                      <TextBlock Text="{DynamicResource KeyDetection.Metric.Min}" Style="{StaticResource KeyDetectionMetricFooterLabelTextStyle}" />
+                      <TextBlock Margin="4,0,0,0" Style="{StaticResource KeyDetectionMetricFooterValueTextStyle}" Text="{Binding CustomKeyMinimumDownDownText}" />
+                      <TextBlock Margin="14,0,0,0" Text="{DynamicResource KeyDetection.Metric.Avg}" Style="{StaticResource KeyDetectionMetricFooterLabelTextStyle}" />
+                      <TextBlock Margin="4,0,0,0" Style="{StaticResource KeyDetectionMetricFooterValueTextStyle}" Text="{Binding CustomKeyAverageDownDownText}" />
+                    </StackPanel>
+                  </Grid>
+                </Border>
+                <Border Grid.Column="4" Style="{StaticResource KeyDetectionTimingSurfaceBorderStyle}">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+                      <TextBlock Text="{DynamicResource KeyDetection.Metric.DownToUp}" Style="{StaticResource KeyDetectionMetricHeaderTextStyle}" />
+                      <TextBlock Grid.Column="2" Style="{StaticResource KeyDetectionMetricInlineTimingValueTextStyle}" Text="{Binding CustomKeyCurrentDownUpText}" />
+                    </Grid>
+                    <StackPanel Grid.Row="2" Margin="0,6,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
+                      <TextBlock Text="{DynamicResource KeyDetection.Metric.Min}" Style="{StaticResource KeyDetectionMetricFooterLabelTextStyle}" />
+                      <TextBlock Margin="4,0,0,0" Style="{StaticResource KeyDetectionMetricFooterValueTextStyle}" Text="{Binding CustomKeyMinimumDownUpText}" />
+                      <TextBlock Margin="14,0,0,0" Text="{DynamicResource KeyDetection.Metric.Avg}" Style="{StaticResource KeyDetectionMetricFooterLabelTextStyle}" />
+                      <TextBlock Margin="4,0,0,0" Style="{StaticResource KeyDetectionMetricFooterValueTextStyle}" Text="{Binding CustomKeyAverageDownUpText}" />
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Border>
+      </Grid>
+    </Grid>
+  </Grid>
+</UserControl>
