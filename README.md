@@ -138,4 +138,11 @@ The GPU chart renderer is split into `ClickSyncMouseTester.ChartGpu` so chart re
 
 ## License
 
-No license file is currently included in this repository. Confirm licensing before redistributing source or binaries.
+Except for third-party components and assets, the original source code
+and documentation in this repository are licensed under the
+[Apache License 2.0](LICENSE).
+
+Third-party dependencies and assets remain subject to their respective
+license terms. Fonts, product names, trademarks, and brand logos are not
+licensed under the Apache License 2.0 unless explicitly stated otherwise.
+All trademarks are the property of their respective owners.
