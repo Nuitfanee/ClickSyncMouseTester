@@ -1,0 +1,15 @@
+[package]
+name = "clicksync-core"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.94"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.151"
+
+[[bin]]
+name = "foundation-report"
+path = "src/bin/foundation_report.rs"

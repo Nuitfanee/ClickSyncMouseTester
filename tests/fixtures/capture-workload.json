@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "build_configuration": "release",
+  "warmup_rounds": 1,
+  "measured_rounds": 5,
+  "duration_ms": 1000,
+  "command_timeout_ms": 6000,
+  "workload_timeout_ms": 10000,
+  "observer_modes": [
+    {
+      "id": "sampled",
+      "poll_interval_ms": 1,
+      "retain_progress": true
+    },
+    {
+      "id": "minimal",
+      "poll_interval_ms": 10,
+      "retain_progress": false
+    }
+  ],
+  "replay_definition": {
+    "timestamp_frequency": 10000000,
+    "first_raw_ticks": 1000000,
+    "delta_x_period": 7,
+    "delta_x_offset": -3,
+    "delta_y_period": 5,
+    "delta_y_offset": -2
+  },
+  "noise_policy": {
+    "relative_tolerance_percent": 20.0,
+    "observation_absolute_ms": 2.0,
+    "hot_path_absolute_ns": 50.0,
+    "action": "Preserve every round; flag noise or regression for investigation. This R2 baseline is not an R5 performance pass."
+  },
+  "measurement_definitions": {
+    "standalone": "Existing capture test calls the production decoded Raw Input dispatch and queue path with controlled records. Excludes GetRawInputData, hardware arrival, IPC, and app ingestion.",
+    "integrated": "Release worker replay through the production named pipes, receiver, and session owner, using only the public Backend API.",
+    "all_committed_ns": "From immediately before Start to the first public status observation of the exact complete record count. Includes replay scheduling, IPC, ingestion, status publication, and observer polling.",
+    "command_ack_ns": "Wall time around the public Backend execute call. This is software control acknowledgment time, not input or hardware latency.",
+    "progress": "Public status observations, not per-record enqueue/send/commit timestamps. Captured and sent counters may be from an older status frame.",
+    "throughput": "Complete records divided by observed all-committed wall time. Paced replay throughput, not maximum capture throughput.",
+    "wire_record_payload_bytes": "Exact fixed-record payload from record count times runtime wire width. Excludes frame headers and does not claim to count memory copies.",
+    "percentiles": "Nearest-rank percentiles across the five measured trials, not per-packet latency percentiles. P95, P99, and P99.9 may coincide with the maximum.",
+    "observer_comparison": "Sampled 1 ms and minimal 10 ms observers use identical transport and input. Their timing differences expose observer sensitivity, not exact observer overhead.",
+    "budgets": "Read current runtime constants/configuration and observed reservations; fixture contains no duplicate resource budget.",
+    "raw_input_smoke": "A real registered Raw Input window reports enumeration and observed actual packets separately. Zero packets is valid initialization evidence, not high-rate hardware verification."
+  },
+  "workloads": [
+    {
+      "id": "single-1khz",
+      "device_keys": [1],
+      "reports_per_second": 1000,
+      "records_per_device": 1000
+    },
+    {
+      "id": "dual-1khz",
+      "device_keys": [1, 2],
+      "reports_per_second": 1000,
+      "records_per_device": 1000
+    },
+    {
+      "id": "single-8khz",
+      "device_keys": [1],
+      "reports_per_second": 8000,
+      "records_per_device": 8000
+    },
+    {
+      "id": "dual-8khz",
+      "device_keys": [1, 2],
+      "reports_per_second": 8000,
+      "records_per_device": 8000
+    }
+  ]
+}

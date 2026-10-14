@@ -1,0 +1,13 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/clicksync-core",
+    "crates/clicksync-ipc",
+    "crates/clicksync-capture",
+    "crates/clicksync-app",
+    "crates/clicksync-chart",
+]
+exclude = ["vendor/gpui-0.2.2"]
+
+[patch.crates-io]
+gpui = { path = "vendor/gpui-0.2.2" }

@@ -1,0 +1,41 @@
+[package]
+name = "clicksync-capture"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.94"
+license = "Apache-2.0"
+publish = false
+
+[features]
+diagnostic-window = []
+controlled-input = []
+
+[[bin]]
+name = "clicksync-capture-diagnostic"
+path = "src/diagnostic/main.rs"
+required-features = ["diagnostic-window"]
+
+[dependencies]
+clicksync-core = { path = "../clicksync-core" }
+clicksync-ipc = { path = "../clicksync-ipc" }
+rtrb = "=0.4.0"
+serde_json = "=1.0.151"
+serde = { version = "=1.0.229", features = ["derive"] }
+windows-sys = { version = "=0.61.2", features = [
+    "Win32_Devices_DeviceAndDriverInstallation",
+    "Win32_Devices_HumanInterfaceDevice",
+    "Win32_Devices_Properties",
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Performance",
+    "Win32_System_Threading",
+    "Win32_UI_Input",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_Graphics_Gdi",
+] }
+
+[dev-dependencies]
+allocation-counter = "0.8.1"

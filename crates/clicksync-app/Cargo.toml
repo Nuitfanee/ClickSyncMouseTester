@@ -1,0 +1,52 @@
+[package]
+name = "clicksync-app"
+version = "0.8.0"
+edition = "2024"
+rust-version = "1.94"
+license = "Apache-2.0"
+publish = false
+
+[features]
+ui-restoration-probe = [
+    "dep:png",
+    "gpui/frame-timing",
+    "clicksync-capture/controlled-input",
+    "windows/Win32_UI_Input_KeyboardAndMouse",
+]
+
+[dependencies]
+clicksync-core = { path = "../clicksync-core" }
+clicksync-chart = { path = "../clicksync-chart" }
+clicksync-ipc = { path = "../clicksync-ipc" }
+clicksync-capture = { path = "../clicksync-capture" }
+gpui = { version = "=0.2.2", default-features = false, features = ["windows-manifest"] }
+serde = { version = "=1.0.229", features = ["derive", "rc"] }
+serde_json = "=1.0.151"
+png = { version = "=0.18.1", optional = true }
+raw-window-handle = "=0.6.2"
+
+[dev-dependencies]
+png = "=0.18.1"
+
+[target.'cfg(windows)'.build-dependencies]
+embed-resource = "=3.0.11"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "=0.61.3", features = [
+    "Win32_Foundation",
+    "Win32_Globalization",
+    "Win32_Graphics_Direct3D",
+    "Win32_Graphics_Direct3D11",
+    "Win32_Graphics_Dwm",
+    "Win32_Graphics_Dxgi",
+    "Win32_Graphics_Dxgi_Common",
+    "Win32_Graphics_Gdi",
+    "Win32_Storage_FileSystem",
+    "Win32_System_SystemInformation",
+    "Win32_System_Performance",
+    "Win32_System_Threading",
+    "Win32_Security",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_HiDpi",
+    "Win32_UI_Shell",
+] }
