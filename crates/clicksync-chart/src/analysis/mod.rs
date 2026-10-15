@@ -1,4 +1,5 @@
 pub mod calibration;
+pub mod detail;
 pub mod histogram;
 pub mod keys;
 pub mod polling;

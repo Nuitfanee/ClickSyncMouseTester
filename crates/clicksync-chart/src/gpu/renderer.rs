@@ -129,6 +129,10 @@ struct Generation {
     completion: ID3D11Query,
 }
 
+// Resident batches and metadata scans are work limits, not streaming buffer capacities.
+const INSTANCES_PER_DRAW: usize = 8192;
+const BLOCKS_PER_TICK: usize = 1024;
+
 #[repr(C)]
 struct Constants {
     scale: [f32; 2],
@@ -353,12 +357,19 @@ impl Renderer {
         if self.generating.is_some() {
             return self.busy();
         }
-        let bytes = spec.width as usize * spec.height as usize * 4;
         if spec.width > D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION
             || spec.height > D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION
-            || bytes > self.limits.layer_bytes
         {
-            return self.busy();
+            return Err(GpuError::LayerCapacity);
+        }
+        let bytes = spec.width as usize * spec.height as usize * 4;
+        let retained = self.displayed.as_ref().map_or(0, |layer| {
+            layer.target.width as usize * layer.target.height as usize * 4
+        });
+        if self.limits.layer_slots < 2
+            || bytes.saturating_add(bytes.max(retained)) > self.limits.layer_bytes
+        {
+            return Err(GpuError::LayerCapacity);
         }
         let available = self.layers.iter().position(|l| {
             Rc::strong_count(l) == 1 && l.width == spec.width && l.height == spec.height
@@ -479,10 +490,12 @@ impl Renderer {
         }
         self.bind(context, work);
         let mut draws = 0;
-        while draws < self.limits.draws_per_tick {
+        let mut visited = 0;
+        while draws < self.limits.draws_per_tick && visited < BLOCKS_PER_TICK {
             let Some(block) = work.scene.blocks.get(work.block) else {
                 break;
             };
+            visited += 1;
             if block.instances.is_empty() || !block.instances.intersects(block.origin, &work.spec) {
                 self.report.culled_instances += block.instances.len() as u64;
                 work.block += 1;
@@ -505,7 +518,7 @@ impl Renderer {
             let (buffer, count, offset, slot) = if let Some(buffer) = resident {
                 (
                     buffer,
-                    visible.len(),
+                    visible.len().min(INSTANCES_PER_DRAW),
                     (visible.start * size_of::<Instance>()) as u32,
                     None,
                 )

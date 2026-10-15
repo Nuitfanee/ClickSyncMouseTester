@@ -17,6 +17,7 @@ struct BlockIndex {
     geometry: Arc<GeometryBlock>,
     order: Vec<usize>,
     nodes: Vec<Node>,
+    ordered_x: bool,
 }
 
 impl BlockIndex {
@@ -32,6 +33,7 @@ impl BlockIndex {
             order: (0..geometry.samples.len()).collect(),
             geometry,
             nodes: Vec::with_capacity(nodes),
+            ordered_x: false,
         };
         // Ordered X partitions need no permutation. The spatial Y partitions
         // must remain available for tall data and anisotropic hover queries.
@@ -40,6 +42,7 @@ impl BlockIndex {
             .relative_points
             .windows(2)
             .all(|p| p[0][0].total_cmp(&p[1][0]).is_le());
+        index.ordered_x = ordered;
         index.build(0..index.order.len(), ordered);
         index
     }
@@ -224,6 +227,11 @@ impl HitIndex {
         }
         best.map(|(_, sample)| sample)
     }
+
+    /// Matches the geometry order supplied to `prepare`; reused blocks keep this fact.
+    pub fn is_x_ordered(&self, block: usize) -> bool {
+        self.blocks.get(block).is_some_and(|block| block.ordered_x)
+    }
 }
 
 #[cfg(test)]
@@ -251,11 +259,20 @@ mod tests {
         let mut geometry = GeometryStore::new(257);
         geometry.replace_from(0, samples.iter().copied(), 1);
         let hit = HitIndex::prepare(geometry.blocks(), None);
-        for block in &hit.blocks {
+        for (index, block) in hit.blocks.iter().enumerate() {
+            assert_eq!(
+                hit.is_x_ordered(index),
+                block
+                    .geometry
+                    .relative_points
+                    .windows(2)
+                    .all(|p| p[0][0].total_cmp(&p[1][0]).is_le())
+            );
             let mut spatial = BlockIndex {
                 geometry: block.geometry.clone(),
                 order: (0..block.geometry.samples.len()).collect(),
                 nodes: Vec::new(),
+                ordered_x: false,
             };
             spatial.build(0..spatial.order.len(), false);
             assert_eq!(block.nodes.len(), spatial.nodes.len());
@@ -281,6 +298,9 @@ mod tests {
             }
         }
         let reused = HitIndex::prepare(geometry.blocks(), Some(&hit));
+        for index in 0..geometry.blocks().len() {
+            assert_eq!(hit.is_x_ordered(index), reused.is_x_ordered(index));
+        }
         assert!(
             reused
                 .blocks

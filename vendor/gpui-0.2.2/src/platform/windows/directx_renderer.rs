@@ -1,5 +1,6 @@
 use std::{
     mem::ManuallyDrop,
+    os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle},
     sync::{Arc, OnceLock},
 };
 
@@ -7,7 +8,8 @@ use ::util::ResultExt;
 use anyhow::{Context, Result};
 use windows::{
     Win32::{
-        Foundation::HWND,
+        Foundation::{HANDLE, HWND, WAIT_OBJECT_0, WAIT_TIMEOUT},
+        System::Threading::WaitForSingleObject,
         Graphics::{
             Direct3D::*,
             Direct3D11::*,
@@ -53,6 +55,53 @@ pub(crate) struct DirectXRenderer {
     external_context_state: ID3DDeviceContextState,
     frame_capture_requested: bool,
     frame_capture: Option<(ID3D11Texture2D, ID3D11Query, u32, u32)>,
+    presentation: PresentationState,
+    frame_admitted: bool,
+}
+
+#[derive(Default)]
+struct PresentationState {
+    completed: u64,
+    pending: bool,
+}
+
+impl PresentationState {
+    fn finish(&mut self, result: windows::core::HRESULT) -> Result<()> {
+        self.pending = result == DXGI_ERROR_WAS_STILL_DRAWING;
+        if self.pending {
+            return Ok(());
+        }
+        result.ok().context("Presenting swap chain failed")?;
+        // An occluded swap chain did not submit a visible frame.
+        if result == windows::core::HRESULT(0) {
+            self.completed += 1;
+        }
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod presentation_tests {
+    use super::{
+        PresentationState, DXGI_ERROR_WAS_STILL_DRAWING, DXGI_ERROR_DEVICE_REMOVED,
+    };
+    use windows::Win32::Foundation::DXGI_STATUS_OCCLUDED;
+
+    #[test]
+    fn presentation_backpressure_retries_without_claiming_a_submitted_frame() {
+        let mut state = PresentationState::default();
+        for _ in 0..100 {
+            state.finish(DXGI_ERROR_WAS_STILL_DRAWING).unwrap();
+            assert!(state.pending);
+            assert_eq!(state.completed, 0);
+        }
+        state.finish(windows::core::HRESULT(0)).unwrap();
+        assert!(!state.pending);
+        assert_eq!(state.completed, 1);
+        state.finish(DXGI_STATUS_OCCLUDED).unwrap();
+        assert_eq!(state.completed, 1);
+        assert!(state.finish(DXGI_ERROR_DEVICE_REMOVED).is_err());
+    }
 }
 
 /// Direct3D objects
@@ -68,6 +117,7 @@ pub(crate) struct DirectXRendererDevices {
 struct DirectXResources {
     // Direct3D rendering objects
     swap_chain: IDXGISwapChain1,
+    frame_latency: OwnedHandle,
     render_target: ManuallyDrop<ID3D11Texture2D>,
     render_target_view: [Option<ID3D11RenderTargetView>; 1],
 
@@ -179,6 +229,8 @@ impl DirectXRenderer {
             external_context_state,
             frame_capture_requested: false,
             frame_capture: None,
+            presentation: PresentationState::default(),
+            frame_admitted: false,
         })
     }
 
@@ -308,8 +360,18 @@ impl DirectXRenderer {
 
     #[inline]
     fn present(&mut self) -> Result<()> {
-        let result = unsafe { self.resources.swap_chain.Present(0, DXGI_PRESENT(0)) };
-        result.ok().context("Presenting swap chain failed")
+        let result = unsafe { self.resources.swap_chain.Present(0, DXGI_PRESENT_DO_NOT_WAIT) };
+        self.presentation.finish(result)?;
+        self.frame_admitted = self.presentation.pending;
+        Ok(())
+    }
+
+    pub(crate) fn presentation_count(&self) -> u64 {
+        self.presentation.completed
+    }
+
+    pub(crate) fn presentation_pending(&self) -> bool {
+        self.presentation.pending
     }
 
     pub(crate) fn handle_device_lost(&mut self, directx_devices: &DirectXDevices) {
@@ -378,6 +440,8 @@ impl DirectXRenderer {
             .handle_device_lost(&devices.device, &devices.device_context);
         self.devices = devices;
         self.resources = resources;
+        self.frame_admitted = false;
+        self.presentation.pending = true;
         self.globals = globals;
         self.pipelines = pipelines;
         self.direct_composition = direct_composition;
@@ -393,6 +457,14 @@ impl DirectXRenderer {
     }
 
     pub(crate) fn draw(&mut self, scene: &Scene) -> Result<()> {
+        self.presentation.pending = true;
+        if !self.frame_admitted {
+            match unsafe { WaitForSingleObject(HANDLE(self.resources.frame_latency.as_raw_handle()), 0) } {
+                WAIT_OBJECT_0 => self.frame_admitted = true,
+                WAIT_TIMEOUT => return Ok(()),
+                _ => anyhow::bail!("swap-chain frame admission failed"),
+            }
+        }
         self.pre_draw()?;
         for batch in scene.batches() {
             match batch {
@@ -433,6 +505,7 @@ impl DirectXRenderer {
         }
         self.resources.width = width;
         self.resources.height = height;
+        self.frame_admitted = false;
 
         // Clear the render target before resizing
         unsafe { self.devices.device_context.OMSetRenderTargets(None, None) };
@@ -451,7 +524,7 @@ impl DirectXRenderer {
                     width,
                     height,
                     RENDER_TARGET_FORMAT,
-                    DXGI_SWAP_CHAIN_FLAG(0),
+                    DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT,
                 )
                 .context("Failed to resize swap chain")?;
         }
@@ -813,6 +886,11 @@ impl DirectXResources {
                 height,
             )?
         };
+        let latency_chain: IDXGISwapChain2 = swap_chain.cast()?;
+        unsafe { latency_chain.SetMaximumFrameLatency(1)? };
+        let latency_handle = unsafe { latency_chain.GetFrameLatencyWaitableObject() };
+        anyhow::ensure!(!latency_handle.is_invalid(), "swap-chain frame admission handle missing");
+        let frame_latency = unsafe { OwnedHandle::from_raw_handle(latency_handle.0) };
 
         let (
             render_target,
@@ -827,6 +905,7 @@ impl DirectXResources {
 
         Ok(ManuallyDrop::new(Self {
             swap_chain,
+            frame_latency,
             render_target,
             render_target_view,
             path_intermediate_texture,
@@ -1226,7 +1305,7 @@ fn create_swap_chain_for_composition(
         Scaling: DXGI_SCALING_STRETCH,
         SwapEffect: DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,
         AlphaMode: DXGI_ALPHA_MODE_PREMULTIPLIED,
-        Flags: 0,
+        Flags: DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT.0 as u32,
     };
     Ok(unsafe { dxgi_factory.CreateSwapChainForComposition(device, &desc, None)? })
 }
@@ -1254,7 +1333,7 @@ fn create_swap_chain(
         Scaling: DXGI_SCALING_NONE,
         SwapEffect: DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,
         AlphaMode: DXGI_ALPHA_MODE_IGNORE,
-        Flags: 0,
+        Flags: DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT.0 as u32,
     };
     let swap_chain =
         unsafe { dxgi_factory.CreateSwapChainForHwnd(device, hwnd, &desc, None, None) }?;

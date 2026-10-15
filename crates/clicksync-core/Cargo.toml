@@ -3,7 +3,7 @@ name = "clicksync-core"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.94"
-license = "Apache-2.0"
+license = "MIT"
 publish = false
 
 [dependencies]

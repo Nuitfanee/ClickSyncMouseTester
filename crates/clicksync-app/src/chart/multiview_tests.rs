@@ -180,8 +180,10 @@ fn replacing_and_removing_a_view_rejects_its_late_result_and_preserves_other_rec
 #[test]
 fn fixed_statistics_match_exact_query_and_follow_range_changes() {
     use crate::product::performance_analysis::{PlotAnalysis, PlotOptions, filter_query};
+    use clicksync_chart::analysis::detail::{StatisticKind, StatisticValue};
     let (mut session, prefix) = input(1024, CapturePhase::Paused);
     let mut trial = trial::CooperativeTrial::default();
+    let mut previous = None;
     for (id, range, stems) in [
         (1, None, false),
         (2, Some((12.0, 42.0)), false),
@@ -206,20 +208,53 @@ fn fixed_statistics_match_exact_query_and_follow_range_changes() {
             result.request.parameters.time_basis,
             prefix.datasets[0].1.timestamp_frequency(),
         );
-        let expected =
-            clicksync_chart::analysis::statistics::summarize(&query, &result.request.parameters)
-                .unwrap();
-        let actual = result.datasets[0].distribution.as_ref().unwrap();
-        assert_eq!(
-            serde_json::to_value(actual).unwrap(),
-            serde_json::to_value(expected).unwrap()
-        );
+        let actual = result.datasets[0].statistics.as_ref().unwrap();
+        assert_eq!(actual.sample_count, query.samples.len());
+        assert_eq!(actual.rows.len(), 5);
+        for axis in [Axis::X, Axis::Y] {
+            let (sum, peak) = query
+                .records
+                .iter()
+                .map(|event| {
+                    f64::from(if axis == Axis::X {
+                        event.delta_x
+                    } else {
+                        event.delta_y
+                    })
+                    .abs()
+                })
+                .fold((0.0, 0.0_f64), |(sum, peak), value| {
+                    (sum + value, peak.max(value))
+                });
+            for (kind, number) in [
+                (
+                    StatisticKind::MeanAbsolute,
+                    sum / query.records.len() as f64,
+                ),
+                (StatisticKind::PeakAbsolute, peak),
+            ] {
+                assert_eq!(
+                    actual
+                        .rows
+                        .iter()
+                        .find(|row| row.kind == kind && row.axis == Some(axis))
+                        .unwrap()
+                        .value,
+                    Some(StatisticValue::Scalar(number)),
+                );
+            }
+        }
         if id == 3 {
             assert_eq!(result.datasets[0].work.new_record_reads, 0);
+            assert!(
+                Arc::ptr_eq(previous.as_ref().unwrap(), actual),
+                "style-only changes reuse the semantic summary"
+            );
         }
+        previous = Some(actual.clone());
     }
     session.begin_collecting(1_300_000, false, false).unwrap();
-    let live = request(
+    let mut live = request(
         3,
         Arc::new(SessionPrefix {
             phase: CapturePhase::Collecting,
@@ -228,9 +263,10 @@ fn fixed_statistics_match_exact_query_and_follow_range_changes() {
         }),
         4,
     );
+    live.analysis = Some(PlotAnalysis::default());
     trial.submit(3, live).unwrap();
     let result = (0..100)
         .find_map(|_| trial.step().unwrap().map(|(_, result)| result))
         .unwrap();
-    assert!(result.datasets[0].distribution.is_none());
+    assert!(result.datasets[0].statistics.is_none());
 }

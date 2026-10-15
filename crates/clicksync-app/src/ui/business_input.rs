@@ -24,8 +24,10 @@ impl GpuiHost {
         self.sensitivity_reset += 1;
         self.domain_frame = None;
         self.business_input.bindings[slot] = None;
+        self.business_input.binding_slot = None;
         self.business_input.first = None;
         self.business_input.issue = None;
+        self.sensitivity.binding_issues[slot] = None;
         self.sensitivity.disconnected[slot] = false;
         self.selected = self
             .business_input
@@ -47,7 +49,10 @@ impl GpuiHost {
             Some(Duration::from_secs(10)),
         ) {
             Ok(_) => self.business_input.binding_slot = Some(slot),
-            Err(error) => self.control_error = Some(error),
+            Err(error) => {
+                self.sensitivity.binding_issues[slot] =
+                    Some(sensitivity::BindingIssue::Error(error));
+            }
         }
     }
     pub(super) fn begin_calibration_motion(&mut self) {
@@ -98,6 +103,7 @@ impl GpuiHost {
                         && let Some(slot) = self.business_input.binding_slot.take()
                     {
                         self.business_input.bindings[slot] = Some(candidate.device_key);
+                        self.sensitivity.binding_issues[slot] = None;
                         self.sensitivity.disconnected[slot] = false;
                         self.selected = self
                             .business_input
@@ -111,14 +117,25 @@ impl GpuiHost {
                 }
                 Ok(issue) => {
                     self.business_input.issue = Some(issue);
-                    self.business_input.binding_slot = None;
+                    if let Some(slot) = self.business_input.binding_slot.take()
+                        && self.page == Page::Sensitivity
+                    {
+                        self.sensitivity.binding_issues[slot] =
+                            Some(sensitivity::BindingIssue::Motion(issue));
+                    }
                     if self.page == Page::Calibration {
                         self.capture_command("pause");
                     }
                 }
                 Err(error) => {
-                    self.control_error = Some(error);
-                    self.business_input.binding_slot = None;
+                    if let Some(slot) = self.business_input.binding_slot.take()
+                        && self.page == Page::Sensitivity
+                    {
+                        self.sensitivity.binding_issues[slot] =
+                            Some(sensitivity::BindingIssue::Error(error));
+                    } else {
+                        self.control_error = Some(error);
+                    }
                     self.lock.release();
                 }
             }

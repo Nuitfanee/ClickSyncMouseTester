@@ -1,6 +1,7 @@
 use crate::backend::{Backend, CapturePhase, SessionPrefix};
 mod bounds;
-pub use bounds::BoundsWork;
+pub use bounds::{BoundsWork, ValueBand};
+pub mod gaps;
 mod link;
 pub use link::LinkedResult;
 pub(crate) use link::histogram_bin;
@@ -86,11 +87,25 @@ pub struct DatasetChart {
     pub histogram: Vec<clicksync_chart::analysis::histogram::HistogramBin>,
     pub plot_origin: clicksync_chart::Point,
     pub plot_bounds: [f64; 4],
-    pub interval_band: Option<[f64; 3]>,
+    pub value_band: Option<ValueBand>,
+    follow_band: Option<(f64, Option<ValueBand>)>,
     pub bounds_work: BoundsWork,
-    pub gaps: Vec<[f64; 2]>,
-    pub distribution: Option<clicksync_chart::analysis::statistics::Distribution>,
+    pub gaps: Option<Arc<gaps::GapIndex>>,
+    pub statistics: Option<Arc<clicksync_chart::analysis::detail::DetailStatistics>>,
+    pub histogram_statistics: Option<clicksync_chart::analysis::detail::HistogramStatistics>,
     link_index: Option<Arc<link::LinkIndex>>,
+}
+
+impl DatasetChart {
+    pub(crate) fn value_band_for(&self, mode: ViewMode) -> Option<ValueBand> {
+        if let ViewMode::Follow { window_ms } = mode
+            && let Some((cached_window, band)) = self.follow_band
+            && cached_window == window_ms
+        {
+            return band;
+        }
+        self.value_band
+    }
 }
 
 pub struct ChartResult {
@@ -172,6 +187,13 @@ impl ChartResult {
         self.workspace_viewport_for(device_key, ViewMode::FullSession, false)
     }
 
+    pub(crate) fn focus_workspace_viewport(
+        &self,
+        device_key: u32,
+    ) -> Result<clicksync_chart::gpu::Viewport, String> {
+        self.workspace_viewport_for(device_key, ViewMode::FullSession, true)
+    }
+
     fn workspace_viewport_for(
         &self,
         device_key: u32,
@@ -192,28 +214,83 @@ impl ChartResult {
         if self.request.kind == PlotKind::Trajectory {
             return Ok(viewport);
         }
+        if focus && self.request.kind != PlotKind::Histogram && mode == ViewMode::FullSession {
+            let start = self
+                .request
+                .analysis
+                .as_ref()
+                .and_then(|analysis| analysis.range)
+                .map_or(0.0, |range| range.0);
+            // Use unpadded extents so a short recording keeps its complete time range.
+            if self.datasets.iter().any(|dataset| {
+                !dataset.geometry.is_empty()
+                    && dataset.plot_origin.x.value() + dataset.plot_bounds[1] - start > 1000.0
+            }) {
+                viewport.origin.x = shifted(
+                    viewport.origin.x,
+                    clicksync_chart::Coordinate::Scalar(start).relative_to(viewport.origin.x),
+                );
+                viewport.width = 1000.0;
+            }
+        }
         if focus
             && self.request.kind != PlotKind::Histogram
             && self
                 .datasets
                 .iter()
                 .filter(|dataset| !dataset.geometry.is_empty())
-                .all(|dataset| dataset.interval_band.is_some())
+                .all(|dataset| dataset.value_band_for(mode).is_some())
         {
+            use clicksync_chart::{Coordinate, Metric};
+            let origin = self
+                .datasets
+                .iter()
+                .find(|d| d.device_key == device_key)
+                .unwrap()
+                .plot_origin
+                .y;
+            let metric = self.request.parameters.metric;
+            let nonnegative = matches!(
+                metric,
+                Metric::Interval
+                    | Metric::IntervalTrend
+                    | Metric::RawFrequency
+                    | Metric::Frequency
+                    | Metric::DeltaMagnitude
+                    | Metric::PathLength
+                    | Metric::VelocityMagnitude
+                    | Metric::PathSpeed
+            );
+            let floor = match metric {
+                Metric::Interval | Metric::IntervalTrend => 0.002,
+                Metric::Velocity(_) | Metric::VelocityMagnitude | Metric::PathSpeed => 0.01,
+                _ => 2.0,
+            };
             let mut band: Option<[f64; 2]> = None;
             for values in self
                 .datasets
                 .iter()
-                .filter_map(|dataset| dataset.interval_band)
+                .filter_map(|dataset| dataset.value_band_for(mode))
             {
-                let padding = (values[2] - values[0]).max(values[1] * 0.2).max(0.002) * 0.15;
-                let low = (values[0] - padding).max(0.0);
-                let high = values[2] + padding;
+                let [low, median, high] = values.quantiles;
+                let offset = values.origin.relative_to(origin);
+                let magnitude = if matches!(metric, Metric::Interval | Metric::IntervalTrend) {
+                    (values.origin.value() + median).abs() * 0.2
+                } else {
+                    0.0
+                };
+                let padding = (high - low).max(magnitude).max(floor) * 0.15;
+                let low = if nonnegative {
+                    (offset + low - padding).max(Coordinate::Scalar(0.0).relative_to(origin))
+                } else {
+                    offset + low - padding
+                };
+                let high = offset + high + padding;
                 band = Some(band.map_or([low, high], |old| [old[0].min(low), old[1].max(high)]));
             }
             if let Some([low, high]) = band {
-                viewport.origin.y = clicksync_chart::Coordinate::Scalar(low);
-                viewport.height = high - low;
+                (viewport.origin.y, viewport.height) =
+                    padded_axis(origin, low, high, high - low, 0.0);
                 return Ok(viewport);
             }
         }
@@ -401,6 +478,8 @@ impl ChartWorker {
                 let mut scheduler = trial::CooperativeTrial::with_budget(budget);
                 let mut revisions = [0; trial::MAX_DEMANDS];
                 while !cancelled.load(Ordering::Acquire) {
+                    let mut retired: [Option<trial::Demand>; trial::MAX_DEMANDS] =
+                        std::array::from_fn(|_| None);
                     {
                         let (lock, wake) = &*mailbox;
                         let mut state = lock.lock().expect("chart mailbox");
@@ -426,7 +505,8 @@ impl ChartWorker {
                                     .expect("validated chart quota");
                             }
                             if revisions[slot] != demand.revision {
-                                scheduler.remove(slot).expect("valid chart slot");
+                                retired[slot] =
+                                    Some(scheduler.retire(slot).expect("valid chart slot"));
                                 revisions[slot] = demand.revision;
                             }
                             if slot == next_slot
@@ -438,6 +518,8 @@ impl ChartWorker {
                         state.report.active_requests = usize::from(!scheduler.is_idle());
                         state.report.pending_requests = scheduler.pending_count();
                     }
+                    // Large history caches must never be freed while UI poll waits on this lock.
+                    drop(retired);
                     let completion = scheduler.step_completion(&cancelled);
                     let mut state = mailbox.0.lock().expect("chart mailbox");
                     state.report.active_requests = 0;
@@ -686,6 +768,7 @@ struct EngineCache {
     bounds: std::collections::HashMap<u32, bounds::BoundsCache>,
     analysis_scenes: std::collections::HashMap<u32, AnalysisCache>,
     statistics: std::collections::HashMap<u32, CachedStatistics>,
+    gaps: std::collections::HashMap<u32, CachedGaps>,
     scene_leases: std::collections::HashMap<usize, SceneBlockLease>,
     leased_analysis: Option<Option<crate::product::performance_analysis::PlotAnalysis>>,
     managed: Vec<Arc<clicksync_core::BudgetReservation>>,
@@ -695,7 +778,13 @@ struct EngineCache {
 struct CachedStatistics {
     version: clicksync_chart::DataVersion,
     range: Option<(f64, f64)>,
-    distribution: Option<clicksync_chart::analysis::statistics::Distribution>,
+    summary: Arc<clicksync_chart::analysis::detail::DetailStatistics>,
+}
+
+struct CachedGaps {
+    version: clicksync_chart::DataVersion,
+    range: Option<(f64, f64)>,
+    index: Arc<gaps::GapIndex>,
 }
 
 struct SceneBlockLease {
@@ -758,6 +847,7 @@ impl EngineCache {
         request: ChartRequest,
         cancelled: &AtomicBool,
         mailbox: &Arc<(Mutex<Mailbox>, Condvar)>,
+        byte_budget: Option<&Arc<clicksync_core::SharedByteBudget>>,
     ) -> Result<ChartResult, String> {
         let identity = (
             request.source_version,
@@ -774,7 +864,15 @@ impl EngineCache {
             self.bounds.clear();
             self.analysis_scenes.clear();
             self.statistics.clear();
+            self.gaps.clear();
             self.identity = Some(identity);
+        }
+        let frozen = matches!(
+            request.prefix.phase,
+            CapturePhase::Paused | CapturePhase::Stopped | CapturePhase::Faulted
+        );
+        if !frozen {
+            self.gaps.clear();
         }
         let valid = || {
             !cancelled.load(Ordering::Acquire)
@@ -870,11 +968,7 @@ impl EngineCache {
                 geometry.extend(secondary.geometry().blocks().iter().cloned());
                 scene.blocks.extend(cached.scene(request.kind, 1 << 16)?);
             }
-            let distribution = if request.analysis.is_some()
-                && matches!(
-                    request.prefix.phase,
-                    CapturePhase::Paused | CapturePhase::Stopped | CapturePhase::Faulted
-                ) {
+            let statistics = if request.analysis.is_some() && frozen {
                 let range = request
                     .analysis
                     .as_ref()
@@ -885,55 +979,17 @@ impl EngineCache {
                     .get(key)
                     .is_none_or(|cached| cached.version != version || cached.range != range)
                 {
-                    let selected = |sample: &clicksync_chart::Sample| {
-                        range.is_none_or(|(start, end)| {
-                            crate::product::performance_analysis::time_ms(
-                                snapshot,
-                                sample.source_index,
-                                request.parameters.time_basis
-                                    == clicksync_chart::TimeBasis::Logical,
-                            )
-                            .is_some_and(|time| time >= start && time <= end)
-                        })
-                    };
-                    let primary = engine.geometry().samples().filter(selected);
-                    let distribution = if matches!(
-                        request.parameters.metric,
-                        clicksync_chart::Metric::Velocity(_)
-                            | clicksync_chart::Metric::VelocityMagnitude
-                            | clicksync_chart::Metric::PathSpeed
-                    ) && request.secondary_metric.is_some()
-                    {
-                        let secondary = &self
-                            .secondary
+                    let secondary = request.secondary_metric.and_then(|_| {
+                        self.secondary
                             .iter()
                             .find(|(id, _)| id == key)
-                            .expect("prepared secondary")
-                            .1
-                            .engine;
-                        clicksync_chart::analysis::statistics::distribution(
-                            primary
-                                .zip(secondary.geometry().samples().filter(selected))
-                                .map(|(a, b)| a.point.y.value().hypot(b.point.y.value())),
-                        )
-                    } else {
-                        clicksync_chart::analysis::statistics::distribution_with_dispersion(
-                            primary.map(|sample| {
-                                let value = sample.point.y.value();
-                                if matches!(
-                                    request.parameters.metric,
-                                    clicksync_chart::Metric::Velocity(_)
-                                        | clicksync_chart::Metric::VelocityMagnitude
-                                        | clicksync_chart::Metric::PathSpeed
-                                ) {
-                                    value.abs()
-                                } else {
-                                    value
-                                }
-                            }),
-                            request.parameters.metric != clicksync_chart::Metric::Frequency,
-                        )
-                    };
+                            .map(|(_, cached)| &cached.engine)
+                    });
+                    let summary = Arc::new(
+                        clicksync_chart::analysis::detail::DetailStatistics::compute(
+                            prefix, engine, secondary, range,
+                        ),
+                    );
                     if !valid() {
                         return Err("chart target superseded".into());
                     }
@@ -942,13 +998,13 @@ impl EngineCache {
                         CachedStatistics {
                             version,
                             range,
-                            distribution,
+                            summary,
                         },
                     );
                 }
                 self.statistics
                     .get(key)
-                    .and_then(|cached| cached.distribution.clone())
+                    .map(|cached| cached.summary.clone())
             } else {
                 None
             };
@@ -971,10 +1027,12 @@ impl EngineCache {
                     y: clicksync_chart::Coordinate::Scalar(0.0),
                 },
                 plot_bounds: [0.0; 4],
-                interval_band: None,
+                value_band: None,
+                follow_band: None,
                 bounds_work: BoundsWork::default(),
-                gaps: Vec::new(),
-                distribution,
+                gaps: None,
+                statistics,
+                histogram_statistics: None,
                 link_index: None,
             });
         }
@@ -1027,7 +1085,8 @@ impl EngineCache {
                     ));
                     cache.hit = Some(dataset.hit_index.clone());
                 }
-                if analysis.options.gaps
+                if frozen
+                    && analysis.options.gaps
                     && analysis
                         .options
                         .gap_dataset
@@ -1035,11 +1094,43 @@ impl EngineCache {
                     && request.kind != PlotKind::Histogram
                     && request.kind != PlotKind::Trajectory
                 {
-                    dataset.gaps = crate::product::performance_analysis::report_gaps(
-                        &snapshot,
-                        request.parameters.time_basis,
-                        analysis.range,
-                    );
+                    let version =
+                        fixed(dataset.device_key, &snapshot, request.prefix.complete).version();
+                    if self.gaps.get(&dataset.device_key).is_none_or(|cached| {
+                        cached.version != version || cached.range != analysis.range
+                    }) {
+                        // The shared index owns its lease, including while retained by a cache.
+                        self.gaps.remove(&dataset.device_key);
+                        let bytes = snapshot
+                            .event_count()
+                            .checked_mul(64)
+                            .ok_or("gap capacity overflow")?;
+                        let reservation = byte_budget
+                            .map(|budget| budget.try_reserve(bytes))
+                            .transpose()
+                            .map_err(|error| error.to_string())?;
+                        let marked = crate::product::performance_analysis::report_gaps(
+                            &snapshot,
+                            request.parameters.time_basis,
+                            analysis.range,
+                        );
+                        let index = Arc::new(gaps::GapIndex::new(marked, reservation));
+                        if !valid() {
+                            return Err("chart target superseded".into());
+                        }
+                        self.gaps.insert(
+                            dataset.device_key,
+                            CachedGaps {
+                                version,
+                                range: analysis.range,
+                                index,
+                            },
+                        );
+                    }
+                    dataset.gaps = self
+                        .gaps
+                        .get(&dataset.device_key)
+                        .map(|cached| cached.index.clone());
                 }
                 for (side, metric) in request.trend_metrics().enumerate() {
                     let (_, cached) = self
@@ -1128,25 +1219,42 @@ impl EngineCache {
                 .or_default()
                 .measure(&dataset.scene, &valid)?;
         }
-        if matches!(
-            request.parameters.metric,
-            clicksync_chart::Metric::Interval | clicksync_chart::Metric::IntervalTrend
-        ) && request.kind != PlotKind::Histogram
-        {
-            for dataset in &mut datasets {
-                dataset.interval_band = bounds::interval_band(&dataset.geometry);
-            }
-        }
-        if request.analysis.is_some()
-            && matches!(
-                request.prefix.phase,
-                CapturePhase::Paused | CapturePhase::Stopped | CapturePhase::Faulted
-            )
-        {
+        if !matches!(request.kind, PlotKind::Histogram | PlotKind::Trajectory) {
+            let window = if let ViewMode::Follow { window_ms } = request.view {
+                let origin = datasets.first().map(|d| d.plot_origin.x);
+                origin.map(|origin| {
+                    let end = datasets.iter().fold(0.0_f64, |end, d| {
+                        end.max(d.plot_origin.x.relative_to(origin) + d.plot_bounds[1])
+                    });
+                    let start = shifted(origin, end - window_ms);
+                    (start, origin.relative_to(start) + end)
+                })
+            } else {
+                None
+            };
             for dataset in &mut datasets {
                 if !valid() {
                     return Err("chart target superseded".into());
                 }
+                let ordered = |index| dataset.hit_index.is_x_ordered(index);
+                dataset.value_band = bounds::value_band(&dataset.geometry, None, ordered);
+                if let ViewMode::Follow { window_ms } = request.view {
+                    dataset.follow_band = Some((
+                        window_ms,
+                        bounds::value_band(&dataset.geometry, window, ordered),
+                    ));
+                }
+            }
+        }
+        if request.analysis.is_some() && frozen {
+            for dataset in &mut datasets {
+                if !valid() {
+                    return Err("chart target superseded".into());
+                }
+                dataset.histogram_statistics =
+                    clicksync_chart::analysis::detail::HistogramStatistics::compute(
+                        &dataset.histogram,
+                    );
                 let snapshot = &request
                     .prefix
                     .datasets

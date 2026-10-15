@@ -10,11 +10,54 @@ pub(super) enum Step {
     Measure,
 }
 
+#[derive(Debug)]
+pub(super) enum BindingIssue {
+    Motion(clicksync_capture::observation::MotionResult),
+    Error(String),
+}
+
+impl BindingIssue {
+    fn text(&self, english: bool, other_bound: bool) -> &str {
+        use clicksync_capture::observation::MotionResult;
+        let (chinese, english_text) = match self {
+            Self::Error(error) if error == "no eligible motion device" => {
+                if other_bound {
+                    (
+                        "未检测到另一只鼠标，请连接后重试",
+                        "No other mouse found. Connect another mouse and retry.",
+                    )
+                } else {
+                    (
+                        "未检测到可绑定的鼠标，请连接后重试",
+                        "No mouse found. Connect a mouse and retry.",
+                    )
+                }
+            }
+            Self::Error(error) => return error,
+            Self::Motion(MotionResult::TimedOut) => (
+                "未检测到鼠标移动，请点击重试",
+                "No movement detected. Click Retry to bind.",
+            ),
+            Self::Motion(MotionResult::DeviceRemoved) => (
+                "鼠标已断开，请连接后重试",
+                "Mouse disconnected. Reconnect it and retry.",
+            ),
+            Self::Motion(MotionResult::Revoked) => (
+                "绑定已取消，请点击重试",
+                "Binding cancelled. Click Retry to bind.",
+            ),
+            Self::Motion(MotionResult::Selected(_)) => return "",
+        };
+        if english { english_text } else { chinese }
+    }
+}
+
 pub(super) struct SensitivityPage {
     pub step: Step,
     pub target_dpi: String,
     pub editor: Option<gpui::Entity<editor::TextInput>>,
     pub binding_focus: Vec<gpui::FocusHandle>,
+    pub binding_issues: [Option<BindingIssue>; 2],
     binding_hover: Option<usize>,
     pub disconnected: [bool; 2],
     pub expired: bool,
@@ -35,6 +78,7 @@ impl Default for SensitivityPage {
             target_dpi: String::new(),
             editor: None,
             binding_focus: Vec::new(),
+            binding_issues: [None, None],
             binding_hover: None,
             disconnected: [false; 2],
             expired: false,
@@ -133,16 +177,16 @@ fn disconnected_hint(disconnected: [bool; 2], english: bool) -> Option<&'static 
     let (chinese, english_text) = match disconnected {
         [false, false] => return None,
         [true, false] => (
-            "被复制鼠标已断开，请重新绑定。",
-            "The reference mouse disconnected. Bind it again.",
+            "被复制鼠标需要重新绑定。",
+            "Bind the reference mouse again.",
         ),
         [false, true] => (
-            "目标鼠标已断开，请重新绑定并填写当前 DPI。",
-            "The target mouse disconnected. Bind it again and enter its current DPI.",
+            "请重新绑定目标鼠标，并填写当前 DPI。",
+            "Bind the target mouse again and enter its current DPI.",
         ),
         [true, true] => (
-            "两只鼠标均已断开，请重新绑定并填写目标鼠标当前 DPI。",
-            "Both mice disconnected. Bind them again and enter the target mouse's current DPI.",
+            "请重新绑定两只鼠标，并填写目标鼠标当前 DPI。",
+            "Bind both mice again and enter the target mouse's current DPI.",
         ),
     };
     Some(if english { english_text } else { chinese })
@@ -368,6 +412,7 @@ impl GpuiHost {
             self.business_input.bindings[slot] = None;
             self.business_input.binding_slot = None;
             self.business_input.issue = None;
+            self.sensitivity.binding_issues[slot] = None;
             self.selected = self
                 .business_input
                 .bindings
@@ -418,6 +463,7 @@ impl GpuiHost {
             {
                 self.business_input.bindings[side] = None;
                 self.sensitivity.disconnected[side] = true;
+                self.sensitivity.binding_issues[side] = None;
                 if side == 1 {
                     self.sensitivity.target_dpi.clear();
                     if let Some(editor) = &self.sensitivity.editor {
@@ -549,9 +595,15 @@ impl GpuiHost {
         };
         let group: SharedString = format!("sensitivity-bind-{side}").into();
         let text = if pending {
-            self.text("等待运动…", "Waiting…")
+            if self.runtime.borrow().pending_action() == Some("observe") {
+                self.text("正在检测…", "Checking…")
+            } else {
+                self.text("等待移动…", "Waiting…")
+            }
         } else if bound {
             self.text("解除绑定", "Unbind")
+        } else if self.sensitivity.binding_issues[side].is_some() {
+            self.text("重试绑定", "Retry")
         } else if self.sensitivity.disconnected[side] {
             self.text("重新绑定", "Rebind")
         } else {
@@ -671,6 +723,42 @@ impl GpuiHost {
             self.sensitivity.copied = true;
         }
     }
+    pub(super) fn sensitivity_binding_hint(&self, side: usize) -> &str {
+        if self.business_input.binding_slot == Some(side) {
+            return if self.runtime.borrow().pending_action() == Some("observe") {
+                self.text("正在检测可用鼠标…", "Checking available mice…")
+            } else if side == 0 {
+                self.text(
+                    "请只移动被复制鼠标，自动完成绑定",
+                    "Move only the reference mouse to bind it.",
+                )
+            } else {
+                self.text(
+                    "请只移动目标鼠标，自动完成绑定",
+                    "Move only the target mouse to bind it.",
+                )
+            };
+        }
+        if let Some(issue) = &self.sensitivity.binding_issues[side] {
+            return issue.text(
+                self.settings.english,
+                self.business_input.bindings[1 - side].is_some(),
+            );
+        }
+        if self.sensitivity.disconnected[side] {
+            return self.text(
+                "连接鼠标后，点击重新绑定并移动这只鼠标",
+                "Connect the mouse, then click Rebind and move it.",
+            );
+        }
+        if self.business_input.bindings[side].is_none() {
+            return self.text(
+                "点击绑定，再移动这只鼠标",
+                "Click Bind, then move this mouse.",
+            );
+        }
+        ""
+    }
     fn sensitivity_size(&self, window: &Window) -> (f32, f32) {
         (
             f32::from(window.viewport_size().width) - 136.0,
@@ -695,6 +783,9 @@ impl GpuiHost {
             });
         let now = Instant::now();
         let (width, height) = self.sensitivity_size(window);
+        if motion_preference::reduced() {
+            self.sensitivity.motion = StageMotion::default();
+        }
         let moving = self.sensitivity.motion.advance(now);
         if moving {
             window.request_animation_frame();
@@ -771,8 +862,8 @@ impl GpuiHost {
                                     ))
                                     .when(self.sensitivity.disconnected[side], |row| {
                                         row.child(label(
-                                            self.text("设备已断开", "Disconnected"),
-                                            palette.accent,
+                                            self.text("需要重新绑定", "Rebind required"),
+                                            palette.muted,
                                             13.0,
                                         ))
                                     }),
@@ -801,25 +892,15 @@ impl GpuiHost {
                             )
                             .child(
                                 label(
-                                    if pending {
-                                        if side == 0 {
-                                            self.text(
-                                                "轻移被复制鼠标以完成绑定",
-                                                "Move the reference mouse to bind",
-                                            )
-                                        } else {
-                                            self.text(
-                                                "轻移目标鼠标以完成绑定",
-                                                "Move the target mouse to bind",
-                                            )
-                                        }
+                                    self.sensitivity_binding_hint(side).to_owned(),
+                                    if self.sensitivity.binding_issues[side].is_some() {
+                                        palette.accent
                                     } else {
-                                        ""
+                                        palette.muted
                                     },
-                                    palette.muted,
                                     13.0,
                                 )
-                                .h(px(20.0))
+                                .min_h(px(20.0))
                                 .line_height(px(20.0)),
                             ),
                     );
@@ -842,6 +923,14 @@ impl GpuiHost {
                             13.0,
                         )),
                 );
+                form = form.when_some(
+                    localized_ui_error(
+                        &self.control_error,
+                        &self.backend_error,
+                        self.settings.english,
+                    ),
+                    |form, error| form.child(label(error, palette.accent, 13.0)),
+                );
                 hero = hero.child(
                     div()
                         .absolute()
@@ -855,27 +944,8 @@ impl GpuiHost {
                         .opacity(reveal)
                         .child(form),
                 );
-                let message = if let Some(hint) =
-                    disconnected_hint(self.sensitivity.disconnected, self.settings.english)
-                {
-                    hint
-                } else if self.business_input.issue
-                    == Some(clicksync_capture::observation::MotionResult::TimedOut)
-                {
-                    self.text("绑定超时，请重试。", "Binding timed out. Try again.")
-                } else if parse_dpi(&self.sensitivity.target_dpi).is_none() {
-                    self.text(
-                        "绑定两只鼠标，并填写目标鼠标当前 DPI。",
-                        "Bind both mice and enter the target mouse's current DPI.",
-                    )
-                } else {
-                    self.text(
-                        "改 DPI 或重绑会清空已测结果。",
-                        "Changing DPI or bindings clears measured results.",
-                    )
-                };
                 let ready = self.sensitivity_ready();
-                footer = footer.child(label(message, palette.muted, 14.0)).child(
+                footer = footer.justify_end().child(
                     design::button(
                         "sensitivity-next",
                         self.text("下一步", "NEXT"),
@@ -1098,7 +1168,7 @@ impl GpuiHost {
                     .child(
                         label(
                             if disconnected {
-                                self.text("设备已断开", "Device disconnected")
+                                self.text("需要重新绑定", "Rebind required")
                             } else if recommended.is_some() {
                                 self.text("测量完成", "Measurement complete")
                             } else if needs_retry {
@@ -1122,6 +1192,21 @@ impl GpuiHost {
                             .max_w(px(820.0))
                             .text_center()
                             .line_height(px(22.0)),
+                    )
+                    .when_some(
+                        localized_ui_error(
+                            &self.control_error,
+                            &self.backend_error,
+                            self.settings.english,
+                        ),
+                        |content, error| {
+                            content.child(
+                                label(error, palette.accent, 13.0)
+                                    .mt(px(8.0))
+                                    .max_w(px(820.0))
+                                    .text_center(),
+                            )
+                        },
                     )
                     .child(
                         div()
@@ -1152,7 +1237,7 @@ impl GpuiHost {
                     let connected = !self.sensitivity.disconnected[side]
                         && self.business_input.bindings[side].is_some();
                     let state = if self.sensitivity.disconnected[side] {
-                        self.text("已断开", "Disconnected")
+                        self.text("待重新绑定", "Rebind required")
                     } else if !connected {
                         self.text("等待绑定", "Not connected")
                     } else if let Some(active) = active {
@@ -1371,41 +1456,44 @@ impl GpuiHost {
                                     )),
                                 )
                             })
-                            .when(!can_copy && (!can_retry || active.is_some()), |d| {
-                                d.child(
-                                    design::button(
-                                        "sensitivity-start-measurement",
-                                        if active.is_some() {
-                                            self.text("取消测量", "Cancel")
-                                        } else if recommended.is_some() {
-                                            self.text("测量完成", "Complete")
-                                        } else {
-                                            self.text("开始测量 · S", "Start · S")
-                                        },
-                                        palette,
-                                        self.settings.english,
-                                        recommended.is_none(),
-                                        can_start || active.is_some(),
-                                    )
-                                    .min_h(px(44.0))
-                                    .min_w(px(152.0))
-                                    .on_click(cx.listener(
-                                        |host, _, _, cx| {
-                                            if host
-                                                .sensitivity
-                                                .frame
-                                                .as_ref()
-                                                .is_some_and(|frame| frame.active.is_some())
-                                            {
-                                                host.cancel_sensitivity_round();
+                            .when(
+                                !disconnected && !can_copy && (!can_retry || active.is_some()),
+                                |d| {
+                                    d.child(
+                                        design::button(
+                                            "sensitivity-start-measurement",
+                                            if active.is_some() {
+                                                self.text("取消测量", "Cancel")
+                                            } else if recommended.is_some() {
+                                                self.text("测量完成", "Complete")
                                             } else {
-                                                host.start_round();
-                                            }
-                                            cx.notify();
-                                        },
-                                    )),
-                                )
-                            }),
+                                                self.text("开始测量 · S", "Start · S")
+                                            },
+                                            palette,
+                                            self.settings.english,
+                                            recommended.is_none(),
+                                            can_start || active.is_some(),
+                                        )
+                                        .min_h(px(44.0))
+                                        .min_w(px(152.0))
+                                        .on_click(
+                                            cx.listener(|host, _, _, cx| {
+                                                if host
+                                                    .sensitivity
+                                                    .frame
+                                                    .as_ref()
+                                                    .is_some_and(|frame| frame.active.is_some())
+                                                {
+                                                    host.cancel_sensitivity_round();
+                                                } else {
+                                                    host.start_round();
+                                                }
+                                                cx.notify();
+                                            }),
+                                        ),
+                                    )
+                                },
+                            ),
                     );
                 hero = hero.child(content.child(footer));
                 footer = div();
@@ -1422,22 +1510,12 @@ impl GpuiHost {
             .pb(px(18.0))
             .bg(rgb(palette.background))
             .text_color(rgb(palette.text))
-            .font_family(design::Typography::body_font(self.settings.english))
+            .font(design::ui_font())
             .when(!self.custom_chrome, |d| {
                 d.track_focus(&self.focus)
                     .on_key_down(cx.listener(|host, e, window, cx| host.keyboard(e, window, cx)))
             })
             .child(hero)
-            .when_some(
-                displayed_error(&self.control_error, &self.backend_error),
-                |d, error| {
-                    d.child(label(
-                        binding_error_text(&error, self.settings.english).to_owned(),
-                        palette.accent,
-                        12.0,
-                    ))
-                },
-            )
             .child(footer)
     }
 }
@@ -1470,14 +1548,6 @@ fn capture_failure_hint(
         }
     })
 }
-pub(super) fn binding_error_text(error: &str, english: bool) -> &str {
-    if !english && error == "no eligible motion device" {
-        "没有可绑定的鼠标设备。"
-    } else {
-        error
-    }
-}
-
 fn failure_text(failure: Failure, english: bool) -> &'static str {
     let pair = match failure {
         Failure::Timeout => ("测量超时，请重试。", "Measurement timed out. Try again."),
@@ -1587,6 +1657,52 @@ mod tests {
         let page = SensitivityPage::default();
         assert!(page.target_dpi.is_empty());
         assert!(page.editor.is_none());
+    }
+
+    #[test]
+    fn binding_issues_keep_raw_errors_and_explain_recovery_in_both_languages() {
+        use clicksync_capture::observation::MotionResult;
+        let missing = BindingIssue::Error("no eligible motion device".into());
+        assert_eq!(
+            missing.text(false, false),
+            "未检测到可绑定的鼠标，请连接后重试"
+        );
+        assert_eq!(
+            missing.text(false, true),
+            "未检测到另一只鼠标，请连接后重试"
+        );
+        assert_eq!(
+            missing.text(true, false),
+            "No mouse found. Connect a mouse and retry."
+        );
+        assert_eq!(
+            missing.text(true, true),
+            "No other mouse found. Connect another mouse and retry."
+        );
+        let BindingIssue::Error(raw) = &missing else {
+            unreachable!();
+        };
+        assert_eq!(raw, "no eligible motion device");
+        let unexpected = BindingIssue::Error("original backend diagnostic".into());
+        for english in [false, true] {
+            assert_eq!(
+                unexpected.text(english, false),
+                "original backend diagnostic"
+            );
+            for result in [
+                MotionResult::TimedOut,
+                MotionResult::DeviceRemoved,
+                MotionResult::Revoked,
+            ] {
+                let issue = BindingIssue::Motion(result);
+                assert!(
+                    issue
+                        .text(english, false)
+                        .contains(if english { "retry" } else { "重试" })
+                        || issue.text(english, false).contains("Retry")
+                );
+            }
+        }
     }
 
     #[test]

@@ -157,6 +157,7 @@ impl GpuiHost {
         self.lock.release();
         self.runtime.borrow_mut().cancel_motion();
         self.page_generation = self.runtime.borrow_mut().request_page_reset();
+        self.backend_error = None;
         self.domain_reset += 1;
         self.domain_frame = None;
         self.calibration = CalibrationPage::default();
@@ -227,7 +228,11 @@ impl GpuiHost {
     }
     fn calibration_quality(&self) -> String {
         if let Some(quality) = capture_quality(
-            self.runtime.borrow().status().as_ref(),
+            self.runtime
+                .borrow()
+                .status()
+                .filter(|status| status.generation >= self.page_generation)
+                .as_ref(),
             self.settings.english,
         ) {
             return quality;
@@ -598,7 +603,7 @@ impl GpuiHost {
             .size_full()
             .flex()
             .flex_col()
-            .font_family(design::Typography::body_font(self.settings.english))
+            .font(design::ui_font())
             .bg(rgb(palette.background))
             .text_color(rgb(palette.text))
             .px(px(32.0))
@@ -670,7 +675,14 @@ fn capture_quality(status: Option<&crate::backend::AppStatus>, english: bool) ->
     if !capture_incomplete(status) {
         return None;
     }
-    let error = capture_status_error(status)?;
+    if status.capture_fault == Some(crate::backend::CaptureFault::DeviceDisconnected) {
+        return Some(if english {
+            "Mouse connection interrupted. This result is incomplete. Reconnect the mouse, then reset and measure again."
+        } else {
+            "鼠标连接已中断，本次结果不完整。请重新连接鼠标，重置后重新测量。"
+        }.to_owned());
+    }
+    let error = localized_capture_error(capture_status_error(status)?, english);
     Some(if english {
         format!(
             "Capture failed or data is incomplete. This result is not reliable; reset and measure again. {error}"
@@ -803,6 +815,23 @@ mod tests {
                 .contains("dropped 7 packets")
         );
         assert!(capture_quality(None, true).is_none());
+    }
+
+    #[test]
+    fn disconnected_capture_quality_is_localized_without_raw_driver_text() {
+        let status = crate::backend::AppStatus {
+            phase: crate::backend::CapturePhase::Faulted,
+            complete: false,
+            capture_fault: Some(crate::backend::CaptureFault::DeviceDisconnected),
+            error: Some("changed backend diagnostic wording".into()),
+            ..Default::default()
+        };
+        for english in [false, true] {
+            let message = capture_quality(Some(&status), english).unwrap();
+            assert!(!message.contains("selected input device disconnected"));
+            assert!(!message.contains("changed backend diagnostic wording"));
+            assert!(message.contains(if english { "Reconnect" } else { "重新连接" }));
+        }
     }
     #[test]
     fn trace_fits_without_stretch_and_converges_from_current_view() {

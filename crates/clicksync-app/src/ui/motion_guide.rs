@@ -81,10 +81,18 @@ impl MotionGuide {
 
 impl Render for MotionGuide {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        if self.advance(
-            Instant::now(),
-            window.is_window_active() && self.demonstrating,
-        ) {
+        let reduced = motion_preference::reduced();
+        if reduced {
+            self.position = 0.0;
+            self.opacity = 1.0;
+            self.started = None;
+        }
+        if !reduced
+            && self.advance(
+                Instant::now(),
+                window.is_window_active() && self.demonstrating,
+            )
+        {
             let entity = cx.entity().downgrade();
             window.on_next_frame(move |_, cx| {
                 let _ = entity.update(cx, |_, cx| cx.notify());

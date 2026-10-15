@@ -225,6 +225,7 @@ pub(super) struct Motion {
     underlines: [Underline; 4],
     hover_surfaces: [Underline; 5],
     text_cache: TextCache,
+    handoff_pause: Option<Instant>,
 }
 impl Motion {
     pub fn new(startup: bool) -> Self {
@@ -254,6 +255,7 @@ impl Motion {
             underlines: std::array::from_fn(|i| Underline::new(i == 0 || i == 3, now)),
             hover_surfaces: std::array::from_fn(|_| Underline::new(false, now)),
             text_cache: Rc::new(RefCell::new(BTreeMap::new())),
+            handoff_pause: None,
         }
     }
     pub fn visible(&self) -> bool {
@@ -274,6 +276,7 @@ impl Motion {
         self.show_at(brand, Instant::now());
     }
     fn show_at(&mut self, brand: String, now: Instant) {
+        self.handoff_pause = None;
         self.advance_curtain(now);
         self.brand = brand;
         self.from = self.coverage;
@@ -343,6 +346,57 @@ impl Motion {
         }
     }
     pub fn update(&mut self, now: Instant, geometry: Geometry, settings: &Settings) -> bool {
+        self.update_with_motion(now, geometry, settings, motion_preference::reduced())
+    }
+
+    fn update_with_motion(
+        &mut self,
+        now: Instant,
+        geometry: Geometry,
+        settings: &Settings,
+        reduced: bool,
+    ) -> bool {
+        if self.handoff_pause.is_some() {
+            return false;
+        }
+        if reduced {
+            if self.phase == Phase::Closing {
+                self.phase = Phase::Hidden;
+                self.coverage = 0.0;
+                self.hovered = None;
+                self.springs.clear();
+            } else if self.visible() {
+                self.phase = Phase::Interactive;
+                self.coverage = 1.0;
+                self.intro_elapsed = MENU_READY_SECONDS;
+                let count = assets().get(&self.brand).map_or(4, Vec::len);
+                self.springs = (0..count)
+                    .map(|_| Spring {
+                        y: 0.0,
+                        scale: 1.0,
+                        velocity_y: 0.0,
+                        velocity_scale: 0.0,
+                        target_y: 0.0,
+                        target_scale: 1.0,
+                    })
+                    .collect();
+            }
+            self.last = now;
+            self.underlines = [
+                !settings.english,
+                settings.english,
+                !settings.dark,
+                settings.dark,
+            ]
+            .map(|selected| Underline::new(selected, now));
+            self.hover_surfaces = std::array::from_fn(|i| {
+                Underline::new(
+                    self.hovered == Some(i) || self.closing_page == Some(Page::ALL[i]),
+                    now,
+                )
+            });
+            return false;
+        }
         self.advance_curtain(now);
         let count = assets().get(&self.brand).map_or(4, Vec::len);
         let (width, height) = geometry.brand_size();
@@ -351,10 +405,7 @@ impl Motion {
             if self.springs.len() != count {
                 self.springs = (0..count).map(|_| Spring::intro(layout.2)).collect();
             }
-            let dt = now
-                .saturating_duration_since(self.last)
-                .as_secs_f64()
-                .min(1.0 / 15.0);
+            let dt = now.saturating_duration_since(self.last).as_secs_f64();
             let pointer = self.pointer.filter(|(x, y)| {
                 *x as f64 >= width as f64 * 0.05 - 10.0
                     && (*x as f64) <= width as f64 * 0.95 + 10.0
@@ -429,6 +480,19 @@ impl Motion {
         let mut motion = self.clone();
         motion.startup = false;
         motion
+    }
+
+    pub fn hold_for_handoff(&mut self) {
+        self.handoff_pause = Some(self.started);
+    }
+
+    pub fn resume_handoff(&mut self, now: Instant) {
+        if let Some(paused) = self.handoff_pause.take() {
+            let elapsed = now.saturating_duration_since(paused);
+            self.started += elapsed;
+            self.intro_started += elapsed;
+            self.last = now;
+        }
     }
 }
 
@@ -622,7 +686,10 @@ fn moving_text(
                 .borrow_mut()
                 .entry(key)
                 .or_insert_with(|| {
-                    let mut font = gpui::font(family);
+                    let mut font = gpui::Font {
+                        family: family.into(),
+                        ..design::ui_font()
+                    };
                     font.weight = weight;
                     window.text_system().shape_line(
                         value.into(),
@@ -703,7 +770,7 @@ pub(super) fn menu<T: 'static>(
         .w(px(width))
         .h(px(height))
         .bg(rgb(palette.curtain))
-        .font_family(design::Typography::body_font(settings.english))
+        .font(design::ui_font())
         .text_color(rgb(0x000000))
         .child(
             div()
@@ -816,7 +883,6 @@ pub(super) fn menu<T: 'static>(
                         } else {
                             0.55 + 0.45 * underline
                         })
-                        .when(index == 0, |text| text.font_family(design::CHINESE_FONT))
                         .child(label),
                 )
                 .child(
@@ -1011,7 +1077,7 @@ pub(super) fn menu<T: 'static>(
                     &motion.text_cache,
                     page.label(false),
                     TextFont {
-                        family: design::CHINESE_FONT,
+                        family: design::DISPLAY_FONT,
                         size: MENU_TITLE_SIZE * item_scale,
                         weight: gpui::FontWeight::BOLD,
                     },
@@ -1102,6 +1168,85 @@ mod tests {
 
     fn geometry() -> Geometry {
         super::geometry(DEFAULT_WIDTH as f32, DEFAULT_HEIGHT as f32)
+    }
+    #[test]
+    fn handoff_keeps_exit_time_until_first_main_presentation() {
+        let mut motion = Motion::new(true);
+        let start = motion.started;
+        motion.update_with_motion(
+            start + Duration::from_secs(2),
+            geometry(),
+            &Settings::default(),
+            false,
+        );
+        motion.begin_close_at(Some(Page::Keys), start + Duration::from_secs(2));
+        motion.hold_for_handoff();
+        let mut main = motion.transfer_to_main();
+        let ready = start + Duration::from_secs(12);
+        assert!(!main.update_with_motion(ready, geometry(), &Settings::default(), false));
+        assert_eq!(main.coverage, 1.0);
+        main.resume_handoff(ready);
+        assert!(main.update_with_motion(ready, geometry(), &Settings::default(), false));
+        assert_eq!(main.coverage, 1.0);
+        assert!(!main.update_with_motion(
+            ready + Duration::from_secs(1),
+            geometry(),
+            &Settings::default(),
+            false
+        ));
+        assert_eq!(main.phase, Phase::Hidden);
+    }
+
+    #[test]
+    fn reduced_motion_has_no_displacement_or_animation_loop_and_keeps_input() {
+        let mut motion = Motion::new(true);
+        let now = Instant::now();
+        assert!(!motion.update_with_motion(now, geometry(), &Settings::default(), true));
+        assert!(motion.accepts_input() && motion.interactive());
+        assert_eq!(motion.coverage, 1.0);
+        assert!(
+            motion
+                .springs
+                .iter()
+                .all(|s| s.y == 0.0 && s.scale == 1.0 && !s.moving())
+        );
+        motion.begin_close_at(Some(Page::Keys), now);
+        assert!(!motion.update_with_motion(now, geometry(), &Settings::default(), true));
+        assert_eq!(motion.phase, Phase::Hidden);
+    }
+    #[test]
+    fn menu_springs_keep_wall_time_across_stalls_and_frame_partitions() {
+        let start = Instant::now();
+        let run = |step_ms: u64| {
+            let mut motion = Motion::new(false);
+            motion.show_at("nuit".into(), start);
+            motion.update(start, geometry(), &Settings::default());
+            for ms in (step_ms..2000).step_by(step_ms as usize).chain([2000]) {
+                motion.update(
+                    start + Duration::from_millis(ms),
+                    geometry(),
+                    &Settings::default(),
+                );
+            }
+            motion
+        };
+        let reference = run(2);
+        for step in [3, 8, 16, 33, 100, 200, 500, 2000] {
+            let motion = run(step);
+            assert_eq!(motion.phase, reference.phase);
+            assert_eq!(motion.coverage, reference.coverage);
+            for (a, b) in motion.springs.iter().zip(&reference.springs) {
+                assert!((a.y - b.y).abs() < 1e-8, "step={step}: {} != {}", a.y, b.y);
+                assert!((a.scale - b.scale).abs() < 1e-8);
+            }
+        }
+        let mut motion = run(500);
+        assert!(!motion.update(
+            start + Duration::from_secs(60),
+            geometry(),
+            &Settings::default()
+        ));
+        assert!(motion.springs.iter().all(|spring| !spring.moving()));
     }
     #[test]
     fn menu_text_finishes_at_a_stable_zero_gpu_offset() {

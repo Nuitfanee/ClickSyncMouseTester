@@ -10,6 +10,7 @@ pub enum Unit {
     Milliseconds,
     Hertz,
     MetersPerSecond,
+    Millimeters,
     Percent,
 }
 
@@ -51,6 +52,7 @@ impl Unit {
             Self::Milliseconds => "ms",
             Self::Hertz => "Hz",
             Self::MetersPerSecond => "m/s",
+            Self::Millimeters => "mm",
             Self::Percent => "%",
         }
     }

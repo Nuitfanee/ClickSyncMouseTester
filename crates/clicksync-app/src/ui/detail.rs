@@ -3,6 +3,7 @@ use crate::chart::ChartResult;
 use crate::product::performance_analysis::{Group, PlotOptions};
 use std::{collections::hash_map::RandomState, hash::BuildHasher};
 use workspace::compact_button;
+mod statistics;
 
 fn default_export_filename(mouse_name: &str) -> String {
     let name: String = mouse_name
@@ -147,6 +148,7 @@ impl GpuiHost {
         }
         self.save_detail_view();
         if self.workspace.detail.is_none()
+            && METRICS[metric].0 == clicksync_chart::Metric::Trajectory
             && !histogram
             && let Some(viewport) = self
                 .workspace
@@ -282,7 +284,6 @@ impl GpuiHost {
         self.displayed = None;
         self.target = None;
         self.query_request = None;
-        self.selection_start = None;
     }
 
     pub(super) fn apply_detail_result(&mut self, result: Arc<ChartResult>) {
@@ -811,8 +812,6 @@ impl GpuiHost {
                 false,
                 can_fit,
             )
-            .justify_start()
-            .px(px(8.0))
             .on_click(cx.listener(move |host, _, _, cx| {
                 if can_fit && let Some(chart) = host.analysis_chart() {
                     chart.borrow_mut().fit_trajectory();
@@ -824,7 +823,7 @@ impl GpuiHost {
                 }
             })),
         );
-        if metric == 5 && !histogram {
+        if METRICS[metric].0 != clicksync_chart::Metric::Trajectory && !histogram {
             display = display.child(
                 compact_button(
                     "detail-focus-values",
@@ -835,7 +834,7 @@ impl GpuiHost {
                 )
                 .on_click(cx.listener(move |host, _, _, cx| {
                     if can_fit && let Some(chart) = host.analysis_chart() {
-                        chart.borrow_mut().fit_value_axis();
+                        chart.borrow_mut().fit_focus();
                         host.workspace
                             .interaction
                             .as_ref()
@@ -852,10 +851,7 @@ impl GpuiHost {
                 gpui::MouseButton::Left,
                 cx.listener(|host, event: &gpui::MouseDownEvent, _, cx| {
                     if let Some(chart) = host.analysis_chart() {
-                        if event.modifiers.shift {
-                            host.selection_start =
-                                chart.borrow_mut().begin_selection(event.position);
-                        } else if event.click_count == 2 {
+                        if event.click_count == 2 {
                             chart.borrow_mut().fit_trajectory();
                         } else {
                             chart.borrow_mut().drag_start(event.position);
@@ -875,14 +871,18 @@ impl GpuiHost {
             .on_mouse_up(
                 gpui::MouseButton::Left,
                 cx.listener(|host, _, _, cx| {
-                    host.finish_analysis_selection();
+                    if let Some(chart) = host.analysis_chart() {
+                        chart.borrow_mut().drag_end();
+                    }
                     cx.notify();
                 }),
             )
             .on_mouse_up_out(
                 gpui::MouseButton::Left,
                 cx.listener(|host, _, _, cx| {
-                    host.finish_analysis_selection();
+                    if let Some(chart) = host.analysis_chart() {
+                        chart.borrow_mut().drag_end();
+                    }
                     cx.notify();
                 }),
             )
@@ -914,12 +914,19 @@ impl GpuiHost {
             .w(px(232.0)).flex_shrink_0().h_full().overflow_y_scroll()
             .flex().flex_col().gap(px(22.0)).pl(px(20.0)).pt(px(8.0))
             .border_l_1().border_color(rgb(palette.hairline))
-            .child(self.detail_statistics(metric, palette))
+            .child(self.detail_statistics(metric, palette).when(
+                options.gaps && !histogram && METRICS[metric].0 != clicksync_chart::Metric::Trajectory,
+                |panel| panel.child(self.workspace_gap_readout(cx)),
+            ))
             .child(div().border_t_1().border_color(rgb(palette.hairline)).pt(px(14.0))
                 .child(div().mb(px(10.0)).font_weight(gpui::FontWeight::MEDIUM).child(self.text("图层与视野", "Layers & view")))
                 .child(display))
             .child(div().text_size(px(12.0)).line_height(px(22.0)).text_color(rgb(palette.muted))
-                .child(if histogram { self.text("拖动平移 · 滚轮缩放\n双击查看全局\nEsc 返回总览", "Drag to pan · Scroll to zoom\nDouble-click for global view\nEsc to overview") } else { self.text("拖动平移 · 滚轮缩放\nShift 拖动选择范围\n双击查看全局\nEsc 返回总览", "Drag to pan · Scroll to zoom\nShift-drag to select a range\nDouble-click for global view\nEsc to overview") }));
+                .child(if METRICS[metric].0 == clicksync_chart::Metric::Trajectory {
+                    self.text("拖动平移 · 滚轮等比缩放\n双击查看全局\nEsc 返回总览", "Drag to pan · Scroll to zoom equally\nDouble-click for global view\nEsc to overview")
+                } else {
+                    self.text("拖动平移 · 滚轮缩放\nShift + 滚轮：仅缩放横轴\nCtrl + 滚轮：仅缩放纵轴\n双击查看全局\nEsc 返回总览", "Drag to pan · Scroll to zoom\nShift + scroll: X axis only\nCtrl + scroll: Y axis only\nDouble-click for global view\nEsc to overview")
+                }));
         div()
             .flex_1()
             .min_h_0()
@@ -965,6 +972,116 @@ impl GpuiHost {
             )
     }
 
+    fn detail_statistics_current(&self, result: &ChartResult, metric: usize) -> bool {
+        // Style and bin changes do not change the statistics of the fixed input.
+        let mut parameters = self.settings.parameters(
+            metric,
+            self.workspace.detail_histogram,
+            self.logical,
+            self.parameter_version,
+        );
+        parameters.histogram = result.request.parameters.histogram;
+        result.request.source_version == self.import_identity
+            && result.request.parameters == parameters
+            && result.request.secondary_metric
+                == crate::product::secondary_metric(metric, self.workspace.detail_histogram)
+            && self.workspace.analysis.as_ref().is_some_and(|analysis| {
+                Arc::ptr_eq(&result.request.prefix, &analysis.input)
+                    && result.request.analysis.as_ref().and_then(|a| a.range) == analysis.range
+                    && result
+                        .request
+                        .dataset_cpi
+                        .iter()
+                        .enumerate()
+                        .all(|(side, (key, cpi))| *cpi == self.performance_cpi(*key, side))
+            })
+    }
+
+    pub(super) fn detail_gap_values(&self) -> Option<(usize, crate::chart::gaps::GapStatistics)> {
+        let metric = self.workspace.detail?;
+        let options = self.detail_options(metric);
+        if !options.gaps || self.workspace.detail_histogram {
+            return None;
+        }
+        let key = options.gap_dataset?;
+        let views = self.workspace_plot_views(0);
+        if views.iter().any(|view| view.borrow().capacity_blocked()) {
+            return None;
+        }
+        let primary = views.first()?.borrow();
+        for view in &views {
+            let view = view.borrow();
+            if view.dataset_key() != key || !view.can_overlay(&primary) {
+                continue;
+            }
+            let result = view.presented_result()?;
+            if !self.detail_statistics_current(&result, metric)
+                || !result.request.analysis.as_ref().is_some_and(|analysis| {
+                    analysis.options.gaps && analysis.options.gap_dataset == Some(key)
+                })
+            {
+                return None;
+            }
+            let group = result
+                .datasets
+                .iter()
+                .position(|dataset| dataset.device_key == key)?;
+            return Some((group, view.visible_gap_statistics()?));
+        }
+        None
+    }
+
+    pub(super) fn render_gap_statistics(
+        &self,
+        values: Option<(usize, crate::chart::gaps::GapStatistics)>,
+    ) -> gpui::Div {
+        let palette = design::Palette::for_theme(self.settings.dark);
+        let group = values.map_or("", |(group, _)| ["A", "B", "C"][group.min(2)]);
+        let count = values.map_or_else(|| "—".into(), |(_, stats)| stats.count.to_string());
+        let mean = values
+            .and_then(|(_, stats)| stats.mean_ms)
+            .map_or_else(|| "—".into(), |mean| format!("{mean:.2} ms"));
+        let mut panel = div().size_full().flex().flex_col().gap(px(12.0)).child(
+            div()
+                .h(px(22.0))
+                .text_size(px(12.0))
+                .text_color(rgb(palette.muted))
+                .child(format!(
+                    "{}  {group}",
+                    self.text("当前窗口缺口", "Window gaps")
+                )),
+        );
+        for (label, value) in [
+            (self.text("缺口数量", "Gap count"), count),
+            (self.text("平均间隔", "Mean interval"), mean),
+        ] {
+            panel = panel.child(
+                div()
+                    .h(px(22.0))
+                    .flex_shrink_0()
+                    .flex()
+                    .items_center()
+                    .justify_between()
+                    .gap(px(8.0))
+                    .child(
+                        div()
+                            .min_w_0()
+                            .truncate()
+                            .text_color(rgb(palette.muted))
+                            .child(label),
+                    )
+                    .child(
+                        div()
+                            .flex_shrink_0()
+                            .font_family(design::DISPLAY_FONT)
+                            .font_weight(gpui::FontWeight::MEDIUM)
+                            .child(value),
+                    ),
+            );
+        }
+        panel
+    }
+
     fn detail_statistics(&self, metric: usize, palette: design::Palette) -> gpui::Div {
         let group = self.workspace.export_group;
         let result = self
@@ -972,30 +1089,9 @@ impl GpuiHost {
             .and_then(|chart| chart.borrow().presented_result());
         let dataset = result
             .as_ref()
-            .filter(|result| {
-                // Style and bin changes do not change the statistics of the fixed input.
-                let mut parameters =
-                    self.settings
-                        .parameters(metric, false, self.logical, self.parameter_version);
-                parameters.histogram = result.request.parameters.histogram;
-                result.request.source_version == self.import_identity
-                    && result.request.parameters == parameters
-                    && result.request.secondary_metric
-                        == crate::product::secondary_metric(metric, self.workspace.detail_histogram)
-                    && self.workspace.analysis.as_ref().is_some_and(|analysis| {
-                        Arc::ptr_eq(&result.request.prefix, &analysis.input)
-                            && result.request.analysis.as_ref().and_then(|a| a.range)
-                                == analysis.range
-                            && result
-                                .request
-                                .dataset_cpi
-                                .iter()
-                                .enumerate()
-                                .all(|(side, (key, cpi))| *cpi == self.performance_cpi(*key, side))
-                    })
-            })
+            .filter(|result| self.detail_statistics_current(result, metric))
             .and_then(|result| result.datasets.get(group));
-        let distribution = dataset.and_then(|dataset| dataset.distribution.as_ref());
+        let summary = dataset.and_then(|dataset| dataset.statistics.as_deref());
         let mut panel = div()
             .flex()
             .flex_col()
@@ -1012,7 +1108,7 @@ impl GpuiHost {
                     .text_color(rgb(palette.muted))
                     .child(if dataset.is_none() {
                         self.text("正在计算…", "Calculating…")
-                    } else if distribution.is_none() {
+                    } else if summary.is_none_or(|summary| summary.sample_count == 0) {
                         self.text("此范围暂无有效样本", "No valid samples in this range")
                     } else if self
                         .workspace
@@ -1025,47 +1121,44 @@ impl GpuiHost {
                         self.text("全部采集数据", "Full capture")
                     }),
             );
-        let unit = crate::chart::labels::Unit::metric(METRICS[metric].0);
-        let value = |v| {
-            format!(
-                "{} {}",
-                unit.readout(clicksync_chart::Coordinate::Scalar(v)),
-                unit.symbol()
-            )
-        };
-        for (label, number) in [
-            (
-                self.text("样本数", "Samples"),
-                distribution.map(|d| d.sample_count.to_string()),
-            ),
-            (
-                self.text("均值", "Mean"),
-                distribution.map(|d| value(d.average)),
-            ),
-            (
-                self.text("标准差", "Std. deviation"),
-                distribution.map(|d| value(d.standard_deviation)),
-            ),
-            (
-                self.text("中位数", "Median"),
-                distribution.map(|d| value(d.p50)),
-            ),
-            ("P95", distribution.map(|d| value(d.p95))),
-        ] {
+        let Some(summary) = summary else { return panel };
+        let parameters = &result.as_ref().unwrap().request.parameters;
+        for (label, number) in statistics::rows(
+            summary,
+            dataset.unwrap().histogram_statistics,
+            parameters.metric,
+            self.settings.english,
+        ) {
             panel = panel.child(
                 div()
-                    .h(px(22.0))
+                    .min_h(px(22.0))
                     .flex()
+                    .flex_wrap()
                     .items_center()
                     .justify_between()
-                    .gap(px(8.0))
+                    .gap_x(px(8.0))
+                    .gap_y(px(2.0))
                     .child(div().text_color(rgb(palette.muted)).child(label))
                     .child(
                         div()
+                            .flex_shrink_0()
                             .font_family(design::DISPLAY_FONT)
                             .font_weight(gpui::FontWeight::MEDIUM)
-                            .child(number.unwrap_or_else(|| "—".into())),
+                            .child(number),
                     ),
+            );
+        }
+        if let Some(explanation) = statistics::explanation(
+            parameters.metric,
+            parameters.histogram.is_some(),
+            self.settings.english,
+        ) {
+            panel = panel.child(
+                div()
+                    .text_size(px(12.0))
+                    .line_height(px(18.0))
+                    .text_color(rgb(palette.muted))
+                    .child(explanation),
             );
         }
         panel
@@ -2078,26 +2171,6 @@ impl GpuiHost {
             }
         }
         self.clear_analysis_interaction();
-    }
-
-    fn finish_analysis_selection(&mut self) {
-        let Some(chart) = self.analysis_chart() else {
-            return;
-        };
-        chart.borrow_mut().drag_end();
-        let Some(start) = self.selection_start.take() else {
-            return;
-        };
-        if let Some((result, key, end)) = chart.borrow().hit() {
-            let snapshot = result.snapshot(key).unwrap();
-            if let (Some(start), Some(end)) = (
-                crate::product::performance_analysis::time_ms(snapshot, start, self.logical),
-                crate::product::performance_analysis::time_ms(snapshot, end, self.logical),
-            ) {
-                self.set_analysis_range(start.min(end), start.max(end));
-            }
-        }
-        chart.borrow_mut().end_selection();
     }
 }
 

@@ -28,7 +28,11 @@ pub(super) struct Workspace {
     #[cfg(feature = "ui-restoration-probe")]
     pub capture_source: Option<clicksync_core::protocol::CaptureSource>,
     #[cfg(feature = "ui-restoration-probe")]
+    pub preview_status: Option<crate::backend::AppStatus>,
+    #[cfg(feature = "ui-restoration-probe")]
     pub capture_controls: [Rc<std::cell::Cell<Bounds<gpui::Pixels>>>; 3],
+    #[cfg(feature = "ui-restoration-probe")]
+    pub recovery_control: Rc<std::cell::Cell<Bounds<gpui::Pixels>>>,
     pub enabled: bool,
     pub chart_window: bool,
     pub child: Option<gpui::WindowHandle<GpuiHost>>,
@@ -864,31 +868,35 @@ impl GpuiHost {
                     _ => true,
                 };
             actions = actions.child(
-                compact_button(action, self.text(chinese, english), palette, false, enabled)
-                    .bg(rgb(palette.selected))
-                    .text_color(rgb(palette.accent))
-                    .font_weight(gpui::FontWeight::SEMIBOLD)
-                    .when(enabled, |button| {
-                        button.hover(move |style| {
-                            style
-                                .bg(rgb(palette.selected))
-                                .text_color(rgb(palette.accent_hover))
-                        })
-                    })
-                    .map(|button| {
-                        #[cfg(feature = "ui-restoration-probe")]
-                        let button = button.relative().child(probe::control_bounds(
-                            self.workspace.capture_controls[if action == "stop" { 1 } else { 2 }]
-                                .clone(),
-                        ));
-                        button
-                    })
-                    .on_click(cx.listener(move |host, _, _, cx| {
-                        if enabled {
-                            host.capture_command(action);
-                            cx.notify();
-                        }
-                    })),
+                compact_button_with_hover(
+                    action,
+                    self.text(chinese, english),
+                    palette,
+                    false,
+                    enabled,
+                    move |style| {
+                        style
+                            .bg(rgb(palette.selected))
+                            .text_color(rgb(palette.accent_hover))
+                    },
+                )
+                .bg(rgb(palette.selected))
+                .text_color(rgb(palette.accent))
+                .font_weight(gpui::FontWeight::SEMIBOLD)
+                .map(|button| {
+                    #[cfg(feature = "ui-restoration-probe")]
+                    let button = button.relative().child(probe::control_bounds(
+                        self.workspace.capture_controls[if action == "stop" { 1 } else { 2 }]
+                            .clone(),
+                    ));
+                    button
+                })
+                .on_click(cx.listener(move |host, _, _, cx| {
+                    if enabled {
+                        host.capture_command(action);
+                        cx.notify();
+                    }
+                })),
             );
         }
         if locked || (phase == crate::backend::CapturePhase::Paused && self.imported.is_none()) {
@@ -1252,7 +1260,7 @@ impl GpuiHost {
                         }
                     })),
                 );
-                if metric == 5 {
+                if METRICS[metric].0 != clicksync_chart::Metric::Trajectory {
                     plot_actions = plot_actions.child(
                         compact_button(
                             format!("monitor-focus-{metric}"),
@@ -1272,12 +1280,13 @@ impl GpuiHost {
                                 .visible_views(host.workspace.monitors[index].iter().cloned())
                                 .first()
                             {
-                                view.borrow_mut().fit_value_axis();
+                                view.borrow_mut().fit_focus();
+                                host.sync_monitor_time(view);
                                 host.workspace
                                     .interaction
                                     .as_ref()
                                     .unwrap()
-                                    .notify_plot(index + 1, cx);
+                                    .notify_plots(cx);
                             }
                         })),
                     );
@@ -1609,12 +1618,23 @@ impl GpuiHost {
             .as_ref()
             .unwrap()
             .set_opacity(opacity, cx);
-        let capture_error = self
+        let capture_status = self
             .runtime
             .borrow()
             .status()
-            .filter(|status| status.generation >= self.page_generation)
-            .and_then(|status| capture_banner(&status, self.settings.english));
+            .filter(|status| status.generation >= self.page_generation);
+        #[cfg(feature = "ui-restoration-probe")]
+        let capture_status = self.workspace.preview_status.clone().or(capture_status);
+        let capture_error = capture_status
+            .as_ref()
+            .and_then(|status| capture_banner(status, self.settings.english));
+        let interrupted = capture_status.as_ref().is_some_and(capture_incomplete);
+        let can_restart = interrupted
+            && self
+                .runtime
+                .borrow()
+                .device_catalog
+                .accepts_selection(&self.selected);
         let state = div()
             .flex()
             .flex_shrink_0()
@@ -1635,6 +1655,8 @@ impl GpuiHost {
             )
             .child(if pending {
                 self.text("处理中…", "Pending…").to_owned()
+            } else if interrupted {
+                self.text("记录已中断", "Recording interrupted").to_owned()
             } else {
                 localized_state(&format!("{phase:?}"), self.settings.english).to_owned()
             })
@@ -1783,20 +1805,65 @@ impl GpuiHost {
             .pt(px(8.0))
             .pb(px(8.0))
             .gap(px(6.0))
-            .when_some(self.control_error.clone(), |row, message| {
-                row.child(
-                    div()
-                        .text_size(px(12.0))
-                        .text_color(rgb(0xb04758))
-                        .child(message),
-                )
-            })
+            .when_some(
+                localized_ui_error(&self.control_error, &None, self.settings.english),
+                |row, message| {
+                    row.child(
+                        div()
+                            .text_size(px(12.0))
+                            .text_color(rgb(0xb04758))
+                            .child(message),
+                    )
+                },
+            )
             .when_some(capture_error, |row, message| {
                 row.child(
                     div()
-                        .text_size(px(12.0))
-                        .text_color(rgb(0xb04758))
-                        .child(message),
+                        .min_h(px(36.0))
+                        .flex()
+                        .items_center()
+                        .gap(px(16.0))
+                        .border_b_1()
+                        .border_color(rgb(palette.hairline))
+                        .pb(px(6.0))
+                        .text_size(px(13.0))
+                        .line_height(px(20.0))
+                        .text_color(rgb(palette.muted))
+                        .child(div().flex_1().min_w_0().child(message))
+                        .when(interrupted, |notice| {
+                            notice.child(
+                                compact_button(
+                                    "restart-interrupted-capture",
+                                    if can_restart {
+                                        self.text("开始新记录 · S", "New recording · S")
+                                    } else {
+                                        self.text("选择设备", "Select device")
+                                    },
+                                    palette,
+                                    false,
+                                    configurable,
+                                )
+                                .flex_shrink_0()
+                                .when(cfg!(feature = "ui-restoration-probe"), |button| {
+                                    #[cfg(feature = "ui-restoration-probe")]
+                                    let button = button.child(super::probe::control_bounds(
+                                        self.workspace.recovery_control.clone(),
+                                    ));
+                                    button
+                                })
+                                .on_click(cx.listener(
+                                    move |host, _, window, cx| {
+                                        if configurable && can_restart {
+                                            host.capture_command("start");
+                                            cx.notify();
+                                        } else if configurable {
+                                            host.return_to_performance_setup(window, cx);
+                                            window.remove_window();
+                                        }
+                                    },
+                                )),
+                            )
+                        }),
                 )
             })
             .child(analysis);
@@ -1807,7 +1874,7 @@ impl GpuiHost {
             .flex_col()
             .bg(rgb(palette.background))
             .text_color(rgb(palette.text))
-            .font_family(design::Typography::body_font(self.settings.english))
+            .font(design::ui_font())
             .text_size(px(13.0))
             .child(caption)
             .child(body)
@@ -1923,6 +1990,23 @@ pub(super) fn compact_button(
     primary: bool,
     enabled: bool,
 ) -> gpui::Stateful<gpui::Div> {
+    compact_button_with_hover(id, label, palette, primary, enabled, move |style| {
+        style.bg(rgb(if primary {
+            palette.accent_hover
+        } else {
+            palette.hover
+        }))
+    })
+}
+
+fn compact_button_with_hover(
+    id: impl Into<gpui::SharedString>,
+    label: impl Into<gpui::SharedString>,
+    palette: design::Palette,
+    primary: bool,
+    enabled: bool,
+    hover: impl FnOnce(gpui::StyleRefinement) -> gpui::StyleRefinement,
+) -> gpui::Stateful<gpui::Div> {
     div()
         .id(id.into())
         .h(px(34.0))
@@ -1953,13 +2037,7 @@ pub(super) fn compact_button(
             button
                 .focusable()
                 .cursor_pointer()
-                .hover(move |style| {
-                    style.bg(rgb(if primary {
-                        palette.accent_hover
-                    } else {
-                        palette.hover
-                    }))
-                })
+                .hover(hover)
                 .active(move |style| {
                     style
                         .bg(rgb(if primary {
@@ -2069,6 +2147,20 @@ fn caption_button(
 
 fn capture_banner(status: &crate::backend::AppStatus, english: bool) -> Option<String> {
     let message = capture_status_error(status)?;
+    if status.capture_fault == Some(crate::backend::CaptureFault::DeviceDisconnected) {
+        let connected = !status.selected_device_keys.is_empty()
+            && status
+                .selected_device_keys
+                .iter()
+                .all(|key| status.devices.iter().any(|device| device.key == *key));
+        return Some(match (connected, english) {
+            (false, false) => "鼠标连接已中断，记录已停止。重新连接并选择设备后，开始新记录。",
+            (false, true) => "Mouse connection interrupted. Reconnect and select a device, then start a new recording.",
+            (true, false) => "鼠标已重新连接，上次记录仍不完整。开始新记录以继续。",
+            (true, true) => "Mouse reconnected. The previous recording is incomplete. Start a new recording to continue.",
+        }.to_owned());
+    }
+    let message = localized_capture_error(message, english);
     let title = match (capture_incomplete(status), english) {
         (true, false) => "采集中断：",
         (true, true) => "Capture interrupted:",
@@ -2121,7 +2213,7 @@ pub(super) fn chart_canvas(
     outcome: Option<Arc<Mutex<WindowSmokeReport>>>,
     dark: bool,
     english: bool,
-    on_present: impl Fn(u64, &mut Window) + 'static,
+    on_frame: impl Fn(Option<u64>, &mut Window, &mut gpui::App) + 'static,
     on_pan: impl Fn(Rc<RefCell<ChartView>>, &mut gpui::App) + 'static,
 ) -> gpui::Div {
     let prepare = views.clone();
@@ -2129,7 +2221,7 @@ pub(super) fn chart_canvas(
     let on_pan = Rc::new(on_pan);
     div().size_full().flex_1().min_h_0().relative().child(
         canvas(
-            move |bounds, window, _| {
+            move |bounds, window, cx| {
                 let mut viewport = None;
                 let grouped = prepare.len() > 1;
                 // All visible datasets finish one common result before advancing together.
@@ -2168,15 +2260,28 @@ pub(super) fn chart_canvas(
                         view.borrow_mut()
                             .set_overlay_viewport(primary.presented_viewport());
                     }
-                    if !primary.ready() {
+                    // Publishing a compatible older group may leave identical pixels but newer data.
+                    if prepare
+                        .iter()
+                        .any(|view| view.borrow().needs_presentation(grouped))
+                        && prepare.iter().all(|view| !view.borrow().capacity_blocked())
+                    {
                         window.request_animation_frame();
                     }
-                    if let Some(result) = primary.presented_result() {
-                        on_present(result.request.id, window);
-                    }
                 }
+                on_frame(
+                    prepare
+                        .first()
+                        .and_then(|view| view.borrow().displayed_request_id()),
+                    window,
+                    cx,
+                );
             },
             move |bounds, _, window, cx| {
+                if let Some(blocked) = paint.iter().find(|view| view.borrow().capacity_blocked()) {
+                    blocked.borrow_mut().paint(window, cx);
+                    return;
+                }
                 if let Some(view) = paint.first() {
                     let view = view.clone();
                     let owner = window.current_view();
@@ -2235,6 +2340,40 @@ pub(super) fn chart_canvas(
         )
         .size_full(),
     )
+}
+
+#[cfg(test)]
+mod compact_button_tests {
+    use super::*;
+
+    #[test]
+    fn custom_hover_is_registered_once_only_when_enabled() {
+        for dark in [false, true] {
+            let palette = design::Palette::for_theme(dark);
+            for action in ["stop", "reset"] {
+                for primary in [false, true] {
+                    for enabled in [false, true] {
+                        let calls = std::cell::Cell::new(0);
+                        let _button = compact_button_with_hover(
+                            action,
+                            action,
+                            palette,
+                            primary,
+                            enabled,
+                            |style| {
+                                calls.set(calls.get() + 1);
+                                style
+                                    .bg(rgb(palette.selected))
+                                    .text_color(rgb(palette.accent_hover))
+                            },
+                        );
+                        assert_eq!(calls.get(), usize::from(enabled));
+                        let _default = compact_button(action, action, palette, primary, enabled);
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -2332,5 +2471,44 @@ mod capture_banner_tests {
                 .unwrap()
                 .starts_with("采集中断：")
         );
+    }
+
+    #[test]
+    fn reconnect_updates_the_recording_notice_without_repairing_old_data() {
+        let mut status = crate::backend::AppStatus {
+            phase: crate::backend::CapturePhase::Faulted,
+            complete: false,
+            selected_device_keys: vec![1],
+            capture_fault: Some(crate::backend::CaptureFault::DeviceDisconnected),
+            error: Some("changed backend diagnostic wording".into()),
+            ..Default::default()
+        };
+        for english in [false, true] {
+            let message = capture_banner(&status, english).unwrap();
+            assert!(message.contains(if english { "Reconnect" } else { "重新连接" }));
+            assert!(!message.contains("selected input device disconnected"));
+            assert!(!message.contains("changed backend diagnostic wording"));
+        }
+        status
+            .devices
+            .push(clicksync_core::devices::DeviceDescriptor {
+                key: 1,
+                ..Default::default()
+            });
+        for english in [false, true] {
+            let message = capture_banner(&status, english).unwrap();
+            assert!(message.contains(if english {
+                "reconnected"
+            } else {
+                "重新连接"
+            }));
+            assert!(message.contains(if english { "incomplete" } else { "不完整" }));
+        }
+        assert!(!status.complete && capture_incomplete(&status));
+        status.error = None;
+        status.capture_fault = None;
+        status.complete = true;
+        status.phase = crate::backend::CapturePhase::Empty;
+        assert!(capture_banner(&status, false).is_none());
     }
 }

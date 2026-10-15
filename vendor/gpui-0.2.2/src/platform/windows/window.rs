@@ -872,6 +872,14 @@ impl PlatformWindow for WindowsWindow {
         self.0.state.borrow_mut().renderer.request_frame_capture()
     }
 
+    fn windows_presentation_count(&self) -> u64 {
+        self.0.state.borrow().renderer.presentation_count()
+    }
+
+    fn windows_presentation_pending(&self) -> bool {
+        self.0.state.borrow().renderer.presentation_pending()
+    }
+
     fn take_windows_frame(&self) -> anyhow::Result<Option<crate::windows_graphics::WindowsFrame>> {
         self.0.state.borrow_mut().renderer.take_frame()
     }

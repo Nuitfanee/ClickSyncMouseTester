@@ -55,7 +55,7 @@ impl GlyphCache {
                 px(font_size),
                 &[gpui::TextRun {
                     len: text.len(),
-                    font: gpui::font(design::DISPLAY_FONT),
+                    font: design::ui_font(),
                     color: rgb(0xffffff).into(),
                     background_color: None,
                     underline: None,

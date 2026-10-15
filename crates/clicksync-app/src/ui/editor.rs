@@ -760,7 +760,7 @@ impl Render for TextInput {
             }))
             .line_height(px(if self.compact { 22.0 } else { 32.0 }))
             .text_size(px(if self.compact { 14.0 } else { 24.0 }))
-            .font_family(super::design::DISPLAY_FONT)
+            .font(super::design::ui_font())
             .border_b_1()
             .border_color(rgb(self.palette.hairline))
             .focus(|style| style.border_color(rgb(self.palette.accent)))

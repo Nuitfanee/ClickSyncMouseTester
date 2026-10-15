@@ -497,6 +497,7 @@ fn settle_motion_owner(
             status.phase = CapturePhase::Empty;
             status.complete = true;
             status.error = None;
+            status.capture_fault = None;
         }
         match shared.motion.peek(motion.id) {
             Some(MotionResult::Selected(candidate)) => {

@@ -318,11 +318,7 @@ pub(super) fn shape_label(
 ) -> gpui::ShapedLine {
     let run = TextRun {
         len: value.len(),
-        font: font(if workspace {
-            crate::ui::design::DISPLAY_FONT
-        } else {
-            "Segoe UI"
-        }),
+        font: crate::ui::design::ui_font(),
         color: rgb(if workspace {
             crate::ui::design::Palette::for_theme(dark).muted
         } else {

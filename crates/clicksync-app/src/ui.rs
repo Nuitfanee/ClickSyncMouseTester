@@ -15,6 +15,7 @@ mod device_picker;
 pub(crate) mod editor;
 mod keys;
 mod motion_guide;
+mod motion_preference;
 mod navigation;
 #[cfg(feature = "ui-restoration-probe")]
 mod page_profile;
@@ -49,6 +50,14 @@ const MIN_WIDTH: u32 = 1240;
 const MIN_HEIGHT: u32 = 800;
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(feature = "ui-restoration-probe")]
+    if std::env::args().nth(1).as_deref() == Some("--profile-startup-ui") {
+        return shell::startup_probe::run(PathBuf::from(
+            std::env::args()
+                .nth(2)
+                .ok_or("startup report path missing")?,
+        ));
+    }
     #[cfg(feature = "ui-restoration-probe")]
     if std::env::args().nth(1).as_deref() == Some("--preview-ui") {
         return preview::run(PathBuf::from(
@@ -234,7 +243,6 @@ struct GpuiHost {
     displayed: Option<Arc<crate::chart::ChartResult>>,
     query: Option<QuerySummary>,
     query_request: Option<u64>,
-    selection_start: Option<usize>,
     focus: gpui::FocusHandle,
     edit: Option<usize>,
     editors: Vec<gpui::Entity<editor::TextInput>>,
@@ -270,6 +278,10 @@ impl GpuiHost {
         mut control_error: Option<String>,
         cx: &mut Context<Self>,
     ) -> Self {
+        #[cfg(feature = "ui-restoration-probe")]
+        if let Err(error) = design::verify_font_shaping(window) {
+            outcome_error(&outcome, error.to_string());
+        }
         let bridge = match GpuiBridge::new(window, !interactive && result.is_none()) {
             Ok(bridge) => Some(bridge),
             Err(error) => {
@@ -430,7 +442,6 @@ impl GpuiHost {
             displayed: None,
             query: None,
             query_request: None,
-            selection_start: None,
             focus: cx.focus_handle(),
             edit: None,
             editors,
@@ -533,7 +544,6 @@ impl GpuiHost {
                     self.keys.reset_statistics();
                     self.query = None;
                     self.query_request = None;
-                    self.selection_start = None;
                 }
                 Ok(_) if action == "resume" => {
                     self.query = None;
@@ -563,9 +573,7 @@ impl GpuiHost {
         let status = self.runtime.borrow().status();
         if let Some(status) = status {
             let current = status.generation >= self.page_generation;
-            if current {
-                changed |= update_backend_error(&mut self.backend_error, &status);
-            }
+            changed |= update_backend_error(&mut self.backend_error, &status, self.page_generation);
             let catalog_changed = self
                 .runtime
                 .borrow_mut()
@@ -998,7 +1006,6 @@ impl GpuiHost {
         }
         self.keys.reset_transient();
         self.keys_ui.reset_transient();
-        self.cancel_selection();
         self.observe_capture();
     }
 
@@ -1015,7 +1022,6 @@ impl GpuiHost {
         self.target = None;
         self.query = None;
         self.query_request = None;
-        self.cancel_selection();
         if let Some(chart) = &self.chart {
             let viewport = chart.borrow().viewport();
             chart.borrow_mut().set_viewport(viewport, false);
@@ -1072,7 +1078,6 @@ impl GpuiHost {
             }
             self.round_cancelled += 1;
             self.keys.reset_transient();
-            self.cancel_selection();
             self.runtime.borrow_mut().invalidate(self.receiver);
             self.receiver = self.runtime.borrow_mut().attach();
             self.file_busy = false;
@@ -1084,6 +1089,7 @@ impl GpuiHost {
             self.edit = None;
             self.device_menu = false;
             self.control_error = None;
+            self.backend_error = None;
             self.file_message = None;
             self.query = None;
             self.selected.clear();
@@ -1093,6 +1099,7 @@ impl GpuiHost {
     fn reset_for_navigation(&mut self) {
         self.lock.release();
         self.page_generation = self.runtime.borrow_mut().request_page_reset();
+        self.backend_error = None;
     }
     fn can_navigate(&self) -> bool {
         !self.workspace.chart_window
@@ -1235,12 +1242,6 @@ impl GpuiHost {
             frame.sensitivity =
                 clicksync_chart::analysis::sensitivity::SensitivityEngine::default().frame();
             frame.sensitivity_reset = self.sensitivity_reset;
-        }
-    }
-    fn cancel_selection(&mut self) {
-        self.selection_start = None;
-        for chart in [&self.chart, &self.comparison_chart].into_iter().flatten() {
-            chart.borrow_mut().end_selection();
         }
     }
     fn edit_value(&self, index: usize) -> String {
@@ -1627,8 +1628,15 @@ fn capture_status_error(status: &crate::backend::AppStatus) -> Option<&str> {
         })
 }
 
-fn update_backend_error(error: &mut Option<String>, status: &crate::backend::AppStatus) -> bool {
-    let next = capture_status_error(status);
+fn update_backend_error(
+    error: &mut Option<String>,
+    status: &crate::backend::AppStatus,
+    minimum_generation: u64,
+) -> bool {
+    let next = (status.generation >= minimum_generation
+        && status.capture_fault != Some(crate::backend::CaptureFault::DeviceDisconnected))
+    .then(|| capture_status_error(status))
+    .flatten();
     if error.as_deref() == next {
         return false;
     }
@@ -1636,12 +1644,38 @@ fn update_backend_error(error: &mut Option<String>, status: &crate::backend::App
     true
 }
 
-fn displayed_error(control: &Option<String>, backend: &Option<String>) -> Option<String> {
+fn localized_capture_error(error: &str, english: bool) -> &str {
+    match (error, english) {
+        ("selected input device disconnected", false) => "鼠标连接已中断，请重新连接后开始新测量。",
+        ("selected input device disconnected", true) => {
+            "Mouse connection interrupted. Reconnect it and start a new measurement."
+        }
+        ("Capture failed; reset and measure again.", false) => "采集已停止，请重置后重新测量。",
+        ("Capture data is incomplete; reset and measure again.", false)
+        | ("capture queue overflow; received prefix is incomplete", false)
+        | ("capture stop reports an incomplete received prefix", false) => {
+            "本次数据不完整，请重新开始测量。"
+        }
+        _ => error,
+    }
+}
+
+fn localized_ui_error(
+    control: &Option<String>,
+    backend: &Option<String>,
+    english: bool,
+) -> Option<String> {
+    let control = control
+        .as_deref()
+        .map(|error| localized_capture_error(error, english));
+    let backend = backend
+        .as_deref()
+        .map(|error| localized_capture_error(error, english));
     match (control, backend) {
         (Some(control), Some(backend)) if control != backend => {
             Some(format!("{control}\n{backend}"))
         }
-        (Some(error), _) | (_, Some(error)) => Some(error.clone()),
+        (Some(error), _) | (_, Some(error)) => Some(error.to_owned()),
         _ => None,
     }
 }
@@ -1835,31 +1869,86 @@ mod capture_error_tests {
         };
         let mut backend = None;
         let control = Some("same diagnostic".to_owned());
-        assert!(!update_backend_error(&mut backend, &healthy));
+        assert!(!update_backend_error(&mut backend, &healthy, 0));
         let mut fault = AppStatus {
             phase: CapturePhase::Faulted,
             error: control.clone(),
             ..healthy.clone()
         };
-        assert!(update_backend_error(&mut backend, &fault));
-        assert_eq!(displayed_error(&control, &backend), control);
-        assert!(!update_backend_error(&mut backend, &fault));
-        assert!(update_backend_error(&mut backend, &healthy));
-        assert_eq!(displayed_error(&control, &backend), control);
+        assert!(update_backend_error(&mut backend, &fault, 0));
+        assert_eq!(localized_ui_error(&control, &backend, true), control);
+        assert!(!update_backend_error(&mut backend, &fault, 0));
+        assert!(update_backend_error(&mut backend, &healthy, 0));
+        assert_eq!(localized_ui_error(&control, &backend, true), control);
         // A successful ACK can clear control text before the old owner state retires.
-        assert!(update_backend_error(&mut backend, &fault));
-        assert!(displayed_error(&None, &backend).is_some());
-        assert!(update_backend_error(&mut backend, &healthy));
-        assert!(displayed_error(&None, &backend).is_none());
+        assert!(update_backend_error(&mut backend, &fault, 0));
+        assert!(localized_ui_error(&None, &backend, true).is_some());
+        assert!(update_backend_error(&mut backend, &healthy, 0));
+        assert!(localized_ui_error(&None, &backend, true).is_none());
         fault.error = Some("new capture fault".into());
-        assert!(update_backend_error(&mut backend, &fault));
+        assert!(update_backend_error(&mut backend, &fault, 0));
         assert_eq!(
-            displayed_error(&control, &backend).as_deref(),
+            localized_ui_error(&control, &backend, true).as_deref(),
             Some("same diagnostic\nnew capture fault")
         );
         assert_eq!(control.as_deref(), Some("same diagnostic"));
         fault.error = None;
-        assert!(update_backend_error(&mut backend, &fault));
+        assert!(update_backend_error(&mut backend, &fault, 0));
         assert!(backend.unwrap().contains("Capture failed"));
+    }
+
+    #[test]
+    fn capture_errors_retire_with_the_page_generation_without_changing_integrity() {
+        let mut fault = crate::backend::AppStatus {
+            generation: 7,
+            phase: crate::backend::CapturePhase::Faulted,
+            complete: false,
+            error: Some("selected input device disconnected".into()),
+            ..Default::default()
+        };
+        let mut error = None;
+        assert!(update_backend_error(&mut error, &fault, 7));
+        assert_eq!(error, fault.error);
+        assert!(update_backend_error(&mut error, &fault, 8));
+        assert!(error.is_none());
+        assert!(!update_backend_error(&mut error, &fault, 8));
+        assert!(!fault.complete && capture_incomplete(&fault));
+        fault.generation = 8;
+        assert!(update_backend_error(&mut error, &fault, 8));
+        assert_eq!(error, fault.error);
+    }
+
+    #[test]
+    fn disconnection_uses_local_recovery_ui_and_keeps_unrelated_diagnostics() {
+        let fault = AppStatus {
+            generation: 7,
+            phase: CapturePhase::Faulted,
+            capture_fault: Some(crate::backend::CaptureFault::DeviceDisconnected),
+            error: Some("changed backend diagnostic wording".into()),
+            ..Default::default()
+        };
+        let mut backend = Some("previous fault".to_owned());
+        assert!(update_backend_error(&mut backend, &fault, 7));
+        assert!(backend.is_none());
+        assert!(capture_incomplete(&fault));
+        let unrelated =
+            Some("independent file failure\nselected input device disconnected".to_owned());
+        for english in [false, true] {
+            assert!(localized_ui_error(&None, &backend, english).is_none());
+            assert_eq!(localized_ui_error(&unrelated, &backend, english), unrelated);
+        }
+        let mut unclassified = fault;
+        unclassified.capture_fault = Some(crate::backend::CaptureFault::Other);
+        assert!(update_backend_error(&mut backend, &unclassified, 7));
+        assert_eq!(backend, unclassified.error);
+        assert_eq!(
+            localized_ui_error(
+                &None,
+                &Some("Capture failed; reset and measure again.".into()),
+                false
+            )
+            .as_deref(),
+            Some("采集已停止，请重置后重新测量。")
+        );
     }
 }

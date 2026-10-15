@@ -13,6 +13,8 @@ desktop.ini
 
 # Local documentation and development workflow
 *.md
+!/README.md
+!/README.zh-CN.md
 *.rst
 /docs/
 /plans/

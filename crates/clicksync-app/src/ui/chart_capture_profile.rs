@@ -230,21 +230,43 @@ fn run_window(path: PathBuf) -> gpui::Result<()> {
                         }))?;
                         let (handle, child) = next(main, &measured, cx).await?;
                         wait(handle, &child, all_visible, cx).await?;
-                        handle.update(cx, |_, window, cx| {
+                        handle.update(cx, |_, _, cx| {
                             child.update(cx, |host, cx| {
                                 ensure!(host.imported.as_ref().is_some_and(|(snapshot, cpi)|
                                     Arc::ptr_eq(snapshot, &imported) && *cpi == Some(1600.0))
                                     && host.workspace.groups.len() == 1
                                     && host.workspace.next_group_key == 1001,
                                     "opening lost imported measurements or comparison identity");
-                                host.return_to_performance_setup(window, cx);
+                                // Inject directory-loss presentation; click the production recovery action.
+                                host.selected.clear();
+                                host.workspace.preview_status = Some(crate::backend::AppStatus {
+                                    generation: host.page_generation,
+                                    phase: CapturePhase::Faulted,
+                                    capture_fault: Some(crate::backend::CaptureFault::DeviceDisconnected),
+                                    error: Some("changed backend diagnostic wording".into()),
+                                    ..Default::default()
+                                });
+                                cx.notify();
                                 Ok::<_, gpui::private::anyhow::Error>(())
-                            })?;
-                            window.remove_window();
-                            Ok::<_, gpui::private::anyhow::Error>(())
+                            })
                         })??;
+                        wait(handle, &child, |host| {
+                            host.workspace.recovery_control.get().size.width > px(0.0)
+                        }, cx).await?;
+                        let recovery = handle.update(cx, |_, _, cx| {
+                            child.read(cx).workspace.recovery_control.get().center()
+                        })?;
+                        click(handle, recovery, cx).await?;
+                        ensure!(handle.update(cx, |_, _, _| ()).is_err(),
+                            "device recovery left a retired chart window open");
                         main.update(cx, |_, _, cx| {
                             let host = measured.read(cx);
+                            let runtime = host.runtime.borrow();
+                            ensure!(cx.windows().len() == 1 && host.workspace.child.is_none()
+                                && runtime.accepts_receiver(host.receiver)
+                                && !runtime.accepts_receiver(child.read(cx).receiver)
+                                && runtime.driver_starts == 1,
+                                "device recovery did not restore the single-window runtime owner");
                             ensure!(host.imported.as_ref().is_some_and(|(snapshot, cpi)|
                                 Arc::ptr_eq(snapshot, &imported) && *cpi == Some(1600.0))
                                 && host.workspace.groups.len() == 1
@@ -254,6 +276,7 @@ fn run_window(path: PathBuf) -> gpui::Result<()> {
                             Ok::<_, gpui::private::anyhow::Error>(())
                         })??;
                         scenario(&report, "imported-measurements-and-comparisons-survive-window-roundtrip");
+                        scenario(&report, "device-recovery-closes-chart-and-restores-configuration-owner");
                         check_keyboard_cold_start(main, &measured, &report, cx).await?;
                         report.lock().unwrap()["passed"] = true.into();
                         Ok(())

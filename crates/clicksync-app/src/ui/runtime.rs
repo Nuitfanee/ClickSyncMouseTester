@@ -100,8 +100,19 @@ pub(super) struct AppRuntime {
     driver_target: Option<(gpui::AnyWindowHandle, gpui::WeakEntity<GpuiHost>)>,
 }
 
-impl AppRuntime {
-    pub fn new(interactive: bool) -> (Rc<RefCell<Self>>, Option<String>) {
+/// Send-only startup work; foreground ownership is attached after initialization.
+pub(super) struct StartupServices {
+    backend: Option<Backend>,
+    worker: crate::chart::ChartWorker,
+    domains: DomainWorker,
+    polling_stream: crate::product::polling_stream::Worker,
+    files: FileWorker,
+    settings: Settings,
+    error: Option<String>,
+}
+
+impl StartupServices {
+    pub fn new(interactive: bool) -> Self {
         let (backend, error) = if interactive {
             match Backend::spawn_in_process(false) {
                 Ok(backend) => (Some(backend), None),
@@ -123,14 +134,33 @@ impl AppRuntime {
                     clicksync_core::SessionConfig::default().managed_memory_budget_bytes,
                 )
             });
+        Self {
+            backend,
+            worker: crate::chart::ChartWorker::spawn_with_budget(byte_budget),
+            domains: DomainWorker::spawn(),
+            polling_stream: crate::product::polling_stream::Worker::spawn(),
+            files: FileWorker::spawn(),
+            settings,
+            error,
+        }
+    }
+}
+
+impl AppRuntime {
+    #[cfg(any(test, feature = "ui-restoration-probe"))]
+    pub fn new(interactive: bool) -> (Rc<RefCell<Self>>, Option<String>) {
+        Self::from_services(StartupServices::new(interactive))
+    }
+
+    pub fn from_services(services: StartupServices) -> (Rc<RefCell<Self>>, Option<String>) {
         (
             Rc::new(RefCell::new(Self {
-                backend,
-                worker: crate::chart::ChartWorker::spawn_with_budget(byte_budget),
-                domains: DomainWorker::spawn(),
-                polling_stream: crate::product::polling_stream::Worker::spawn(),
-                files: FileWorker::spawn(),
-                settings,
+                backend: services.backend,
+                worker: services.worker,
+                domains: services.domains,
+                polling_stream: services.polling_stream,
+                files: services.files,
+                settings: services.settings,
                 preferred_device: None,
                 device_catalog: Default::default(),
                 pending_control: None,
@@ -147,7 +177,7 @@ impl AppRuntime {
                 driver_starts: 0,
                 driver_target: None,
             })),
-            error,
+            services.error,
         )
     }
     pub fn attach(&mut self) -> ReceiverId {

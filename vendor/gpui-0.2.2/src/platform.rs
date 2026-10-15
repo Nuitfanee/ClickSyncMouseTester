@@ -560,6 +560,12 @@ pub(crate) trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     }
 
     #[cfg(target_os = "windows")]
+    fn windows_presentation_count(&self) -> u64 { 0 }
+
+    #[cfg(target_os = "windows")]
+    fn windows_presentation_pending(&self) -> bool { false }
+
+    #[cfg(target_os = "windows")]
     fn request_windows_frame_capture(&self) -> anyhow::Result<()> {
         anyhow::bail!("Windows frame capture is unavailable")
     }

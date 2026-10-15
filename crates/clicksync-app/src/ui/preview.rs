@@ -6,7 +6,8 @@ pub(super) fn run(directory: PathBuf) -> Result<(), Box<dyn std::error::Error>> 
     let filter = std::env::var("CLICKSYNC_PREVIEW_FILTER").ok();
     let make_snapshot =
         |display_name: &str,
-         count: u64|
+         count: u64,
+         disconnected: bool|
          -> Result<Arc<clicksync_core::SessionSnapshot>, Box<dyn std::error::Error>> {
             let mut session =
                 clicksync_core::Session::default_with_metadata(clicksync_core::SessionMetadata {
@@ -24,21 +25,32 @@ pub(super) fn run(directory: PathBuf) -> Result<(), Box<dyn std::error::Error>> 
                     clicksync_core::RawMouseMovementMode::Relative,
                 ))?;
             }
+            if disconnected {
+                let mut evidence = session.capture_evidence();
+                evidence.disconnected = true;
+                session.set_capture_evidence(evidence);
+                session.stop();
+            }
             Ok(Arc::new(session.snapshot()?))
         };
-    let snapshot = make_snapshot("LAMZU Thorn V2", 2048)?;
+    let snapshot = make_snapshot("LAMZU Thorn V2", 2048, false)?;
     let long_snapshot = make_snapshot(
         "LAMZU Thorn V2 8K Wireless Gaming Mouse — Performance Receiver",
         2048,
+        false,
     )?;
     let capture_names = ["Scyrox Turbo 8k dongle", "PIXART VAXEE 8K Wireless"];
     let capture_empty = [
-        make_snapshot(capture_names[0], 0)?,
-        make_snapshot(capture_names[1], 0)?,
+        make_snapshot(capture_names[0], 0, false)?,
+        make_snapshot(capture_names[1], 0, false)?,
     ];
     let capture_data = [
-        make_snapshot(capture_names[0], 2048)?,
-        make_snapshot(capture_names[1], 2048)?,
+        make_snapshot(capture_names[0], 2048, false)?,
+        make_snapshot(capture_names[1], 2048, false)?,
+    ];
+    let disconnected_data = [
+        make_snapshot(capture_names[0], 2048, true)?,
+        make_snapshot(capture_names[1], 2048, true)?,
     ];
     let failure = Arc::new(Mutex::new(Some(
         "Preview cancelled before export completed".to_owned(),
@@ -74,7 +86,7 @@ pub(super) fn run(directory: PathBuf) -> Result<(), Box<dyn std::error::Error>> 
                     let result: gpui::Result<()> = async {
                         let report = Arc::new(Mutex::new(serde_json::json!({"frames": [], "boundary": "Visual fixtures, not physical measurements. No regression suite or capture."})));
                         for (variant, dark, english) in [("light-zh", false, false), ("dark-zh", true, false), ("light-en", false, true), ("dark-en", true, true)] {
-                            for name in ["sensitivity-setup", "sensitivity-setup-wide", "sensitivity-setup-long-name", "sensitivity", "sensitivity-preparing", "sensitivity-collecting", "sensitivity-finishing", "sensitivity-failure", "sensitivity-expired", "sensitivity-result", "sensitivity-large-result", "sensitivity-wide", "sensitivity-long-name", "calibration", "calibration-result", "keys", "keys-idle", "keys-picking", "keys-pressed", "keys-editing", "keys-long-name", "keys-large-counts", "keys-wide", "keys-motion", "setup", "overview", "overview-hover", "metrics", "datasets", "monitors", "detail", "detail-datasets", "count-hover", "layers", "histogram", "histogram-hover", "histogram-locked", "interval-hover", "comparison", "comparison-histogram", "minimum-detail", "wide-detail", "wide-overview", "long-name", "long-name-data", "long-name-detail", "frequency-three-overview", "frequency-three", "frequency-three-wide", "frequency-three-hover", "overview-three-wide", "maximum-overview", "capture-ready", "capture-paused", "capture-stopped", "minimum-capture-ready", "minimum-capture-paused", "minimum-capture-stopped"] {
+                            for name in ["sensitivity-setup", "sensitivity-setup-wide", "sensitivity-setup-long-name", "sensitivity-setup-waiting", "sensitivity-setup-no-device", "sensitivity-setup-no-other-device", "sensitivity-setup-timeout", "sensitivity", "sensitivity-preparing", "sensitivity-collecting", "sensitivity-finishing", "sensitivity-failure", "sensitivity-expired", "sensitivity-result", "sensitivity-large-result", "sensitivity-wide", "sensitivity-long-name", "calibration", "calibration-result", "keys", "keys-idle", "keys-picking", "keys-pressed", "keys-editing", "keys-long-name", "keys-large-counts", "keys-wide", "keys-motion", "setup", "overview", "overview-hover", "metrics", "datasets", "monitors", "detail", "statistics-trajectory", "statistics-path", "statistics-xy-counts", "statistics-xy-cumulative", "statistics-xy-speed", "statistics-interval", "statistics-histogram", "detail-datasets", "count-hover", "layers", "histogram", "histogram-hover", "histogram-locked", "interval-hover", "comparison", "comparison-histogram", "minimum-detail", "wide-detail", "wide-overview", "long-name", "long-name-data", "long-name-detail", "frequency-three-overview", "frequency-three", "frequency-three-wide", "frequency-three-hover", "overview-three-wide", "maximum-overview", "capture-ready", "capture-paused", "capture-stopped", "minimum-capture-ready", "minimum-capture-paused", "minimum-capture-stopped", "disconnected-sensitivity-setup", "disconnected-sensitivity", "disconnected-polling", "disconnected-polling-reconnected", "disconnected-capture", "disconnected-capture-reconnected"] {
                                 if filter.as_ref().is_some_and(|filter| !name.starts_with(filter.as_str())) { continue; }
                                 if name == "keys-motion" && filter.as_deref() != Some("keys-motion") { continue; }
                                 if name == "keys-motion" && variant != "light-zh" { continue; }
@@ -85,15 +97,30 @@ pub(super) fn run(directory: PathBuf) -> Result<(), Box<dyn std::error::Error>> 
                                         key, metadata: clicksync_core::SessionMetadata { display_name: format!("Mouse {}", if key == 1 { "A" } else { "B" }), device_id: format!("preview-{key}"), button_count: 5, ..Default::default() }, ..Default::default()
                                     }).collect::<Vec<_>>());
                                     host.settings.english = english;
-                                    host.custom_chrome = name.starts_with("sensitivity") || name.starts_with("keys") || matches!(name, "calibration" | "calibration-result" | "setup");
+                                    host.custom_chrome = name.starts_with("sensitivity") || name.starts_with("keys") || matches!(name, "calibration" | "calibration-result" | "setup") || (name.starts_with("disconnected") && !name.contains("capture"));
+                                    host.control_error = None;
+                                    host.backend_error = None;
+                                    host.workspace.preview_status = None;
                                     host.workspace.detail_menu = false;
                                     host.workspace.data_menu = false;
                                     host.workspace.monitor_menu = false;
                                     match name {
-                                        name if name.starts_with("sensitivity-setup") => {
+                                        name if name.starts_with("sensitivity-setup") || name == "disconnected-sensitivity-setup" => {
                                             host.page = Page::Sensitivity;
                                             host.sensitivity = sensitivity::SensitivityPage::default();
-                                            host.business_input.bindings = [None, None];
+                                            host.business_input = business_input::BusinessInput::default();
+                                            host.control_error = None;
+                                            if name == "disconnected-sensitivity-setup" {
+                                                host.sensitivity.disconnected = [true; 2];
+                                            }
+                                            if name == "sensitivity-setup-waiting" { host.business_input.binding_slot = Some(1); }
+                                            if matches!(name, "sensitivity-setup-no-device" | "sensitivity-setup-no-other-device") {
+                                                host.sensitivity.binding_issues[1] = Some(sensitivity::BindingIssue::Error("no eligible motion device".into()));
+                                                if name == "sensitivity-setup-no-other-device" { host.business_input.bindings[0] = Some(1); }
+                                            }
+                                            if name == "sensitivity-setup-timeout" {
+                                                host.sensitivity.binding_issues[1] = Some(sensitivity::BindingIssue::Motion(clicksync_capture::observation::MotionResult::TimedOut));
+                                            }
                                             if name == "sensitivity-setup-wide" { window.resize(size(px(1600.0), px(900.0))); }
                                             if name == "sensitivity-setup-long-name" {
                                                 host.business_input.bindings = [Some(1), Some(2)];
@@ -103,7 +130,7 @@ pub(super) fn run(directory: PathBuf) -> Result<(), Box<dyn std::error::Error>> 
                                                 }).collect::<Vec<_>>());
                                             }
                                         }
-                                        name if name.starts_with("sensitivity") => {
+                                        name if name.starts_with("sensitivity") || name == "disconnected-sensitivity" => {
                                             use clicksync_chart::analysis::sensitivity::{MatchFrame, MatchResult, MeasurementState, Stage, Failure};
                                             host.page = Page::Sensitivity;
                                             host.sensitivity = sensitivity::SensitivityPage::default();
@@ -113,6 +140,11 @@ pub(super) fn run(directory: PathBuf) -> Result<(), Box<dyn std::error::Error>> 
                                             host.business_input.bindings = [Some(1), Some(2)];
                                             host.was_active = true;
                                             match name {
+                                                "disconnected-sensitivity" => {
+                                                    host.business_input.bindings = [Some(1), None];
+                                                    host.sensitivity.disconnected = [false, true];
+                                                    host.sensitivity.target_dpi.clear();
+                                                }
                                                 "sensitivity-preparing" | "sensitivity-collecting" | "sensitivity-finishing" => {
                                                     host.sensitivity.requested = true;
                                                     host.sensitivity.frame = Some(MatchFrame {
@@ -142,6 +174,36 @@ pub(super) fn run(directory: PathBuf) -> Result<(), Box<dyn std::error::Error>> 
                                                 }
                                                 _ => {}
                                             }
+                                        }
+                                        "disconnected-polling" | "disconnected-polling-reconnected" => {
+                                            let reconnected = name.ends_with("reconnected");
+                                            host.page = Page::Polling;
+                                            host.polling = polling::PollingPage::disconnected_preview(reconnected);
+                                            host.selected = if reconnected { vec![1] } else { Vec::new() };
+                                            if !reconnected { host.runtime.borrow_mut().device_catalog.update(&[]); }
+                                        }
+                                        "disconnected-capture" | "disconnected-capture-reconnected" => {
+                                            let reconnected = name.ends_with("reconnected");
+                                            host.page = Page::Performance;
+                                            host.workspace.chart_window = true;
+                                            host.show_plot_overview();
+                                            host.workspace.retire(&host.runtime.borrow());
+                                            host.workspace.groups.clear();
+                                            host.imported = None;
+                                            host.selected = vec![1, 2];
+                                            if !reconnected { host.runtime.borrow_mut().device_catalog.update(&[]); }
+                                            host.workspace.latest = Some(Arc::new(crate::backend::SessionPrefix {
+                                                generation: 1, received_sequence: 4096, received_records: 4096,
+                                                phase: crate::backend::CapturePhase::Faulted, complete: false,
+                                                datasets: disconnected_data.iter().enumerate().map(|(side, data)| (side as u32 + 1, data.clone())).collect(),
+                                            }));
+                                            host.workspace.preview_status = Some(crate::backend::AppStatus {
+                                                generation: 1, phase: crate::backend::CapturePhase::Faulted, complete: false,
+                                                capture_fault: Some(crate::backend::CaptureFault::DeviceDisconnected),
+                                                error: Some("selected input device disconnected".into()), selected_device_keys: host.selected.clone(),
+                                                devices: host.runtime.borrow().device_catalog.choices().iter().map(|choice| clicksync_core::devices::DeviceDescriptor { key: choice.key, ..Default::default() }).collect(),
+                                                ..Default::default()
+                                            });
                                         }
                                         "calibration" => { host.page = Page::Calibration; host.calibration = calibration::CalibrationPage::default(); }
                                         "calibration-result" => {
@@ -207,6 +269,30 @@ pub(super) fn run(directory: PathBuf) -> Result<(), Box<dyn std::error::Error>> 
                                         "metrics" => host.workspace.detail_menu = true,
                                         "datasets" | "detail-datasets" | "long-name-data" => host.workspace.data_menu = true,
                                         "monitors" => host.workspace.monitor_menu = true,
+                                        name if name.starts_with("statistics-") => {
+                                            host.page = Page::Performance;
+                                            host.workspace.chart_window = true;
+                                            host.show_plot_overview();
+                                            host.workspace.retire(&host.runtime.borrow());
+                                            host.imported = Some((snapshot.clone(), Some(800.0)));
+                                            host.workspace.groups.clear();
+                                            host.workspace.detail_options.clear();
+                                            host.workspace.histogram_specs.clear();
+                                            host.workspace.hidden_datasets.clear();
+                                            host.workspace.analysis = None;
+                                            host.import_identity += 1;
+                                            host.workspace.detail = Some(match name {
+                                                "statistics-trajectory" => 11,
+                                                "statistics-path" => 12,
+                                                "statistics-xy-counts" => 17,
+                                                "statistics-xy-cumulative" => 18,
+                                                "statistics-xy-speed" => 19,
+                                                "statistics-interval" => 5,
+                                                "statistics-histogram" => 0,
+                                                _ => unreachable!(),
+                                            });
+                                            host.workspace.detail_histogram = name == "statistics-histogram";
+                                        }
                                         "detail" => host.open_plot_detail(0, false),
                                         "histogram" => host.open_plot_detail(0, true),
                                         "histogram-locked" => host.toggle_histogram_policy(0),
@@ -292,7 +378,7 @@ pub(super) fn run(directory: PathBuf) -> Result<(), Box<dyn std::error::Error>> 
                                 loop {
                                     Timer::after(Duration::from_millis(16)).await;
                                     let ready = handle.update(cx, |_, window, cx| rendered.update(cx, |host, cx| {
-                                        let capture_fixture = name.contains("capture-");
+                                        let capture_fixture = name.contains("capture-") || name == "disconnected-capture";
                                         let ready_fixture = capture_fixture && name.ends_with("ready");
                                         if capture_fixture && !ready_fixture {
                                             let events = host.runtime.borrow_mut().poll(host.receiver);

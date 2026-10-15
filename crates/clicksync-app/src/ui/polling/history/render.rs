@@ -640,7 +640,7 @@ struct Axes {
 fn shape(window: &Window, value: String, font_size: f32, color: u32) -> gpui::ShapedLine {
     let run = gpui::TextRun {
         len: value.len(),
-        font: gpui::font(design::DISPLAY_FONT),
+        font: design::ui_font(),
         color: rgb(color).into(),
         background_color: None,
         underline: None,

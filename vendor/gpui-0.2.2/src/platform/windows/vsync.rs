@@ -61,21 +61,57 @@ fn get_dwm_interval() -> Result<Duration> {
         ..Default::default()
     };
     unsafe { DwmGetCompositionTimingInfo(HWND::default(), &mut timing_info) }?;
-    let interval = retrieve_duration(timing_info.qpcRefreshPeriod, *QPC_TICKS_PER_SECOND);
+    Ok(refresh_interval(
+        timing_info.qpcRefreshPeriod,
+        *QPC_TICKS_PER_SECOND,
+        timing_info.rateRefresh.uiDenominator as u64,
+        timing_info.rateRefresh.uiNumerator as u64,
+    ))
+}
+
+fn refresh_interval(qpc_period: u64, qpc_frequency: u64, denominator: u64, numerator: u64) -> Duration {
     // Check for interval values that are impossibly low. A 29 microsecond
     // interval was seen (from a qpcRefreshPeriod of 60).
-    if interval < VSYNC_INTERVAL_THRESHOLD {
-        Ok(retrieve_duration(
-            timing_info.rateRefresh.uiDenominator as u64,
-            timing_info.rateRefresh.uiNumerator as u64,
-        ))
-    } else {
-        Ok(interval)
-    }
+    retrieve_duration(qpc_period, qpc_frequency)
+        .filter(|interval| *interval >= VSYNC_INTERVAL_THRESHOLD)
+        .or_else(|| {
+            retrieve_duration(denominator, numerator)
+                .filter(|interval| *interval >= VSYNC_INTERVAL_THRESHOLD)
+        })
+        .unwrap_or(DEFAULT_VSYNC_INTERVAL)
 }
 
 #[inline]
-fn retrieve_duration(counts: u64, ticks_per_second: u64) -> Duration {
-    let ticks_per_microsecond = ticks_per_second / 1_000_000;
-    Duration::from_micros(counts / ticks_per_microsecond)
+fn retrieve_duration(counts: u64, ticks_per_second: u64) -> Option<Duration> {
+    if ticks_per_second == 0 {
+        return None;
+    }
+    Some(Duration::new(
+        counts / ticks_per_second,
+        ((counts % ticks_per_second) as u128 * 1_000_000_000 / ticks_per_second as u128) as u32,
+    ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn vsync_fallback_preserves_refresh_fractions_and_survives_invalid_timing() {
+        for (denominator, numerator, nanos) in [
+            (1, 60, 16_666_666),
+            (1001, 60_000, 16_683_333),
+            (1, 360, 2_777_777),
+        ] {
+            assert_eq!(
+                refresh_interval(60, 10_000_000, denominator, numerator),
+                Duration::from_nanos(nanos)
+            );
+        }
+        assert_eq!(refresh_interval(166_667, 10_000_000, 0, 0), Duration::from_nanos(16_666_700));
+        for args in [(0, 0, 0, 0), (0, 10_000_000, 1, 0), (1, 10_000_000, 0, 60)] {
+            assert_eq!(refresh_interval(args.0, args.1, args.2, args.3), DEFAULT_VSYNC_INTERVAL);
+        }
+        assert_eq!(retrieve_duration(u64::MAX, 1), Some(Duration::from_secs(u64::MAX)));
+    }
 }

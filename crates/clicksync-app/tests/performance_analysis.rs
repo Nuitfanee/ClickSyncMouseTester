@@ -359,3 +359,304 @@ fn full_json_uses_the_selected_group_and_rejects_unordered_ticks() {
     std::fs::remove_file(json).unwrap();
     std::fs::remove_dir(directory).unwrap();
 }
+
+#[test]
+fn every_detail_metric_and_supported_histogram_has_semantic_frozen_statistics_only() {
+    use clicksync_chart::analysis::detail::{StatisticKind as K, StatisticValue as V};
+    let worker = ChartWorker::spawn();
+    let prefix = input();
+    let mut id = 100;
+    for (index, (metric, _, _)) in clicksync_app::product::METRICS.iter().enumerate() {
+        for histogram in [false, true] {
+            if histogram && (matches!(metric, Metric::Trajectory) || index == 18) {
+                continue;
+            }
+            id += 1;
+            let target = request(prefix.clone(), index, histogram, id);
+            worker.submit(target.clone()).unwrap();
+            let frozen = answer(&worker);
+            for dataset in &frozen.datasets {
+                assert_eq!(
+                    dataset.gaps.is_some(),
+                    !histogram && *metric != Metric::Trajectory,
+                    "{index} / {histogram}: only time plots index marked gaps"
+                );
+                let statistics = dataset.statistics.as_ref().unwrap();
+                assert!(statistics.sample_count > 0, "{index} / {histogram}");
+                let fields: &[K] = if histogram {
+                    &[K::Mean, K::StandardDeviation]
+                } else {
+                    match metric {
+                        Metric::Count(_) | Metric::Velocity(_) => {
+                            &[K::MeanAbsolute, K::PeakAbsolute]
+                        }
+                        Metric::CountTrend(_) | Metric::IntervalTrend => {
+                            &[K::Mean, K::StandardDeviation]
+                        }
+                        Metric::DeltaMagnitude | Metric::VelocityMagnitude | Metric::PathSpeed => {
+                            &[K::Mean, K::P95, K::Maximum]
+                        }
+                        Metric::Interval => &[K::Mean, K::StandardDeviation, K::P99, K::Maximum],
+                        Metric::RawFrequency | Metric::Frequency => {
+                            &[K::Mean, K::StandardDeviation, K::P05]
+                        }
+                        Metric::Trajectory => &[K::PathLength, K::Width, K::Height],
+                        Metric::PathLength => &[K::PathLength],
+                        Metric::Cumulative(_) => &[K::Span, K::AbsoluteTravel],
+                    }
+                };
+                let axis = match metric {
+                    Metric::Count(axis) | Metric::Velocity(axis)
+                        if !histogram && target.secondary_metric.is_some() =>
+                    {
+                        Some(*axis)
+                    }
+                    Metric::Cumulative(axis) if !histogram => Some(*axis),
+                    _ => None,
+                };
+                let mut axes = vec![axis];
+                if target.secondary_metric.is_some() {
+                    axes.push(Some(Axis::Y));
+                }
+                let expected: Vec<_> = std::iter::once((K::Samples, None))
+                    .chain(
+                        axes.into_iter()
+                            .flat_map(|axis| fields.iter().map(move |kind| (*kind, axis))),
+                    )
+                    .collect();
+                assert_eq!(
+                    statistics
+                        .rows
+                        .iter()
+                        .map(|row| (row.kind, row.axis))
+                        .collect::<Vec<_>>(),
+                    expected,
+                    "{index} / {histogram}"
+                );
+                let sample_row = &statistics.rows[0];
+                assert_eq!(
+                    sample_row.value,
+                    Some(V::Integer(statistics.sample_count as i128))
+                );
+                if histogram {
+                    let bins = &dataset.histogram;
+                    let mode = dataset.histogram_statistics.unwrap();
+                    assert_eq!(
+                        bins.iter().map(|bin| bin.count).sum::<usize>(),
+                        statistics.sample_count
+                    );
+                    assert_eq!(
+                        mode.modal_share,
+                        mode.modal_bin.count as f64 * 100.0 / statistics.sample_count as f64
+                    );
+                }
+            }
+            if !histogram
+                && matches!(
+                    metric,
+                    Metric::Velocity(_) | Metric::VelocityMagnitude | Metric::PathSpeed
+                )
+            {
+                let speed = |side: usize| {
+                    let rows = &frozen.datasets[side].statistics.as_ref().unwrap().rows;
+                    match rows
+                        .iter()
+                        .find(|row| matches!(row.kind, K::Mean | K::MeanAbsolute))
+                        .unwrap()
+                        .value
+                        .unwrap()
+                    {
+                        V::Scalar(value) => value,
+                        _ => panic!("speed"),
+                    }
+                };
+                assert_eq!(speed(0), speed(1) * 2.0);
+                assert_eq!(speed(1), speed(2) * 2.0);
+            }
+            id += 1;
+            let mut live = target;
+            live.id = id;
+            live.prefix = Arc::new(SessionPrefix {
+                phase: CapturePhase::Collecting,
+                ..(*prefix).clone()
+            });
+            worker.submit(live).unwrap();
+            let live = answer(&worker);
+            assert!(
+                live.datasets
+                    .iter()
+                    .all(|dataset| dataset.statistics.is_none()
+                        && dataset.histogram_statistics.is_none()
+                        && dataset.gaps.is_none())
+            );
+            assert!(
+                live.datasets
+                    .iter()
+                    .all(|dataset| dataset.work.new_record_reads == 0)
+            );
+        }
+    }
+}
+
+#[test]
+fn collecting_never_builds_gap_analysis_even_with_retained_detail_options() {
+    let worker = ChartWorker::spawn();
+    let mut target = request(input(), 5, false, 490);
+    target.analysis.as_mut().unwrap().range = None;
+    worker.submit(target.clone()).unwrap();
+    let frozen = answer(&worker);
+    let index = frozen.datasets[0].gaps.as_ref().unwrap();
+    assert_eq!(index.query(2.0, 3.0).count, 1);
+    target.id += 1;
+    target.prefix = Arc::new(SessionPrefix {
+        phase: CapturePhase::Collecting,
+        ..(*target.prefix).clone()
+    });
+    worker.submit(target).unwrap();
+    let live = answer(&worker);
+    assert!(
+        live.datasets.iter().all(|dataset| dataset.gaps.is_none()),
+        "retained gap options must not scan and sort live history"
+    );
+    assert!(
+        live.datasets
+            .iter()
+            .all(|dataset| dataset.work.new_record_reads == 0)
+    );
+    assert_eq!(index.query(2.0, 3.0).mean_ms, Some(49.0));
+}
+
+#[test]
+fn gap_statistics_use_visible_intersections_of_the_marked_group_and_fixed_result() {
+    use clicksync_app::chart::gaps::GapStatistics;
+    let worker = ChartWorker::spawn();
+    let mut target = request(input(), 5, false, 500);
+    let analysis = target.analysis.as_mut().unwrap();
+    analysis.range = None;
+    analysis.options.gap_dataset = Some(2);
+    worker.submit(target.clone()).unwrap();
+    let first = answer(&worker);
+    assert!(first.datasets[0].gaps.is_none());
+    assert!(first.datasets[2].gaps.is_none());
+    let index = first.datasets[1].gaps.as_ref().unwrap();
+    let mut marked = Vec::new();
+    index.for_each_visible(0.0, 2000.0, |gap| marked.push(gap));
+    assert_eq!(marked, [[1.0, 50.0]]);
+    assert_eq!(
+        index.query(2.0, 3.0),
+        GapStatistics {
+            count: 1,
+            mean_ms: Some(49.0)
+        }
+    );
+    assert_eq!(index.query(50.0, 55.0), GapStatistics::default());
+    assert_eq!(index.query(60.0, 80.0), GapStatistics::default());
+
+    target.id += 1;
+    target.analysis.as_mut().unwrap().options.lines = false;
+    worker.submit(target.clone()).unwrap();
+    let restyled = answer(&worker);
+    assert!(
+        Arc::ptr_eq(index, restyled.datasets[1].gaps.as_ref().unwrap()),
+        "style changes must reuse fixed gap analysis"
+    );
+
+    target.id += 1;
+    target.analysis.as_mut().unwrap().range = Some((0.0, 3.0));
+    worker.submit(target.clone()).unwrap();
+    let selected = answer(&worker);
+    assert!(!Arc::ptr_eq(
+        index,
+        selected.datasets[1].gaps.as_ref().unwrap()
+    ));
+    assert_eq!(
+        selected.datasets[1].gaps.as_ref().unwrap().query(0.0, 60.0),
+        GapStatistics::default()
+    );
+    assert_eq!(
+        index.query(2.0, 3.0).count,
+        1,
+        "published indices stay immutable"
+    );
+
+    target.id += 1;
+    target.parameters.time_basis = clicksync_chart::TimeBasis::Logical;
+    let analysis = target.analysis.as_mut().unwrap();
+    analysis.range = None;
+    analysis.options.gap_dataset = Some(3);
+    worker.submit(target.clone()).unwrap();
+    let logical = answer(&worker);
+    assert!(logical.datasets[1].gaps.is_none());
+    let expected = clicksync_app::product::performance_analysis::report_gaps(
+        logical.snapshot(3).unwrap(),
+        clicksync_chart::TimeBasis::Logical,
+        None,
+    );
+    let logical_index = logical.datasets[2].gaps.as_ref().unwrap();
+    let mut marked = Vec::new();
+    logical_index.for_each_visible(-1.0, 5000.0, |gap| marked.push(gap));
+    assert_eq!(marked, expected);
+    let stats = logical_index.query(-1.0, 5000.0);
+    assert_eq!(stats.count, expected.len());
+    assert_eq!(
+        stats.mean_ms,
+        (!expected.is_empty())
+            .then(|| expected.iter().map(|[a, b]| b - a).sum::<f64>() / expected.len() as f64)
+    );
+
+    target.id += 1;
+    target.analysis.as_mut().unwrap().options.gaps = false;
+    worker.submit(target.clone()).unwrap();
+    assert!(
+        answer(&worker)
+            .datasets
+            .iter()
+            .all(|dataset| dataset.gaps.is_none())
+    );
+
+    target.id += 1;
+    target.analysis.as_mut().unwrap().options.gaps = true;
+    worker.submit(target.clone()).unwrap();
+    let enabled = answer(&worker);
+    assert!(
+        Arc::ptr_eq(logical_index, enabled.datasets[2].gaps.as_ref().unwrap()),
+        "temporarily disabling marks must not rebuild fixed analysis"
+    );
+
+    target.id += 1;
+    target.source_version += 1;
+    worker.submit(target).unwrap();
+    assert!(
+        !Arc::ptr_eq(
+            logical_index,
+            answer(&worker).datasets[2].gaps.as_ref().unwrap()
+        ),
+        "source replacement must not reuse an old source's index"
+    );
+}
+
+#[test]
+fn shared_gap_index_retains_its_own_budget_after_results_and_worker_retire() {
+    let budget = SharedByteBudget::new(64 * 1024 * 1024);
+    let mut worker = ChartWorker::spawn_with_budget(budget.clone());
+    let mut target = request(input(), 5, false, 600);
+    let analysis = target.analysis.as_mut().unwrap();
+    analysis.range = None;
+    analysis.options.gap_dataset = Some(2);
+    worker.submit(target.clone()).unwrap();
+    let result = answer(&worker);
+    let index = result.datasets[1].gaps.as_ref().unwrap().clone();
+    drop(result);
+    target.id += 1;
+    target.analysis.as_mut().unwrap().options.gaps = false;
+    worker.submit(target).unwrap();
+    drop(answer(&worker));
+    worker.shutdown();
+    assert!(
+        budget.reserved_bytes() > 0,
+        "the immutable index owns its budget"
+    );
+    assert_eq!(index.query(2.0, 3.0).mean_ms, Some(49.0));
+    drop(index);
+    assert_eq!(budget.reserved_bytes(), 0);
+}

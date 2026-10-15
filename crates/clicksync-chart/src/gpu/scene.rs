@@ -351,7 +351,7 @@ impl RenderSpec {
     }
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct ResourceLimits {
     pub resident_bytes: usize,
     pub resident_blocks: usize,
@@ -407,6 +407,8 @@ pub struct ResourceReport {
 pub enum GpuError {
     InvalidScene,
     ResourceBusy,
+    /// Cannot make forward progress at this size while retaining the displayed layer.
+    LayerCapacity,
     WrongEpoch,
     WrongThread,
     WrongDevice,

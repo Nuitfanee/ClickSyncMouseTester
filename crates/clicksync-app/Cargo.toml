@@ -3,7 +3,7 @@ name = "clicksync-app"
 version = "0.8.0"
 edition = "2024"
 rust-version = "1.94"
-license = "Apache-2.0"
+license = "MIT"
 publish = false
 
 [features]
@@ -27,6 +27,7 @@ raw-window-handle = "=0.6.2"
 
 [dev-dependencies]
 png = "=0.18.1"
+ttf-parser = "=0.25.1"
 
 [target.'cfg(windows)'.build-dependencies]
 embed-resource = "=3.0.11"

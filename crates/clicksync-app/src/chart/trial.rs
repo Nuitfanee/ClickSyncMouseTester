@@ -16,7 +16,7 @@ pub struct TrialReport {
 }
 
 #[derive(Default)]
-struct Demand {
+pub(super) struct Demand {
     target: Option<ChartRequest>,
     pending: Option<ChartRequest>,
     active: Option<ChartRequest>,
@@ -116,10 +116,14 @@ impl CooperativeTrial {
     }
 
     pub fn remove(&mut self, slot: usize) -> Result<(), String> {
+        drop(self.retire(slot)?);
+        Ok(())
+    }
+
+    pub(super) fn retire(&mut self, slot: usize) -> Result<Demand, String> {
         let demand = self.demands.get_mut(slot).ok_or("trial demand limit")?;
         self.report.discarded[slot] += u64::from(demand.active.is_some());
-        *demand = Demand::default();
-        Ok(())
+        Ok(std::mem::take(demand))
     }
 
     pub fn report(&self) -> TrialReport {
@@ -357,7 +361,10 @@ impl CooperativeTrial {
             .map(|budget| reserve_scene(&mut demand.cache, &request, budget))
             .transpose()?
             .unwrap_or_default();
-        let mut result = demand.cache.analyze(request, cancelled, &mailbox)?;
+        let mut result =
+            demand
+                .cache
+                .analyze(request, cancelled, &mailbox, self.byte_budget.as_ref())?;
         result.byte_budget = self.byte_budget.clone();
         result.managed = demand.cache.managed.clone();
         result.managed.extend(scene_leases);
@@ -467,12 +474,11 @@ fn reserve_scene(
             current.insert(pointer, entry);
         }
     }
-    // Per-result directories and full-prefix time/gap arrays are not shared by block identity.
+    // Comparison time indices belong to each result; shared gap indices own their leases.
     let arrays_per_report = if request.analysis.is_some() {
         usize::from(
             request.prefix.datasets.len() > 1 && request.prefix.phase != CapturePhase::Collecting,
         ) * 64
-            + usize::from(request.analysis.as_ref().is_some_and(|a| a.options.gaps)) * 64
     } else {
         0
     };

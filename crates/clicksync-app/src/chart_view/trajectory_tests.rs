@@ -311,6 +311,31 @@ fn small_integer_trajectories_remain_inside_the_fitted_view_after_padding_is_qua
 }
 
 #[test]
+fn focus_restores_both_axes_after_manual_zoom_even_from_a_follow_request() {
+    let mut source = result(1);
+    let result = Arc::get_mut(&mut source).unwrap();
+    result.request.kind = PlotKind::Points;
+    result.request.parameters.metric = Metric::Count(clicksync_chart::Axis::X);
+    result.request.view = ViewMode::Follow { window_ms: 100.0 };
+    result.datasets[0].plot_origin.x = Coordinate::Time {
+        ticks: 0,
+        frequency: 1000,
+    };
+    result.datasets[0].plot_bounds[0] = 0.0;
+    result.datasets[0].plot_bounds[1] = 5000.0;
+    let expected = result.focus_workspace_viewport(1).unwrap();
+    let mut view = ChartView::new(source).unwrap();
+    view.set_theme(false, false);
+    assert!(view.viewport().origin.x.value() > 1000.0);
+    view.set_viewport(viewport(600.0, -1_000_000.0, 57.0, 2_000_000.0), true);
+    view.fit_focus();
+    assert_eq!(view.viewport(), expected);
+    assert_eq!(view.viewport().origin.x.value(), 0.0);
+    assert_eq!(view.viewport().width, 1000.0);
+    assert!(view.fixed);
+}
+
+#[test]
 fn display_options_preserve_manual_view_but_range_changes_refit() {
     let mut source = result(1);
     {

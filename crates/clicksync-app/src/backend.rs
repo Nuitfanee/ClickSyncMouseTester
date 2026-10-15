@@ -44,6 +44,14 @@ pub enum CapturePhase {
     Faulted,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+pub enum CaptureFault {
+    DeviceDisconnected,
+    QueueOverflow,
+    Incomplete,
+    Other,
+}
+
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct AppStatus {
     pub phase: CapturePhase,
@@ -64,6 +72,7 @@ pub struct AppStatus {
     pub complete: bool,
     pub ignored_old_batches: u64,
     pub command_pending: bool,
+    pub capture_fault: Option<CaptureFault>,
     pub error: Option<String>,
 }
 
@@ -1314,6 +1323,7 @@ impl SessionOwner {
                 status.phase = CapturePhase::Empty;
                 status.generation = self.generation;
                 status.error = None;
+                status.capture_fault = None;
                 status.complete = true;
                 status.overflow = 0;
             }
@@ -1340,6 +1350,11 @@ impl SessionOwner {
                     if capture.overflow > 0 || capture.disconnected {
                         status_complete_error(
                             &mut status,
+                            if capture.disconnected {
+                                CaptureFault::DeviceDisconnected
+                            } else {
+                                CaptureFault::QueueOverflow
+                            },
                             if capture.disconnected {
                                 "selected input device disconnected".into()
                             } else {
@@ -1533,6 +1548,7 @@ impl SessionOwner {
                 status.generation = self.generation;
                 status.complete = true;
                 status.error = None;
+                status.capture_fault = None;
             }
             CommandTag::Resume => {
                 if ack.generation != self.generation {
@@ -1590,6 +1606,7 @@ impl SessionOwner {
             status.overflow = ack.overflow;
             status_complete_error(
                 &mut status,
+                CaptureFault::Incomplete,
                 "capture stop reports an incomplete received prefix".into(),
             );
         }
@@ -1752,12 +1769,13 @@ impl SessionOwner {
 
 fn set_fault(state: &Arc<Mutex<AppStatus>>, error: String) {
     let mut state = state.lock().expect("application status lock");
-    status_complete_error(&mut state, error);
+    status_complete_error(&mut state, CaptureFault::Other, error);
 }
 
-fn status_complete_error(status: &mut AppStatus, error: String) {
+fn status_complete_error(status: &mut AppStatus, fault: CaptureFault, error: String) {
     if status.phase != CapturePhase::Faulted {
         status.error = Some(error);
+        status.capture_fault = Some(fault);
     }
     status.phase = CapturePhase::Faulted;
     status.complete = false;
@@ -1893,7 +1911,85 @@ mod tests {
             Some("capture sequence discontinuity")
         );
         assert_eq!(status.phase, CapturePhase::Faulted);
+        assert_eq!(status.capture_fault, Some(CaptureFault::Other));
         assert!(!status.complete);
+    }
+
+    #[test]
+    fn capture_fault_kind_survives_discovery_and_secondary_faults_until_a_new_generation() {
+        for (disconnected, expected) in [
+            (true, CaptureFault::DeviceDisconnected),
+            (false, CaptureFault::QueueOverflow),
+        ] {
+            let mut owner = owner();
+            let state = Arc::new(Mutex::new(AppStatus {
+                selected_device_keys: vec![1],
+                ..Default::default()
+            }));
+            let snapshot = Arc::new(Mutex::new(None));
+            let mut ack = CaptureAck {
+                command: CommandTag::Start,
+                generation: 1,
+                cutoff: 0,
+                queued: 0,
+                ticks: 1_000_000,
+                timestamp_frequency: 10_000_000,
+                complete: true,
+                overflow: 0,
+                queue_high_watermark: 0,
+                devices: vec![DeviceDescriptor {
+                    key: 1,
+                    ..Default::default()
+                }],
+                error: None,
+            };
+            owner.handle_ack(ack.clone(), &state, &snapshot).unwrap();
+            owner
+                .handle(
+                    IngestMessage::Status(CaptureStatus {
+                        generation: 1,
+                        captured: 0,
+                        queued: 0,
+                        sent: 0,
+                        overflow: u64::from(!disconnected),
+                        queue_high_watermark: 0,
+                        active: false,
+                        disconnected,
+                    }),
+                    &state,
+                    &snapshot,
+                    &AtomicU64::new(0),
+                )
+                .unwrap();
+            let diagnostic = state.lock().unwrap().error.clone();
+            ack.command = CommandTag::Discover;
+            owner.handle_ack(ack.clone(), &state, &snapshot).unwrap();
+            set_fault(&state, "secondary transport failure".into());
+            {
+                let status = state.lock().unwrap();
+                assert_eq!(status.capture_fault, Some(expected));
+                assert_eq!(status.error, diagnostic);
+                assert!(!status.complete);
+            }
+            ack.command = CommandTag::Start;
+            ack.generation = 2;
+            owner.handle_ack(ack.clone(), &state, &snapshot).unwrap();
+            assert!(state.lock().unwrap().capture_fault.is_none());
+            assert!(state.lock().unwrap().error.is_none());
+            set_fault(&state, "another failure".into());
+            ack.command = CommandTag::Reset;
+            ack.generation = 3;
+            owner
+                .handle(
+                    IngestMessage::Reset(ack),
+                    &state,
+                    &snapshot,
+                    &AtomicU64::new(0),
+                )
+                .unwrap();
+            let status = state.lock().unwrap();
+            assert!(status.capture_fault.is_none() && status.error.is_none() && status.complete);
+        }
     }
 
     #[test]

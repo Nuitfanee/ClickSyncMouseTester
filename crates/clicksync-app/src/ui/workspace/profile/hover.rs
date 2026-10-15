@@ -1,7 +1,7 @@
 use super::*;
 use clicksync_chart::gpu::PlotKind;
 
-fn prefix() -> Result<Arc<SessionPrefix>, clicksync_core::SessionError> {
+pub(super) fn prefix() -> Result<Arc<SessionPrefix>, clicksync_core::SessionError> {
     let mut datasets = Vec::new();
     for (key, dx, dy) in [(1, 2, 1), (2, -3, -2), (3, 1, -3)] {
         let mut session = clicksync_core::Session::default_with_metadata(Default::default())?;
@@ -37,6 +37,10 @@ fn prefix() -> Result<Arc<SessionPrefix>, clicksync_core::SessionError> {
 }
 
 fn position(view: &ChartView) -> gpui::Point<gpui::Pixels> {
+    position_at(view, 12)
+}
+
+pub(super) fn position_at(view: &ChartView, index: usize) -> gpui::Point<gpui::Pixels> {
     let result = view.presented_result().unwrap();
     let dataset = result
         .datasets
@@ -66,7 +70,7 @@ fn position(view: &ChartView) -> gpui::Point<gpui::Pixels> {
             .geometry
             .iter()
             .flat_map(|block| &block.samples)
-            .find(|sample| sample.source_index == 12)
+            .find(|sample| sample.source_index == index)
             .unwrap()
             .point
     };
@@ -130,17 +134,19 @@ async fn inspect(
         Ok::<_, gpui::private::anyhow::Error>(position)
     })??;
     move_pointer(handle, position, cx).await?;
-    handle.update(cx, |_, _, cx| {
+    handle.update(cx, |_, window, cx| {
         let host = host.read(cx);
         let link = host
             .workspace
             .link
             .as_ref()
-            .ok_or_else(|| anyhow!("no hover link"))?;
+            .ok_or_else(|| anyhow!("no hover link: slot={slot}, key={key}, position={position:?}, actual_pointer={:?}, active={}, presentations={}, counts={:?}",
+                window.mouse_position(), window.is_window_active(), window.windows_presentation_count(),
+                host.workspace.interaction.as_ref().unwrap().counts()))?;
         ensure!(
             link.key == key,
-            "plot {slot}: hovering dataset {key} selected dataset {}",
-            link.key
+            "plot {slot}: hovering dataset {key} selected dataset {}, position={position:?}, actual_pointer={:?}",
+            link.key, window.mouse_position()
         );
         let hovered = host
             .plot_views()
@@ -336,10 +342,53 @@ pub(super) async fn verify(
     handle.update(cx, |_, _, cx| {
         host.update(cx, |host, cx| {
             host.toggle_analysis_dataset(1);
+            let view = host.workspace.monitors[1][0].clone();
+            let mut wide = view.borrow().viewport();
+            wide.origin.y = clicksync_chart::Coordinate::Scalar(-10_000.0);
+            wide.height = 20_000.0;
+            view.borrow_mut().set_viewport(wide, true);
             host.open_plot_detail(host.settings.monitor_metrics[1], false);
             cx.notify();
         });
     })?;
+    settle(handle, host, prefix.clone(), cx).await?;
+    handle.update(cx, |_, _, cx| {
+        host.update(cx, |host, cx| {
+            let view = host.analysis_chart().unwrap();
+            let mut view = view.borrow_mut();
+            let result = view.presented_result().unwrap();
+            let focus = result
+                .workspace_viewport(view.dataset_key())
+                .map_err(|error| anyhow!(error))?;
+            ensure!(
+                view.viewport() == focus,
+                "first detail must use focus, not the overview's manual/global Y axis"
+            );
+            view.fit_trajectory();
+            ensure!(
+                view.viewport()
+                    == result
+                        .full_workspace_viewport(view.dataset_key())
+                        .map_err(|error| anyhow!(error))?,
+                "global view must retain the full extent"
+            );
+            let mut panned = view.viewport();
+            panned.origin.x = crate::chart_view::shift_view(panned.origin.x, 0.1);
+            panned.width *= 0.95;
+            view.set_viewport(panned, true);
+            view.fit_focus();
+            ensure!(
+                view.viewport() == focus,
+                "focus must restore both the time range and the value axis"
+            );
+            host.workspace
+                .interaction
+                .as_ref()
+                .unwrap()
+                .notify_plots(cx);
+            Ok::<_, gpui::private::anyhow::Error>(())
+        })
+    })??;
     settle(handle, host, prefix.clone(), cx).await?;
     for key in [2, 1, 3] {
         inspect(handle, host, 0, key, cx).await?;

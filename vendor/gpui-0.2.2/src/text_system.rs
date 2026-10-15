@@ -759,6 +759,13 @@ impl TextRun {
 #[repr(C)]
 pub struct GlyphId(pub(crate) u32);
 
+impl GlyphId {
+    /// Whether this is the font's missing-glyph (.notdef) entry.
+    pub fn is_missing(self) -> bool {
+        self.0 == 0
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct RenderGlyphParams {
     pub(crate) font_id: FontId,

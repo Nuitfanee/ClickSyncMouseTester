@@ -18,6 +18,7 @@ enum Status {
     Cleared,
     NeedDevice,
     Disconnected,
+    Reconnected,
     NoDevices,
     Refreshed,
     Incomplete,
@@ -157,6 +158,19 @@ impl Default for PollingPage {
 }
 
 impl PollingPage {
+    #[cfg(feature = "ui-restoration-probe")]
+    pub(super) fn disconnected_preview(reconnected: bool) -> Self {
+        Self {
+            session_device: Some(1),
+            status: if reconnected {
+                Status::Reconnected
+            } else {
+                Status::Disconnected
+            },
+            ..Default::default()
+        }
+    }
+
     pub fn is_clearing(&self) -> bool {
         self.clearing_since.is_some()
     }
@@ -372,11 +386,9 @@ impl GpuiHost {
             return;
         };
         let resume = self.polling.session_device == Some(device)
-            && self
-                .runtime
-                .borrow()
-                .status()
-                .is_some_and(|status| status.phase == CapturePhase::Paused);
+            && self.runtime.borrow().status().is_some_and(|status| {
+                status.phase == CapturePhase::Paused && !capture_incomplete(&status)
+            });
         self.capture_command(if resume { "resume" } else { "start" });
     }
     pub(super) fn polling_end(&mut self) {
@@ -422,13 +434,24 @@ impl GpuiHost {
                 backend.set_capture_permitted(false);
             }
         }
-        let state = if missing
-            || (self.polling.status == Status::Disconnected && self.selected.is_empty())
-        {
-            Status::Disconnected
-        } else if status.phase == CapturePhase::Faulted || !status.complete {
-            Status::Incomplete
-        } else if self.runtime.borrow().device_catalog.choices().is_empty() {
+        let no_devices = self.runtime.borrow().device_catalog.choices().is_empty();
+        let disconnected = missing
+            || self.polling.status == Status::Disconnected
+            || (self.polling.has_session()
+                && status.capture_fault == Some(crate::backend::CaptureFault::DeviceDisconnected));
+        let state = if disconnected && self.selected.is_empty() {
+            if no_devices {
+                Status::Disconnected
+            } else {
+                Status::NeedDevice
+            }
+        } else if self.polling.has_session() && capture_incomplete(status) {
+            if status.capture_fault == Some(crate::backend::CaptureFault::DeviceDisconnected) {
+                Status::Reconnected
+            } else {
+                Status::Incomplete
+            }
+        } else if no_devices {
             Status::NoDevices
         } else if status.phase == CapturePhase::Collecting {
             Status::Measuring
@@ -570,7 +593,11 @@ impl GpuiHost {
             current: self.polling.current_text.clone(),
             empty: self.polling.empty_text.clone(),
             peak: metrics.map(|frame| frame.metrics.peak_rate),
-            error: displayed_error(&self.control_error, &self.backend_error),
+            error: localized_ui_error(
+                &self.control_error,
+                &self.backend_error,
+                self.settings.english,
+            ),
             quality: self.polling.quality,
         };
         if self.polling.clearing_since.is_some() || self.polling.content_key.as_ref() != Some(&key)
@@ -696,8 +723,15 @@ impl GpuiHost {
             Status::Incomplete => (
                 self.text("数据不完整", "Incomplete data"),
                 self.text(
-                    "本次测量已停止，请结束并重新开始。",
-                    "Measurement stopped. Clear it and start again.",
+                    "本次测量已中断，可重新测试或结束并清空。",
+                    "Measurement interrupted. Start a new test or clear the results.",
+                ),
+            ),
+            Status::Reconnected => (
+                self.text("需要重新测试", "New test required"),
+                self.text(
+                    "鼠标已连接，上次测量已中断。可重新测试或清空结果。",
+                    "Mouse connected. The previous measurement was interrupted. Start a new test or clear the results.",
                 ),
             ),
             Status::Measuring if self.polling.quality != RateStatus::Valid => {
@@ -770,10 +804,17 @@ impl GpuiHost {
             ),
             Status::NeedDevice => (
                 self.text("请选择设备", "Select a device"),
-                self.text(
-                    "选择目标鼠标后开始测试。",
-                    "Select a mouse to start testing.",
-                ),
+                if has_session {
+                    self.text(
+                        "本次测量已中断，请重新选择鼠标后测试。",
+                        "Measurement interrupted. Select a mouse to start a new test.",
+                    )
+                } else {
+                    self.text(
+                        "选择目标鼠标后开始测试。",
+                        "Select a mouse to start testing.",
+                    )
+                },
             ),
             Status::Refreshed => (
                 self.text("设备已刷新", "Devices refreshed"),
@@ -1006,6 +1047,16 @@ impl GpuiHost {
         }
         let primary_text = if locked {
             self.text("正在测试", "TESTING")
+        } else if has_session
+            && matches!(
+                self.polling.status,
+                Status::Incomplete
+                    | Status::Disconnected
+                    | Status::Reconnected
+                    | Status::NeedDevice
+            )
+        {
+            self.text("重新测试", "START NEW TEST")
         } else if has_session && self.polling.session_device == self.selected.first().copied() {
             self.text("继续测试", "RESUME TEST")
         } else {
@@ -1048,6 +1099,22 @@ impl GpuiHost {
                     .text_color(rgb(palette.muted))
                     .opacity(status_alpha)
                     .child(notes),
+            )
+            .when_some(
+                localized_ui_error(
+                    &self.control_error,
+                    &self.backend_error,
+                    self.settings.english,
+                ),
+                |actions, error| {
+                    actions.child(
+                        div()
+                            .text_size(px(14.0))
+                            .line_height(px(22.0))
+                            .text_color(rgb(palette.muted))
+                            .child(error),
+                    )
+                },
             )
             .child(
                 div()
@@ -1205,20 +1272,7 @@ impl GpuiHost {
             )
             .child(actions)
             .child(div().flex_1().min_h(px(24.0)))
-            .child(shortcuts)
-            .when_some(
-                displayed_error(&self.control_error, &self.backend_error),
-                |rail, error| {
-                    rail.child(
-                        div()
-                            .mt(px(12.0))
-                            .text_size(px(typography.body))
-                            .line_height(px(22.0))
-                            .text_color(rgb(palette.accent))
-                            .child(error),
-                    )
-                },
-            );
+            .child(shortcuts);
         div()
             .id("polling-workspace")
             .size_full()
@@ -1230,7 +1284,7 @@ impl GpuiHost {
             .pb(px(24.0))
             .bg(rgb(palette.background))
             .text_color(rgb(palette.text))
-            .font_family(design::Typography::body_font(self.settings.english))
+            .font(design::ui_font())
             .text_size(px(typography.body))
             .when(!self.custom_chrome, |body| {
                 body.track_focus(&self.focus).on_key_down(

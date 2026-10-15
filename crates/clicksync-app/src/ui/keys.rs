@@ -857,7 +857,7 @@ impl GpuiHost {
             .overflow_y_scroll()
             .bg(rgb(palette.background))
             .text_color(rgb(palette.text))
-            .font_family(design::Typography::body_font(self.settings.english))
+            .font(design::ui_font())
             .track_focus(&self.focus)
             .on_key_down(cx.listener(Self::keyboard))
             .on_mouse_down(

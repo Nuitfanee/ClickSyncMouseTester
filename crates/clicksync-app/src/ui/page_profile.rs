@@ -5,6 +5,43 @@ use gpui::private::anyhow::{anyhow, ensure};
 use serde_json::{Value, json};
 use std::time::Instant;
 
+#[derive(Clone, Copy, Debug, serde::Serialize)]
+struct WindowState {
+    active: bool,
+    observed_active: bool,
+    window_hwnd: usize,
+    foreground_hwnd: usize,
+    foreground_process_id: u32,
+}
+
+impl WindowState {
+    fn observe(host: &GpuiHost, window: &Window) -> Self {
+        use windows::Win32::UI::WindowsAndMessaging::{
+            GetForegroundWindow, GetWindowThreadProcessId,
+        };
+        let foreground = unsafe { GetForegroundWindow() };
+        let mut foreground_process_id = 0;
+        unsafe { GetWindowThreadProcessId(foreground, Some(&mut foreground_process_id)) };
+        Self {
+            active: window.is_window_active(),
+            observed_active: host.was_active,
+            window_hwnd: host.lock.window_id(),
+            foreground_hwnd: foreground.0 as usize,
+            foreground_process_id,
+        }
+    }
+
+    fn ready(self) -> bool {
+        self.active && self.observed_active && self.native_foreground()
+    }
+
+    fn native_foreground(self) -> bool {
+        self.window_hwnd != 0
+            && self.window_hwnd == self.foreground_hwnd
+            && self.foreground_process_id != 0
+    }
+}
+
 pub(super) fn run(path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     run_window(path).map_err(Into::into)
 }
@@ -301,24 +338,28 @@ async fn exercise(
     report: &Arc<Mutex<Value>>,
     cx: &mut gpui::AsyncWindowContext,
 ) -> gpui::Result<()> {
-    report.lock().unwrap()["method"] = "page-ui-v4-background-discovery".into();
+    report.lock().unwrap()["method"] = "page-ui-v5-window-readiness".into();
+    report.lock().unwrap()["failure_kind"] = Value::Null;
     report.lock().unwrap()["boundary"] = json!(
         "One production window and runtime; direct production commands, not injected hardware input. \
          Command-to-interactive is observed every 10 ms: an upper bound including polling/scheduling delay, \
          not physical display latency. Actual redraw CPU includes draw/Present/cleanup, not GPU completion. \
          Business pages are reset/empty, charts use the same fixed 1024-record controlled session. \
-         No screenshots or forced refresh in measured intervals. Startup carrier, cross-window handoff, \
+         Foreground activation is established before each case, outside measured intervals; \
+         no reactivation, screenshots or forced refresh within them. Startup carrier, cross-window handoff, \
          sustained capture and active business rounds remain covered separately, not measured here."
     );
     report.lock().unwrap()["ready_boundary"] = json!(
-        "Active window, target state, at least one root render, no pending control or capture lock; \
+        "GPUI and observed active state plus native foreground HWND, target state, at least one root render, \
+         no pending control or capture lock; \
          menu/stage transition settled, visible chart layers ready, current-generation owner publication \
          with no command pending or drain in progress. Health is checked only at that ready boundary \
          and at steady-state end, not against intermediate retired owner states. Steady-state checks \
          retain the accepted owner's generation and selected device scope, require healthy data and \
          no runtime pending action; background Discover's raw command_pending is recorded, not a fault. \
-         All readiness polls retain \
-         raw status/errors; steady-state has boundary snapshots only, not continuous fault monitoring. \
+         All readiness polls retain individual predicates, blocked reasons, HWND/PID and raw status/errors. \
+         Lost window activation fails the measurement instead of waiting for the readiness deadline. \
+         Steady-state has window and owner boundary snapshots only, not continuous fault monitoring. \
          Each switch is one raw observation, \
          not a switch-latency percentile. Per-frame percentiles are empirical with sample count n."
     );
@@ -344,6 +385,30 @@ async fn exercise(
         ("overview-return", Page::Performance),
     ] {
         report.lock().unwrap()["active_case"] = name.into();
+        let before = handle.update(cx, |_, window, cx| {
+            WindowState::observe(host.read(cx), window)
+        })?;
+        let activation_started = Instant::now();
+        let activation = if before.ready() {
+            Ok(())
+        } else {
+            activate_smoke_capture_window(handle, host, cx).await
+        };
+        let after = handle.update(cx, |_, window, cx| {
+            WindowState::observe(host.read(cx), window)
+        })?;
+        let precondition = json!({
+            "before": before, "after": after, "recovery_requested": !before.ready(),
+            "elapsed_ms": activation_started.elapsed().as_secs_f64() * 1000.0,
+            "error": activation.as_ref().err().map(ToString::to_string),
+        });
+        report.lock().unwrap()["active_precondition"] = precondition.clone();
+        if activation.is_err() || !after.ready() {
+            report.lock().unwrap()["failure_kind"] = "foreground_precondition".into();
+            gpui::private::anyhow::bail!(
+                "page {name} foreground precondition failed: {precondition}"
+            );
+        }
         let renders = handle.update(cx, |_, window, cx| {
             window.start_frame_timing();
             host.read(cx).outcome.lock().unwrap().frame_count
@@ -381,7 +446,7 @@ async fn exercise(
             })
         })?;
         let mut observations = Vec::with_capacity(1500);
-        let (ready, status, control_error, pending) = loop {
+        let (ready, status, control_error, pending, readiness, window_state) = loop {
             Timer::after(Duration::from_millis(10)).await;
             let observation = handle.update(cx, |_, window, cx| {
                 let host = host.read(cx);
@@ -408,33 +473,59 @@ async fn exercise(
                     status.as_ref(),
                     minimum_generation.max(host.page_generation),
                 );
+                let frame_count = host.outcome.lock().unwrap().frame_count;
+                let window_state = WindowState::observe(host, window);
+                let checks = [
+                    ("window_active", window_state.active),
+                    ("activation_observed", window_state.observed_active),
+                    ("native_foreground", window_state.native_foreground()),
+                    ("target_page", host.page == page),
+                    ("capture_unlocked", !host.lock.locked()),
+                    ("root_rendered", frame_count > renders),
+                    ("control_idle", runtime.pending_action().is_none()),
+                    ("owner_ready", current),
+                    ("motion_settled", host.sensitivity.motion.settled()),
+                    ("menu_ready", menu_ready),
+                    ("stage_ready", stage_ready),
+                    ("target_ready", target_ready),
+                    ("plots_ready", plots_ready),
+                ];
+                let blocked: Vec<_> = checks
+                    .iter()
+                    .filter_map(|(name, ready)| (!ready).then_some(*name))
+                    .collect();
+                let readiness = json!({
+                    "checks": checks.into_iter().collect::<std::collections::BTreeMap<_, _>>(),
+                    "blocked": blocked,
+                    "actual_page": format!("{:?}", host.page),
+                    "target_page": format!("{page:?}"),
+                    "root_renders_before": renders,
+                    "root_renders": frame_count,
+                    "window": window_state,
+                });
                 (
-                    window.is_window_active()
-                        && host.page == page
-                        && !host.lock.locked()
-                        && host.outcome.lock().unwrap().frame_count > renders
-                        && runtime.pending_action().is_none()
-                        && current
-                        && host.sensitivity.motion.settled()
-                        && menu_ready
-                        && stage_ready
-                        && target_ready
-                        && plots_ready,
+                    blocked.is_empty(),
                     status,
                     host.control_error.clone(),
                     runtime.pending_action(),
+                    readiness,
+                    window_state,
                 )
             })?;
-            let (ready, status, control_error, pending) = &observation;
+            let (ready, status, control_error, pending, readiness, window_state) = &observation;
             observations.push((
                 started.elapsed().as_secs_f64() * 1000.0,
                 *ready,
                 status.clone(),
                 control_error.clone(),
                 *pending,
+                readiness.clone(),
             ));
             // An ACK can precede owner publication; do not judge a retired state as the target page.
-            if *ready || started.elapsed() >= Duration::from_secs(15) || observations.len() == 1500
+            if *ready
+                || !window_state.ready()
+                || started.elapsed() >= Duration::from_secs(15)
+                || observations.len() == 1500
             {
                 break observation;
             }
@@ -456,22 +547,34 @@ async fn exercise(
             .push(json!({
                 "name": name, "command_to_interactive_observed_ms": interactive.then_some(response_ms),
                 "transition_observed_ms": response_ms,
+                "foreground_precondition": precondition,
                 "minimum_generation": minimum_generation, "transition_status": status,
                 "transition_control_error": control_error, "transition_pending_action": pending,
-                "transition_observation_columns": ["elapsed_ms", "ready", "status", "control_error", "pending_action"],
+                "transition_readiness": readiness,
+                "transition_observation_columns": ["elapsed_ms", "ready", "status", "control_error", "pending_action", "readiness"],
                 "transition_observations": observations,
                 "first_redraw_submission_observed_ms": first_submit_ms,
                 "transition": frame_statistics(transition),
             }));
+        if !interactive {
+            report.lock().unwrap()["failure_kind"] = if !window_state.ready() {
+                "window_activation_lost"
+            } else if !ready {
+                "readiness_timeout"
+            } else {
+                "backend_unhealthy"
+            }
+            .into();
+        }
         ensure!(
             interactive,
-            "page {name} not interactive: ready={ready}, healthy={healthy}, pending={pending:?}, control_error={control_error:?}"
+            "page {name} not interactive: ready={ready}, healthy={healthy}, pending={pending:?}, control_error={control_error:?}, readiness={readiness}"
         );
         ensure!(omitted == 0, "page {name} transition timing overflow");
         // Let one-shot feedback settle; no refresh or paint requests are injected.
         Timer::after(Duration::from_millis(700)).await;
-        let (submitted, steady_start_status, start_error, start_pending) =
-            handle.update(cx, |_, window, cx| {
+        let (submitted, steady_start_status, start_error, start_pending, start_window) = handle
+            .update(cx, |_, window, cx| {
                 window.start_frame_timing();
                 let host = host.read(cx);
                 (
@@ -479,13 +582,14 @@ async fn exercise(
                     host.runtime.borrow().status(),
                     host.control_error.clone(),
                     host.runtime.borrow().pending_action(),
+                    WindowState::observe(host, window),
                 )
             })?;
         let before_notifications = notifications.get();
         let steady_started = Instant::now();
         Timer::after(Duration::from_secs(1)).await;
-        let (steady, submissions, metrics, steady_end_status, end_error, end_pending) = handle
-            .update(cx, |_, window, cx| {
+        let (steady, submissions, metrics, steady_end_status, end_error, end_pending, end_window) =
+            handle.update(cx, |_, window, cx| {
                 let host = host.read(cx);
                 (
                     window.take_frame_timings().unwrap(),
@@ -494,12 +598,17 @@ async fn exercise(
                     host.runtime.borrow().status(),
                     host.control_error.clone(),
                     host.runtime.borrow().pending_action(),
+                    WindowState::observe(host, window),
                 )
             })?;
         let omitted = steady.omitted;
         let steady_ms = steady_started.elapsed().as_secs_f64() * 1000.0;
-        let mut report = report.lock().unwrap();
-        let entry = report["pages"].as_array_mut().unwrap().last_mut().unwrap();
+        let mut saved_report = report.lock().unwrap();
+        let entry = saved_report["pages"]
+            .as_array_mut()
+            .unwrap()
+            .last_mut()
+            .unwrap();
         entry["steady"] = frame_statistics(steady);
         entry["steady_observed_ms"] = steady_ms.into();
         entry["steady_business_submissions"] = submissions.into();
@@ -515,7 +624,15 @@ async fn exercise(
         entry["steady_end_status"] = json!(steady_end_status);
         entry["steady_control_errors"] = json!([start_error, end_error]);
         entry["steady_pending_actions"] = json!([start_pending, end_pending]);
-        drop(report);
+        entry["steady_start_window"] = json!(start_window);
+        entry["steady_end_window"] = json!(end_window);
+        drop(saved_report);
+        if !start_window.ready() || !end_window.ready() {
+            report.lock().unwrap()["failure_kind"] = "window_activation_lost".into();
+            gpui::private::anyhow::bail!(
+                "page {name} steady-state window activation lost: start={start_window:?}, end={end_window:?}"
+            );
+        }
         let scope = status
             .as_ref()
             .map(|s| (s.generation, &s.selected_device_keys));
@@ -539,12 +656,54 @@ async fn exercise(
         ensure!(omitted == 0, "page {name} steady timing overflow");
     }
     report.lock().unwrap()["active_case"] = Value::Null;
+    report.lock().unwrap()["active_precondition"] = Value::Null;
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn window_readiness_requires_native_foreground_and_both_activation_observations() {
+        let ready = WindowState {
+            active: true,
+            observed_active: true,
+            window_hwnd: 42,
+            foreground_hwnd: 42,
+            foreground_process_id: 7,
+        };
+        assert!(ready.ready());
+        for state in [
+            WindowState {
+                active: false,
+                ..ready
+            },
+            WindowState {
+                observed_active: false,
+                ..ready
+            },
+            WindowState {
+                foreground_hwnd: 99,
+                ..ready
+            },
+            WindowState {
+                foreground_hwnd: 0,
+                ..ready
+            },
+            WindowState {
+                foreground_process_id: 0,
+                ..ready
+            },
+            WindowState {
+                window_hwnd: 0,
+                foreground_hwnd: 0,
+                ..ready
+            },
+        ] {
+            assert!(!state.ready(), "{state:?}");
+        }
+    }
 
     #[test]
     fn readiness_waits_for_owner_scope_before_judging_health() {

@@ -3,7 +3,7 @@ use clicksync_chart::gpu::{
     GpuError, PublishedChartLayer, RenderSpec, Renderer, ResourceLimits, ResourceReport, Viewport,
 };
 use gpui::{
-    App, Bounds, Pixels, Point, TextRun, Window, fill, font, point, px, rgb, size,
+    App, Bounds, Pixels, Point, TextRun, Window, fill, point, px, rgb, size,
     windows_graphics::WindowsSurface,
 };
 use serde::Serialize;
@@ -12,6 +12,7 @@ use std::{cell::RefCell, rc::Rc, sync::Arc};
 mod axes;
 #[cfg(test)]
 mod trajectory_tests;
+mod value_axis;
 
 #[derive(Clone)]
 struct Presentation {
@@ -51,6 +52,7 @@ pub struct ChartView {
     pending_presentation: Option<Presentation>,
     viewport: Viewport,
     trajectory_base: Option<Viewport>,
+    value_axis: value_axis::Stability,
     viewport_revision: u64,
     bounds: Bounds<Pixels>,
     axis_gutter: f32,
@@ -63,8 +65,8 @@ pub struct ChartView {
     overlay_viewport: Option<Viewport>,
     hover: Option<(usize, clicksync_chart::Point)>,
     histogram_hover: Option<clicksync_chart::analysis::histogram::HistogramBin>,
-    selection: Option<(Arc<ChartResult>, Viewport, u64)>,
     limits: ResourceLimits,
+    capacity_blocked: Option<(u32, u32, u64)>,
     workspace_style: bool,
     dark: bool,
     english: bool,
@@ -94,6 +96,7 @@ impl ChartView {
             pending_presentation: None,
             viewport,
             trajectory_base: None,
+            value_axis: value_axis::Stability::default(),
             viewport_revision: 1,
             bounds: Bounds::default(),
             axis_gutter: 48.0,
@@ -106,8 +109,8 @@ impl ChartView {
             overlay_viewport: None,
             hover: None,
             histogram_hover: None,
-            selection: None,
             limits,
+            capacity_blocked: None,
             workspace_style: false,
             dark: false,
             english: false,
@@ -133,6 +136,23 @@ impl ChartView {
     pub(crate) fn result_for_report(&self) -> Arc<ChartResult> {
         self.result.clone()
     }
+    #[cfg(feature = "ui-restoration-probe")]
+    pub(crate) fn convergence_for_report(&self) -> serde_json::Value {
+        serde_json::json!({
+            "ready": self.ready(),
+            "displayed": self.displayed_request_id(),
+            "latest": self.result.request.id,
+            "revision": self.viewport_revision,
+            "displayed_revision": self.displayed.as_ref().map(|p| p.viewport_revision),
+            "displayed_viewport_current": self.displayed.as_ref().map(|p| p.layer.version.spec.viewport == self.viewport),
+            "target": self.group_target().map(|(r, _, revision)| (r.request.id, revision)),
+        })
+    }
+    #[cfg(feature = "ui-restoration-probe")]
+    pub(crate) fn defer_presentation_for_trial(&mut self) {
+        assert!(self.ready() && self.group_target().is_none());
+        self.pending_presentation = self.displayed.clone();
+    }
     pub fn set_result(&mut self, result: Arc<ChartResult>) -> Result<(), String> {
         let range_changed = self.result.request.analysis.as_ref().and_then(|a| a.range)
             != result.request.analysis.as_ref().and_then(|a| a.range);
@@ -142,7 +162,7 @@ impl ChartView {
             || self.result.request.parameters.histogram != result.request.parameters.histogram
             || self.result.request.kind != result.request.kind;
         if range_changed || axes_changed {
-            self.selection = None;
+            self.value_axis = value_axis::Stability::default();
             if !self.trajectory {
                 self.fixed = false;
             }
@@ -155,10 +175,10 @@ impl ChartView {
             || self.result.datasets.get(self.dataset).map(|d| d.device_key)
                 != result.datasets.get(self.dataset).map(|d| d.device_key);
         if replaced {
+            self.value_axis = value_axis::Stability::default();
             self.axis_gutter = 48.0;
             self.displayed = None;
             self.pending_presentation = None;
-            self.selection = None;
             self.fixed = false;
             self.trajectory_base = None;
         }
@@ -170,7 +190,7 @@ impl ChartView {
             && self.result.request.secondary_metric == result.request.secondary_metric
             && self.result.request.kind == result.request.kind
             && self.result.request.view == result.request.view;
-        if !self.fixed && self.selection.is_none() && !same_input {
+        if !self.fixed && !same_input {
             let next = if self.workspace_style {
                 result.workspace_viewport(result.datasets[self.dataset].device_key)?
             } else {
@@ -186,6 +206,8 @@ impl ChartView {
                 && self.result.request.dataset_cpi == result.request.dataset_cpi
                 && self.result.request.secondary_metric == result.request.secondary_metric
                 && self.result.request.kind == result.request.kind
+                && self.result.request.view == result.request.view
+                && self.result.datasets.len() == result.datasets.len()
                 && (matches!(result.request.view, crate::chart::ViewMode::Follow { .. })
                     || (result.request.view == crate::chart::ViewMode::FullSession
                         && result.request.prefix.phase == crate::backend::CapturePhase::Collecting))
@@ -196,11 +218,18 @@ impl ChartView {
                     .zip(&result.datasets)
                     .all(|(old, new)| {
                         !old.geometry.is_empty()
-                            && old.interval_band.is_some() == new.interval_band.is_some()
+                            && old.value_band_for(self.result.request.view).is_some()
+                                == new.value_band_for(result.request.view).is_some()
                     })
             {
-                stable_value_axis(self.viewport, next)
+                self.value_axis.update(
+                    self.viewport,
+                    next,
+                    std::time::Instant::now(),
+                    result.request.prefix.phase == crate::backend::CapturePhase::Collecting,
+                )
             } else {
+                self.value_axis = value_axis::Stability::default();
                 next
             };
             self.trajectory_base = None;
@@ -230,15 +259,13 @@ impl ChartView {
         self.linked = None;
         self.displayed = None;
         self.pending_presentation = None;
-        self.selection = None;
         self.generation = None;
         self.renderer = None;
+        self.capacity_blocked = None;
+        self.report.error = None;
     }
     pub fn set_resource_limits(&mut self, limits: ResourceLimits) {
-        if self.limits.resident_bytes != limits.resident_bytes
-            || self.limits.layer_bytes != limits.layer_bytes
-            || self.limits.instances_per_upload != limits.instances_per_upload
-        {
+        if self.limits != limits {
             self.close();
             self.limits = limits;
             self.viewport_revision += 1;
@@ -271,7 +298,6 @@ impl ChartView {
     }
     pub fn fit_trajectory(&mut self) {
         self.drag_end();
-        self.selection = None;
         let key = self.result.datasets[self.dataset].device_key;
         let fitted = if self.workspace_style {
             self.result.full_workspace_viewport(key)
@@ -282,11 +308,9 @@ impl ChartView {
             self.set_viewport(viewport, true);
         }
     }
-    pub(crate) fn fit_value_axis(&mut self) {
-        if let Ok(fitted) = self.result.workspace_viewport(self.dataset_key()) {
-            let mut viewport = self.viewport;
-            viewport.origin.y = fitted.origin.y;
-            viewport.height = fitted.height;
+    pub(crate) fn fit_focus(&mut self) {
+        self.drag_end();
+        if let Ok(viewport) = self.result.focus_workspace_viewport(self.dataset_key()) {
             self.set_viewport(viewport, true);
         }
     }
@@ -305,6 +329,7 @@ impl ChartView {
             return Err("unknown chart dataset".into());
         }
         self.dataset = index;
+        self.value_axis = value_axis::Stability::default();
         self.overlay = index > 0;
         self.viewport = self
             .result
@@ -334,7 +359,7 @@ impl ChartView {
     }
 
     pub(crate) fn reveal_linked_time(&mut self) -> bool {
-        if !self.is_time_plot() || self.is_dragging() || self.is_selecting() {
+        if !self.is_time_plot() || self.is_dragging() {
             return false;
         }
         let Some((request, points)) = &self.linked else {
@@ -384,6 +409,7 @@ impl ChartView {
         self.bounds
     }
     pub fn set_viewport(&mut self, viewport: Viewport, fixed: bool) {
+        self.value_axis = value_axis::Stability::default();
         if self.viewport != viewport || self.fixed != fixed {
             self.viewport = viewport;
             self.trajectory_base = None;
@@ -400,10 +426,17 @@ impl ChartView {
     pub fn presented_viewport(&self) -> Option<Viewport> {
         self.displayed.as_ref().map(|p| self.paint_viewport(p))
     }
+    pub(crate) fn visible_gap_statistics(&self) -> Option<crate::chart::gaps::GapStatistics> {
+        let presentation = self.displayed.as_ref()?;
+        let index = presentation.result.datasets[self.dataset].gaps.as_ref()?;
+        let viewport = self.paint_viewport(presentation);
+        let start = viewport.origin.x.value();
+        Some(index.query(start, start + viewport.width))
+    }
     fn paint_viewport(&self, presentation: &Presentation) -> Viewport {
         if let Some(viewport) = self.overlay_viewport.filter(|_| self.overlay) {
             viewport
-        } else if self.fixed && self.selection.is_none() {
+        } else if self.fixed {
             self.viewport
         } else {
             presentation.layer.version.spec.viewport
@@ -464,44 +497,16 @@ impl ChartView {
         self.histogram_hover = None;
     }
     pub fn ready(&self) -> bool {
-        self.displayed.as_ref().is_some_and(|p| {
-            self.selection.as_ref().map_or_else(
-                // A group shares the GPU request ID, not each view's local revision.
-                || p.viewport_revision == self.viewport_revision,
-                |s| p.layer.version.spec.request_id == s.2,
-            )
-        })
+        // A group shares the GPU request ID, not each view's local revision.
+        self.displayed
+            .as_ref()
+            .is_some_and(|p| p.viewport_revision == self.viewport_revision)
     }
-    pub fn begin_selection(&mut self, position: Point<Pixels>) -> Option<usize> {
-        self.move_pointer(position);
-        let start = self.hover?.0;
-        self.hold_presentation()?;
-        Some(start)
+    pub(crate) fn needs_presentation(&self, grouped: bool) -> bool {
+        !self.ready() || (grouped && self.displayed_request_id() != Some(self.result.request.id))
     }
-    pub fn hold_presentation(&mut self) -> Option<u64> {
-        let displayed = self.displayed.as_ref()?;
-        self.selection = Some((
-            displayed.result.clone(),
-            self.paint_viewport(displayed),
-            displayed.layer.version.spec.request_id,
-        ));
-        Some(displayed.result.request.id)
-    }
-    pub fn end_selection(&mut self) {
-        if self.selection.take().is_some() {
-            if !self.fixed
-                && let Ok(viewport) = self
-                    .result
-                    .viewport(self.result.datasets[self.dataset].device_key)
-            {
-                self.viewport = viewport;
-                self.trajectory_base = None;
-            }
-            self.viewport_revision += 1;
-        }
-    }
-    pub fn is_selecting(&self) -> bool {
-        self.selection.is_some()
+    pub(crate) fn capacity_blocked(&self) -> bool {
+        self.capacity_blocked.is_some()
     }
     pub fn can_overlay(&self, primary: &Self) -> bool {
         match (&self.displayed, &primary.displayed) {
@@ -571,7 +576,6 @@ impl ChartView {
     pub fn drag_start(&mut self, position: Point<Pixels>) {
         let axes = self.interaction_axes(position);
         if axes != [false, false] {
-            self.end_selection();
             self.drag = Some((position, self.viewport, axes));
         }
     }
@@ -606,7 +610,7 @@ impl ChartView {
         position: Point<Pixels>,
     ) -> Option<(Rc<RefCell<Self>>, bool)> {
         let primary = views.first()?;
-        if views.len() == 1 || primary.borrow().is_selecting() || primary.borrow().is_dragging() {
+        if views.len() == 1 || primary.borrow().is_dragging() {
             let changed = primary.borrow_mut().move_pointer(position);
             return Some((primary.clone(), changed));
         }
@@ -771,7 +775,6 @@ impl ChartView {
             },
         );
         if self.viewport != viewport {
-            self.end_selection();
             self.set_viewport(viewport, true);
             self.report.pan_events += 1;
         }
@@ -807,7 +810,6 @@ impl ChartView {
         if axes == [false, false] {
             return;
         }
-        self.end_selection();
         self.drag_end();
         let factor = factor.clamp(0.1, 10.0);
         self.clear_hover();
@@ -928,11 +930,8 @@ impl ChartView {
         let scale = window.scale_factor();
         let width = (f32::from(self.bounds.size.width) * scale).round() as u32;
         let height = (f32::from(self.bounds.size.height) * scale).round() as u32;
-        let (desired_result, desired_viewport, desired_revision) = self
-            .selection
-            .clone()
-            .or(target)
-            .unwrap_or_else(|| (self.result.clone(), self.viewport, self.viewport_revision));
+        let (desired_result, desired_viewport, desired_revision) =
+            target.unwrap_or_else(|| (self.result.clone(), self.viewport, self.viewport_revision));
         let answer = window.with_windows_graphics(|graphics| {
             if self
                 .renderer
@@ -952,6 +951,12 @@ impl ChartView {
                 )?);
             }
             let renderer = self.renderer.as_mut().unwrap();
+            let capacity_key = (width, height, graphics.device_epoch);
+            if self.capacity_blocked == Some(capacity_key) {
+                return Ok(());
+            }
+            self.capacity_blocked = None;
+            self.report.error = None;
             let mut spec = RenderSpec::new(desired_viewport, width, height, graphics.device_epoch);
             spec.y_down = self.trajectory;
             spec.request_id = desired_revision;
@@ -979,8 +984,7 @@ impl ChartView {
                     .take()
                     .ok_or_else(|| gpui::private::anyhow::anyhow!("missing generation version"))?;
                 let valid = result.eligible_for(&desired_result.request)
-                    && same_surface(&layer.version.spec, &spec)
-                    && (self.selection.is_none() || layer.version.spec.viewport == spec.viewport);
+                    && same_surface(&layer.version.spec, &spec);
                 if valid {
                     let surface =
                         WindowsSurface::new(graphics, layer.texture())?.retain(layer.lease());
@@ -1039,6 +1043,18 @@ impl ChartView {
                         debug_assert!(completed.is_none());
                     }
                     Err(GpuError::ResourceBusy) => {}
+                    Err(GpuError::LayerCapacity) => {
+                        self.capacity_blocked = Some(capacity_key);
+                        self.report.error = Some(
+                            if self.english {
+                                "Chart size exceeds the layer budget. Reduce the window size or comparison groups."
+                            } else {
+                                "图表尺寸超出图层预算，请缩小窗口或减少比较组。"
+                            }.into(),
+                        );
+                        self.report.resources = Some(renderer.report());
+                        return Ok(());
+                    }
                     Err(error) => return Err(error.into()),
                 }
             }
@@ -1055,6 +1071,17 @@ impl ChartView {
     }
 
     pub fn paint(&mut self, window: &mut Window, cx: &mut App) {
+        if self.capacity_blocked.is_some() {
+            if let Some(error) = &self.report.error {
+                text(
+                    error.clone(),
+                    self.bounds.origin + point(px(8.0), px(8.0)),
+                    window,
+                    cx,
+                );
+            }
+            return;
+        }
         let Some(presentation) = &self.displayed else {
             return;
         };
@@ -1074,7 +1101,16 @@ impl ChartView {
                     outer_right: px(self.report.outer_bounds[0] + self.report.outer_bounds[2]),
                     units,
                     kind: presentation.result.request.kind,
-                    interval_ms: dataset.interval_band.map(|band| band[1]),
+                    interval_ms: matches!(
+                        presentation.result.request.parameters.metric,
+                        clicksync_chart::Metric::Interval | clicksync_chart::Metric::IntervalTrend
+                    )
+                    .then(|| {
+                        dataset
+                            .value_band_for(presentation.result.request.view)
+                            .map(|band| band.origin.value() + band.quantiles[1])
+                    })
+                    .flatten(),
                     y_down: spec.y_down,
                     trajectory: self.trajectory,
                     workspace: self.workspace_style,
@@ -1086,22 +1122,23 @@ impl ChartView {
                 cx,
             );
         }
-        for [start, end] in &presentation.result.datasets[self.dataset].gaps {
-            let left = (start - viewport.origin.x.value()) / viewport.width;
-            let right = (end - viewport.origin.x.value()) / viewport.width;
-            if right < 0.0 || left > 1.0 {
-                continue;
-            }
-            window.paint_quad(fill(
-                Bounds {
-                    origin: plot.origin + point(plot.size.width * left.max(0.0) as f32, px(0.0)),
-                    size: size(
-                        plot.size.width * (right.min(1.0) - left.max(0.0)).max(0.0) as f32,
-                        plot.size.height,
-                    ),
-                },
-                gpui::rgba(if self.dark { 0xe6b85022 } else { 0xb3821922 }),
-            ));
+        if let Some(gaps) = &presentation.result.datasets[self.dataset].gaps {
+            let origin = viewport.origin.x.value();
+            gaps.for_each_visible(origin, origin + viewport.width, |[start, end]| {
+                let left = (start - origin) / viewport.width;
+                let right = (end - origin) / viewport.width;
+                window.paint_quad(fill(
+                    Bounds {
+                        origin: plot.origin
+                            + point(plot.size.width * left.max(0.0) as f32, px(0.0)),
+                        size: size(
+                            plot.size.width * (right.min(1.0) - left.max(0.0)).max(0.0) as f32,
+                            plot.size.height,
+                        ),
+                    },
+                    gpui::rgba(if self.dark { 0xe6b85022 } else { 0xb3821922 }),
+                ));
+            });
         }
         let layer_view = spec.viewport;
         let surface_width = plot.size.width * (layer_view.width / viewport.width) as f32;

@@ -182,5 +182,68 @@ pub(in crate::ui) async fn exercise(
         );
         Ok::<_, gpui::private::anyhow::Error>(())
     })??;
+    // Exercise device-directory transitions without pretending replay is physical hotplug.
+    handle.update(cx, |_, _, cx| {
+        host.update(cx, |h, cx| {
+            let healthy = h.runtime.borrow().status().unwrap();
+            let mut fault = healthy.clone();
+            fault.phase = CapturePhase::Faulted;
+            fault.complete = false;
+            fault.capture_fault = Some(crate::backend::CaptureFault::DeviceDisconnected);
+            fault.error = Some("changed backend diagnostic wording".into());
+            fault.devices.clear();
+            h.polling.session_device = Some(1);
+            h.selected = vec![1];
+            h.runtime.borrow_mut().device_catalog.update(&fault.devices);
+            h.update_polling_status(&fault);
+            ensure!(
+                h.selected.is_empty() && h.polling.status == Status::Disconnected,
+                "device removal retained a selected polling device"
+            );
+            for english in [false, true] {
+                update_backend_error(&mut h.backend_error, &fault, h.page_generation);
+                ensure!(
+                    localized_ui_error(&None, &h.backend_error, english).is_none(),
+                    "polling duplicated its local recovery state with a raw diagnostic"
+                );
+            }
+            fault.devices = healthy.devices.clone();
+            h.runtime.borrow_mut().device_catalog.update(&fault.devices);
+            h.update_polling_status(&fault);
+            ensure!(
+                h.polling.status == Status::NeedDevice && h.selected.is_empty(),
+                "reconnection retained the disconnected state or auto-selected a device"
+            );
+            h.polling_select(1);
+            h.update_polling_status(&fault);
+            ensure!(
+                h.polling.status == Status::Reconnected && !fault.complete,
+                "reselection repaired the interrupted polling session"
+            );
+            h.polling = PollingPage::default();
+            h.update_polling_status(&fault);
+            ensure!(
+                h.polling.status == Status::Ready,
+                "a retired session fault leaked into a fresh polling page"
+            );
+            h.backend_error = fault.error.clone();
+            h.navigate(Page::Keys);
+            ensure!(
+                h.page == Page::Keys && h.backend_error.is_none(),
+                "page exit retained the previous capture diagnostic"
+            );
+            ensure!(
+                !update_backend_error(&mut h.backend_error, &fault, h.page_generation)
+                    && h.backend_error.is_none(),
+                "late old-generation status restored a retired capture diagnostic"
+            );
+            scenario(
+                report,
+                "device-loss-local-recovery-reconnect-and-page-error-retirement",
+            );
+            cx.notify();
+            Ok::<_, gpui::private::anyhow::Error>(())
+        })
+    })??;
     Ok(())
 }

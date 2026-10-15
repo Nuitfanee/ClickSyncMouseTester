@@ -25,7 +25,10 @@ use crate::*;
 #[derive(Debug)]
 struct FontInfo {
     font_family: String,
+    identifier: FontIdentifier,
     font_face: IDWriteFontFace3,
+    requested_features: FontFeatures,
+    requested_fallbacks: Option<FontFallbacks>,
     features: IDWriteTypography,
     fallbacks: Option<IDWriteFontFallback>,
     is_system_font: bool,
@@ -330,23 +333,32 @@ impl DirectWriteState {
         }
         unsafe {
             let builder = self.components.factory.CreateFontFallbackBuilder()?;
-            let font_set = &self.system_font_collection.GetFontSet()?;
             for family_name in fallbacks.fallback_list() {
-                let Some(fonts) = font_set
-                    .GetMatchingFonts(
-                        &HSTRING::from(family_name),
-                        DWRITE_FONT_WEIGHT_NORMAL,
-                        DWRITE_FONT_STRETCH_NORMAL,
-                        DWRITE_FONT_STYLE_NORMAL,
-                    )
-                    .log_err()
-                else {
-                    continue;
-                };
-                if fonts.GetFontCount() == 0 {
+                // Match embedded fonts before system fonts, just as primary
+                // font selection does. AddMapping must retain that collection.
+                let mut matched = None;
+                for collection in [&self.custom_font_collection, &self.system_font_collection] {
+                    let Some(fonts) = collection
+                        .GetFontSet()?
+                        .GetMatchingFonts(
+                            &HSTRING::from(family_name),
+                            DWRITE_FONT_WEIGHT_NORMAL,
+                            DWRITE_FONT_STRETCH_NORMAL,
+                            DWRITE_FONT_STYLE_NORMAL,
+                        )
+                        .log_err()
+                    else {
+                        continue;
+                    };
+                    if fonts.GetFontCount() != 0 {
+                        matched = Some((collection, fonts));
+                        break;
+                    }
+                }
+                let Some((collection, fonts)) = matched else {
                     log::error!("No matching font found for {}", family_name);
                     continue;
-                }
+                };
                 let font = fonts.GetFontFaceReference(0)?.CreateFontFace()?;
                 let mut count = 0;
                 font.GetUnicodeRanges(None, &mut count).ok();
@@ -364,7 +376,7 @@ impl DirectWriteState {
                 builder.AddMapping(
                     &unicode_ranges,
                     &[target_family_name.as_ptr()],
-                    None,
+                    collection,
                     None,
                     None,
                     1.0,
@@ -422,6 +434,14 @@ impl DirectWriteState {
             let Some(identifier) = get_font_identifier(&font_face, &self.components.locale) else {
                 continue;
             };
+            if let Some(index) = self.fonts.iter().position(|font| {
+                font.identifier == identifier
+                    && font.is_system_font == is_system_font
+                    && font.requested_features == *font_features
+                    && font.requested_fallbacks.as_ref() == font_fallbacks
+            }) {
+                return Some(FontId(index));
+            }
             let Some(direct_write_features) =
                 (unsafe { self.generate_font_features(font_features).log_err() })
             else {
@@ -431,7 +451,10 @@ impl DirectWriteState {
                 .and_then(|fallbacks| self.generate_font_fallbacks(fallbacks).log_err().flatten());
             let font_info = FontInfo {
                 font_family: family_name.to_owned(),
+                identifier: identifier.clone(),
                 font_face,
+                requested_features: font_features.clone(),
+                requested_fallbacks: font_fallbacks.cloned(),
                 features: direct_write_features,
                 fallbacks,
                 is_system_font,
@@ -646,6 +669,9 @@ impl DirectWriteState {
             let renderer_context = RendererContext {
                 text_system: self,
                 index_converter: StringIndexConverter::new(text),
+                font_runs,
+                font_run_index: 0,
+                font_run_end: font_runs[0].len,
                 runs: &mut runs,
                 width: 0.0,
             };
@@ -1347,6 +1373,9 @@ impl TextRenderer {
 struct RendererContext<'t, 'a, 'b> {
     text_system: &'t mut DirectWriteState,
     index_converter: StringIndexConverter<'a>,
+    font_runs: &'a [FontRun],
+    font_run_index: usize,
+    font_run_end: usize,
     runs: &'b mut Vec<ShapedRun>,
     width: f32,
 }
@@ -1473,7 +1502,7 @@ impl IDWriteTextRenderer_Impl for TextRenderer_Impl {
             return Ok(());
         };
 
-        let font_id = if let Some(id) = context
+        let fallback_font_id = if let Some(id) = context
             .text_system
             .font_id_by_identifier
             .get(&font_identifier)
@@ -1495,8 +1524,33 @@ impl IDWriteTextRenderer_Impl for TextRenderer_Impl {
         let mut utf16_idx = desc.textPosition as usize;
         let mut glyph_idx = 0;
         let mut glyphs = Vec::with_capacity(glyph_count);
+        let mut font_id = fallback_font_id;
         for (cluster_utf16_len, cluster_glyph_count) in cluster_analyzer {
             context.index_converter.advance_to_utf16_ix(utf16_idx);
+            while context.font_run_index + 1 < context.font_runs.len()
+                && context.index_converter.utf8_ix >= context.font_run_end
+            {
+                context.font_run_index += 1;
+                context.font_run_end += context.font_runs[context.font_run_index].len;
+            }
+            let requested_font_id = context.font_runs[context.font_run_index].font_id;
+            // One face can have several IDs with different features or fallbacks.
+            let next_font_id = if context.text_system.fonts[requested_font_id.0].identifier
+                == font_identifier
+            {
+                requested_font_id
+            } else {
+                fallback_font_id
+            };
+            if next_font_id != font_id {
+                if !glyphs.is_empty() {
+                    context.runs.push(ShapedRun {
+                        font_id,
+                        glyphs: std::mem::take(&mut glyphs),
+                    });
+                }
+                font_id = next_font_id;
+            }
             utf16_idx += cluster_utf16_len;
             for (cluster_glyph_idx, glyph_id) in glyph_ids
                 [glyph_idx..(glyph_idx + cluster_glyph_count)]

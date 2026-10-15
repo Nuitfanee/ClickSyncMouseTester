@@ -2078,6 +2078,9 @@ impl Window {
     #[profiling::function]
     fn present(&self) {
         self.platform_window.draw(&self.rendered_frame.scene);
+        #[cfg(target_os = "windows")]
+        self.needs_present.set(self.platform_window.windows_presentation_pending());
+        #[cfg(not(target_os = "windows"))]
         self.needs_present.set(false);
         profiling::finish_frame!();
     }
@@ -4537,6 +4540,12 @@ impl Window {
     #[cfg(target_os = "windows")]
     pub fn request_windows_frame_capture(&self) -> Result<()> {
         self.platform_window.request_windows_frame_capture()
+    }
+
+    /// Successful DXGI submissions, not physical scan-out or compositor completion.
+    #[cfg(target_os = "windows")]
+    pub fn windows_presentation_count(&self) -> u64 {
+        self.platform_window.windows_presentation_count()
     }
 
     /// Poll the bounded diagnostic readback.

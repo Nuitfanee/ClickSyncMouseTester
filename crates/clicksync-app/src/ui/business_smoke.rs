@@ -122,10 +122,57 @@ async fn exercise(
             if let Some(mut backend) = host.runtime.borrow_mut().backend.take() {
                 backend.shutdown().map_err(|error| anyhow!(error))?;
             }
+            host.business_input.bindings = [Some(1), None];
+            host.begin_device_binding(1);
+            ensure!(
+                host.business_input.binding_slot.is_none()
+                    && host.sensitivity.binding_issues[1].is_some()
+                    && !host.sensitivity_binding_hint(1).is_empty(),
+                "synchronous binding failure left a pending movement prompt"
+            );
             host.runtime.borrow_mut().backend = Some(
                 crate::backend::Backend::spawn_in_process(true).map_err(|error| anyhow!(error))?,
             );
+            let previous_error = host.control_error.clone();
+            let mut events = host.runtime.borrow_mut().poll(host.receiver);
+            for result in [
+                Err("no eligible motion device".into()),
+                Ok(clicksync_capture::observation::MotionResult::TimedOut),
+                Ok(clicksync_capture::observation::MotionResult::DeviceRemoved),
+                Ok(clicksync_capture::observation::MotionResult::Revoked),
+            ] {
+                host.business_input.binding_slot = Some(1);
+                events.motion = Some(result);
+                ensure!(
+                    host.business_events(&mut events),
+                    "binding failure was ignored"
+                );
+                let hint = host.sensitivity_binding_hint(1).to_owned();
+                host.reset_measurements();
+                ensure!(
+                    host.business_input.binding_slot.is_none()
+                        && host.business_input.bindings == [Some(1), None]
+                        && host.sensitivity.binding_issues[0].is_none()
+                        && host.sensitivity.binding_issues[1].is_some()
+                        && !hint.is_empty()
+                        && host.sensitivity_binding_hint(1) == hint
+                        && host.control_error == previous_error,
+                    "binding failure escaped its slot or disappeared after editing"
+                );
+            }
+            host.sensitivity.binding_issues[0] = Some(sensitivity::BindingIssue::Error(
+                "no eligible motion device".into(),
+            ));
+            host.business_input.bindings = [None, None];
             host.begin_device_binding(0);
+            ensure!(
+                host.business_input.binding_slot == Some(0)
+                    && host.sensitivity.binding_issues[0].is_none()
+                    && host.sensitivity.binding_issues[1].is_some()
+                    && host.sensitivity_binding_hint(0)
+                        == host.text("正在检测可用鼠标…", "Checking available mice…"),
+                "binding showed a movement prompt before its arm acknowledgement"
+            );
             cx.notify();
             Ok::<_, gpui::private::anyhow::Error>(())
         })
@@ -137,6 +184,22 @@ async fn exercise(
         cx,
     )
     .await?;
+    handle.update(cx, |_, _, cx| {
+        let host = host.read(cx);
+        ensure!(
+            host.sensitivity_binding_hint(0)
+                == host.text(
+                    "请只移动被复制鼠标，自动完成绑定",
+                    "Move only the reference mouse to bind it."
+                ),
+            "armed binding did not explain which mouse to move"
+        );
+        Ok::<_, gpui::private::anyhow::Error>(())
+    })??;
+    scenario(
+        report,
+        "sensitivity-slot-local-binding-feedback-and-arm-ack",
+    );
     handle.update(cx, |_, _, cx| {
         let host = host.read(cx);
         host.runtime
@@ -157,9 +220,14 @@ async fn exercise(
     handle.update(cx, |_, _, cx| {
         host.update(cx, |host, cx| {
             host.begin_device_binding(1);
+            ensure!(
+                host.sensitivity.binding_issues[1].is_none(),
+                "retry retained the previous binding failure"
+            );
             cx.notify();
+            Ok::<_, gpui::private::anyhow::Error>(())
         })
-    })?;
+    })??;
     wait(
         handle,
         host,

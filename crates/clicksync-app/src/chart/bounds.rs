@@ -80,30 +80,89 @@ impl BoundsCache {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct ValueBand {
+    pub origin: Coordinate,
+    /// Relative values preserve small count differences above 2^53.
+    pub quantiles: [f64; 3],
+}
+
 /// Bounded display-only estimate; every real point remains in the render/query geometry.
-pub(super) fn interval_band(blocks: &[Arc<clicksync_chart::GeometryBlock>]) -> Option<[f64; 3]> {
-    let total: usize = blocks.iter().map(|block| block.samples.len()).sum();
+pub(super) fn value_band(
+    blocks: &[Arc<clicksync_chart::GeometryBlock>],
+    window: Option<(Coordinate, f64)>,
+    ordered_x: impl Fn(usize) -> bool,
+) -> Option<ValueBand> {
+    let selected = |index: usize| {
+        let block = &blocks[index];
+        let mut range = 0..block.samples.len();
+        if let Some((start, width)) = window {
+            let offset = block.origin.x.relative_to(start);
+            if offset + block.bounds[1] < 0.0 || offset + block.bounds[0] > width {
+                range = 0..0;
+            } else if ordered_x(index) {
+                range.start = block
+                    .samples
+                    .partition_point(|s| s.point.x.relative_to(start) < 0.0);
+                range.end = block
+                    .samples
+                    .partition_point(|s| s.point.x.relative_to(start) <= width);
+            }
+        }
+        range
+    };
+    let total: usize = (0..blocks.len()).map(|index| selected(index).len()).sum();
     if total < 24 {
         return None;
     }
-    let stride = total.div_ceil(2048);
-    let mut values = Vec::with_capacity(total.min(2048));
-    let mut next = 0;
+    let mut origin = None;
+    let count = total.min(2048);
+    let mut values = Vec::with_capacity(count);
+    // One deterministic, jittered position per stratum avoids locking onto
+    // periodic mouse motion (or periodic outliers) like a fixed stride does.
+    let position = |slot: usize| {
+        let start = slot * total / count;
+        let end = (slot + 1) * total / count;
+        let mut hash = (slot as u64).wrapping_add(0x9e3779b97f4a7c15);
+        hash = (hash ^ (hash >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
+        hash = (hash ^ (hash >> 27)).wrapping_mul(0x94d049bb133111eb);
+        start + ((hash ^ (hash >> 31)) % (end - start) as u64) as usize
+    };
+    let mut slot = 0;
+    let mut next = position(slot);
     let mut offset = 0;
-    for block in blocks {
-        while next < offset + block.samples.len() {
-            let value = block.samples[next - offset].point.y.value();
-            if value.is_finite() && value > 0.0 {
-                values.push(value);
+    for (index, block) in blocks.iter().enumerate() {
+        let range = selected(index);
+        while slot < count && next < offset + range.len() {
+            let point = block.samples[range.start + next - offset].point;
+            if point.y.value().is_finite()
+                && window.is_none_or(|(start, width)| {
+                    (0.0..=width).contains(&point.x.relative_to(start))
+                })
+            {
+                let value = point.y.relative_to(*origin.get_or_insert(point.y));
+                if value.is_finite() {
+                    values.push(value);
+                }
             }
-            next += stride;
+            slot += 1;
+            if slot < count {
+                next = position(slot);
+            }
         }
-        offset += block.samples.len();
+        offset += range.len();
     }
     if values.len() < 24 {
         return None;
     }
     values.sort_unstable_by(f64::total_cmp);
     let last = values.len() - 1;
-    Some([values[last / 40], values[last / 2], values[last * 39 / 40]])
+    Some(ValueBand {
+        origin: origin?,
+        quantiles: [
+            values[last / 40],
+            values[last / 2],
+            values[last - last / 40],
+        ],
+    })
 }

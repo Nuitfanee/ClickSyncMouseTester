@@ -5,11 +5,28 @@ use std::borrow::Cow;
 pub const DISPLAY_FONT: &str = "Space Grotesk";
 pub const CHINESE_FONT: &str = "Microsoft YaHei UI";
 
+const DISPLAY_FONTS: [&[u8]; 3] = [
+    include_bytes!("../../../../assets/fonts/SpaceGrotesk/spacegrotesk-regular.ttf"),
+    include_bytes!("../../../../assets/fonts/SpaceGrotesk/spacegrotesk-medium.ttf"),
+    include_bytes!("../../../../assets/fonts/SpaceGrotesk/spacegrotesk-bold.ttf"),
+];
+
+pub(crate) fn ui_font() -> gpui::Font {
+    static FONT: std::sync::OnceLock<gpui::Font> = std::sync::OnceLock::new();
+    FONT.get_or_init(|| gpui::Font {
+        fallbacks: Some(gpui::FontFallbacks::from_fonts(vec![
+            CHINESE_FONT.to_owned(),
+        ])),
+        ..gpui::font(DISPLAY_FONT)
+    })
+    .clone()
+}
+
 pub(super) fn tabular_display_font() -> gpui::Font {
     static FONT: std::sync::OnceLock<gpui::Font> = std::sync::OnceLock::new();
     FONT.get_or_init(|| gpui::Font {
         features: gpui::FontFeatures(std::sync::Arc::new(vec![("tnum".into(), 1)])),
-        ..gpui::font(DISPLAY_FONT)
+        ..ui_font()
     })
     .clone()
 }
@@ -126,23 +143,99 @@ impl Typography {
             }
         }
     }
-    pub fn body_font(english: bool) -> &'static str {
-        if english { DISPLAY_FONT } else { CHINESE_FONT }
-    }
 }
 
 pub fn install_fonts(cx: &App) -> gpui::Result<()> {
-    cx.text_system().add_fonts(vec![
-        Cow::Borrowed(include_bytes!(
-            "../../../../assets/fonts/SpaceGrotesk/spacegrotesk-regular.ttf"
-        )),
-        Cow::Borrowed(include_bytes!(
-            "../../../../assets/fonts/SpaceGrotesk/spacegrotesk-medium.ttf"
-        )),
-        Cow::Borrowed(include_bytes!(
-            "../../../../assets/fonts/SpaceGrotesk/spacegrotesk-bold.ttf"
-        )),
-    ])
+    cx.text_system().add_fonts(
+        DISPLAY_FONTS
+            .iter()
+            .map(|&bytes| Cow::Borrowed(bytes))
+            .collect(),
+    )?;
+    Ok(())
+}
+
+#[cfg(feature = "ui-restoration-probe")]
+pub(super) fn verify_font_shaping(window: &gpui::Window) -> gpui::Result<()> {
+    let text_system = window.text_system();
+    let weights = [FontWeight::NORMAL, FontWeight::MEDIUM, FontWeight::BOLD];
+    // System font weights can resolve to the same physical face.
+    for weight in weights {
+        let mut chinese = gpui::font(CHINESE_FONT);
+        chinese.weight = weight;
+        text_system.resolve_font(&chinese);
+    }
+    for weight in weights {
+        let mut latin = ui_font();
+        latin.weight = weight;
+        let latin_id = text_system.resolve_font(&latin);
+        let mut tabular = tabular_display_font();
+        tabular.weight = weight;
+        let tabular_id = text_system.resolve_font(&tabular);
+        let mut chinese = gpui::font(CHINESE_FONT);
+        chinese.weight = weight;
+        let chinese_id = text_system.resolve_font(&chinese);
+        let text = "中文鼠标报告率，。 Space Grotesk DPI 0123456789 12.5ms";
+        for (font, expected_latin_id) in [(latin.clone(), latin_id), (tabular, tabular_id)] {
+            let run = gpui::TextRun {
+                len: text.len(),
+                font,
+                color: rgb(0).into(),
+                background_color: None,
+                underline: None,
+                strikethrough: None,
+            };
+            let line = text_system.shape_line(text.into(), px(14.0), &[run], None);
+            for run in &line.runs {
+                for glyph in &run.glyphs {
+                    let ch = text[glyph.index..].chars().next().expect("glyph character");
+                    let expected = if ch.is_ascii() {
+                        expected_latin_id
+                    } else {
+                        chinese_id
+                    };
+                    if glyph.id.is_missing() || run.font_id != expected {
+                        return Err(std::io::Error::other(format!(
+                            "Mixed-script font routing failed for {ch:?} at weight {}: {:?} ({:?}), expected {:?} ({:?})",
+                            weight.0,
+                            run.font_id,
+                            text_system.get_font_for_id(run.font_id),
+                            expected,
+                            text_system.get_font_for_id(expected),
+                        ))
+                        .into());
+                    }
+                }
+            }
+        }
+        // A dynamic name can contain characters outside the embedded UI subset.
+        let dynamic = char::from_u32(0x9f98)
+            .expect("valid CJK codepoint")
+            .to_string();
+        let run = gpui::TextRun {
+            len: dynamic.len(),
+            font: latin,
+            color: rgb(0).into(),
+            background_color: None,
+            underline: None,
+            strikethrough: None,
+        };
+        let line = text_system.shape_line(dynamic.into(), px(14.0), &[run], None);
+        if line.runs.is_empty()
+            || line
+                .runs
+                .iter()
+                .any(|run| run.glyphs.iter().any(|glyph| glyph.id.is_missing()))
+        {
+            return Err(
+                std::io::Error::other("System fallback for dynamic CJK text failed").into(),
+            );
+        }
+    }
+    println!(
+        "Font routing verified: Space Grotesk Latin/digits, Microsoft YaHei UI CJK, system fallback."
+    );
+    Ok(())
 }
 
 /// Stable hit targets and immediate press feedback across product pages.
@@ -264,3 +357,7 @@ impl AssetSource for Assets {
         })
     }
 }
+
+#[cfg(test)]
+#[path = "design/font_tests.rs"]
+mod font_tests;

@@ -4,6 +4,8 @@ use crate::backend::{CapturePhase, SessionPrefix};
 use gpui::private::anyhow::{anyhow, ensure};
 use std::time::Instant;
 
+mod drag;
+mod gaps;
 mod hover;
 
 pub(in crate::ui) fn run(path: PathBuf, reports: usize) -> Result<(), Box<dyn std::error::Error>> {
@@ -178,19 +180,32 @@ async fn settle(
     cx: &mut gpui::AsyncWindowContext,
 ) -> gpui::Result<f64> {
     let start = Instant::now();
+    let mut reported_wait = false;
     loop {
         if pump(handle, host, prefix.clone(), cx)? {
             return Ok(start.elapsed().as_secs_f64() * 1000.0);
         }
-        if start.elapsed() > Duration::from_secs(60) {
-            let state = handle.update(cx, |_, _, cx| {
+        if (!reported_wait && start.elapsed() > Duration::from_secs(10))
+            || start.elapsed() > Duration::from_secs(60)
+        {
+            let state = handle.update(cx, |_, window, cx| {
                 let host = host.read(cx);
                 serde_json::json!({
+                    "elapsed_ms": start.elapsed().as_millis(),
+                    "detail": host.workspace.detail,
+                    "active": window.is_window_active(),
+                    "presentations": window.windows_presentation_count(),
                     "worker": host.runtime.borrow().worker.report(),
+                    "targets": host.workspace.targets.iter().map(|t| t.as_ref().map(|t| t.id)).collect::<Vec<_>>(),
+                    "convergence": host.plot_views().iter().map(|v| v.borrow().convergence_for_report()).collect::<Vec<_>>(),
                     "views": host.plot_views().iter().map(|v| v.borrow().report()).collect::<Vec<_>>(),
                 })
             })?;
-            return Err(anyhow!("profile deadline: {state}"));
+            if start.elapsed() > Duration::from_secs(60) {
+                return Err(anyhow!("profile deadline: {state}"));
+            }
+            eprintln!("profile still waiting: {state}");
+            reported_wait = true;
         }
         Timer::after(Duration::from_millis(4)).await;
     }
@@ -324,8 +339,15 @@ async fn measure(
                 "matching detail replaced immutable CPU payloads"
             );
             ensure!(
-                view.viewport() == viewport,
-                "matching detail reset the overview viewport"
+                view.viewport()
+                    == result
+                        .workspace_viewport(view.dataset_key())
+                        .map_err(|error| anyhow!(error))?,
+                "first detail did not use the focus viewport"
+            );
+            ensure!(
+                view.viewport().origin.x.value() == 0.0 && view.viewport().width == 1000.0,
+                "long detail must start with the first 1000 ms"
             );
             Ok::<_, gpui::private::anyhow::Error>(())
         })??;
@@ -348,6 +370,16 @@ async fn measure(
                     old.len() == new.len() && old.iter().zip(new).all(|(a, b)| Rc::ptr_eq(a, b))
                 });
             ensure!(same, "navigation replaced the monitor views");
+            let slot = host
+                .settings
+                .monitor_metrics
+                .iter()
+                .position(|&m| m == metric)
+                .unwrap();
+            ensure!(
+                host.workspace.monitors[slot][0].borrow().viewport() == viewport,
+                "returning from detail changed the saved overview viewport"
+            );
             ensure!(
                 completed[1..] == host.workspace.completed[1..],
                 "navigation recomputed unchanged monitor inputs"
@@ -363,11 +395,14 @@ async fn measure(
             "return_command_ms": return_command_ms, "return_ready_ms": return_ms,
             "reused_monitors_without_recompute": reused,
             "reused_detail_cpu_result": true,
+            "detail_default_focus": true,
         }));
     }
     let interactions = measure_interactions(handle, host, prefix.clone(), cx).await?;
     let wheel_interactions = measure_wheel(handle, host, prefix.clone(), cx).await?;
     let multi_dataset_hover = hover::verify(handle, host, cx).await?;
+    let drag_interaction = drag::verify(handle, host, cx).await?;
+    let gap_statistics = gaps::verify(handle, host, cx).await?;
     let report = serde_json::json!({
         "scope": "Production GPUI workspace/ChartWorker/D3D11; prebuilt synthetic 8 kHz prefixes. UI pump and observed layer completion intervals, NOT hardware input latency or display FPS.",
         "initial_reports": prefixes[0].received_records,
@@ -381,6 +416,8 @@ async fn measure(
         "initial_ms": initial_ms, "paused_ms": paused_ms, "live": live, "navigation": navigation,
         "interactions": interactions, "wheel_interactions": wheel_interactions,
         "multi_dataset_hover": multi_dataset_hover,
+        "drag_interaction": drag_interaction,
+        "gap_statistics": gap_statistics,
     });
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;

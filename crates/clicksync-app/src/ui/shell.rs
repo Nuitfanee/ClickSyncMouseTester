@@ -207,7 +207,10 @@ fn configure_startup_chrome(handle: HWND) -> gpui::Result<()> {
 }
 
 pub(super) struct StartupShell {
-    pub runtime: Rc<RefCell<runtime::AppRuntime>>,
+    pub runtime: Option<Rc<RefCell<runtime::AppRuntime>>>,
+    settings: Settings,
+    preference_edits: [bool; 2],
+    pending_page: Option<Page>,
     pub main: Option<WindowHandle<GpuiHost>>,
     outcome: Arc<Mutex<WindowSmokeReport>>,
     error: Option<String>,
@@ -221,17 +224,15 @@ pub(super) fn open_startup(
     outcome: Arc<Mutex<WindowSmokeReport>>,
     cx: &mut App,
 ) -> gpui::Result<WindowHandle<StartupShell>> {
-    let (runtime, error) = runtime::AppRuntime::new(true);
-    let quit_runtime = runtime.clone();
-    let quit_outcome = outcome.clone();
-    cx.on_app_quit(move |_| {
-        if let Err(error) = quit_runtime.borrow_mut().shutdown() {
-            outcome_error(&quit_outcome, error);
-        }
-        std::future::ready(())
-    })
-    .detach();
-    runtime::AppRuntime::start_driver(&runtime, cx);
+    open_startup_with(bounds, outcome, cx, || runtime::StartupServices::new(true))
+}
+
+fn open_startup_with(
+    bounds: Bounds<gpui::Pixels>,
+    outcome: Arc<Mutex<WindowSmokeReport>>,
+    cx: &mut App,
+    initialize: impl FnOnce() -> runtime::StartupServices + Send + 'static,
+) -> gpui::Result<WindowHandle<StartupShell>> {
     let opened = cx.open_window(
         WindowOptions {
             show: false,
@@ -245,10 +246,13 @@ pub(super) fn open_startup(
         },
         move |window, cx| {
             let shell = cx.new(|cx| StartupShell {
-                runtime,
+                runtime: None,
+                settings: Settings::default(),
+                preference_edits: [false; 2],
+                pending_page: None,
                 main: None,
                 outcome,
-                error,
+                error: None,
                 focus: cx.focus_handle(),
                 transferring: false,
                 menu: navigation::Motion::new(true),
@@ -275,7 +279,58 @@ pub(super) fn open_startup(
         window.activate_window();
         Ok::<_, gpui::private::anyhow::Error>(())
     })??;
+    // The carrier is already visible; HID discovery and settings IO never run on its UI thread.
+    let initialize = cx.background_executor().spawn(async move { initialize() });
+    cx.spawn(async move |cx| {
+        let services = initialize.await;
+        let _ = opened.update(cx, move |shell, window, cx| {
+            let (runtime, error) = runtime::AppRuntime::from_services(services);
+            let mut settings = runtime.borrow().settings.clone();
+            if shell.preference_edits[0] {
+                settings.english = shell.settings.english;
+            }
+            if shell.preference_edits[1] {
+                settings.dark = shell.settings.dark;
+            }
+            runtime
+                .borrow_mut()
+                .update_settings(settings.clone(), shell.preference_edits.contains(&true));
+            shell.settings = settings;
+            shell.error = error;
+            let quit_runtime = runtime.clone();
+            let outcome = shell.outcome.clone();
+            gpui::App::on_app_quit(cx, move |_| {
+                if let Err(error) = quit_runtime.borrow_mut().shutdown() {
+                    outcome_error(&outcome, error);
+                }
+                std::future::ready(())
+            })
+            .detach();
+            runtime::AppRuntime::start_driver(&runtime, cx);
+            shell.runtime = Some(runtime);
+            if let Some(page) = shell.pending_page.take() {
+                shell.handoff(page, window, cx);
+            }
+            cx.notify();
+        });
+    })
+    .detach();
     Ok(opened)
+}
+
+#[cfg(feature = "ui-restoration-probe")]
+pub(super) mod startup_probe;
+
+fn handoff_wait_expired(
+    foreground_since: &mut Option<std::time::Instant>,
+    now: std::time::Instant,
+    foreground: bool,
+) -> bool {
+    if !foreground {
+        *foreground_since = None;
+        return false;
+    }
+    now.saturating_duration_since(*foreground_since.get_or_insert(now)) >= Duration::from_secs(5)
 }
 
 impl StartupShell {
@@ -283,6 +338,11 @@ impl StartupShell {
         if self.transferring || !self.menu.accepts_input() {
             return;
         }
+        let Some(runtime) = self.runtime.clone() else {
+            self.pending_page = Some(page);
+            cx.notify();
+            return;
+        };
         let mut client_origin = POINT::default();
         if !unsafe { ClientToScreen(hwnd(window), &mut client_origin) }.as_bool() {
             let error = "could not measure the startup window client origin";
@@ -292,9 +352,9 @@ impl StartupShell {
             return;
         }
         self.menu.close(Some(page));
+        self.menu.hold_for_handoff();
         let menu = self.menu.transfer_to_main();
         self.transferring = true;
-        let runtime = self.runtime.clone();
         let outcome = self.outcome.clone();
         let error = self.error.clone();
         let opened = cx.open_window(main_options(window.bounds()), move |window, cx| {
@@ -366,22 +426,40 @@ impl StartupShell {
         window
             .spawn(cx, async move |cx| {
                 let transition: gpui::Result<()> = async {
-                    for _ in 0..250 {
-                        Timer::after(Duration::from_millis(20)).await;
-                        let ready = main.update(cx, |host, window, _| {
+                    let mut state = (false, true, 0);
+                    let mut foreground_since = None;
+                    loop {
+                        Timer::after(Duration::from_millis(if state.1 { 20 } else { 100 })).await;
+                        state = main.update(cx, |host, window, _| {
                             host.focus.focus(window);
-                            window.is_window_active()
-                                && unsafe { GetForegroundWindow() } == hwnd(window)
+                            (
+                                window.is_window_active(),
+                                unsafe { GetForegroundWindow() } == hwnd(window),
+                                window.windows_presentation_count(),
+                            )
                         })?;
-                        if ready {
-                            main.update(cx, |_, window, _| {
-                                set_system_transitions_disabled(hwnd(window), false)
+                        // Another app may own foreground; that must not turn a ready handoff into quit.
+                        if state.2 > 0 {
+                            main.update(cx, |host, window, cx| {
+                                set_system_transitions_disabled(hwnd(window), false)?;
+                                host.menu.resume_handoff(std::time::Instant::now());
+                                cx.notify();
+                                Ok::<_, gpui::private::anyhow::Error>(())
                             })??;
                             startup.update(cx, |_, window, _| window.remove_window())?;
                             return Ok(());
                         }
+                        if handoff_wait_expired(
+                            &mut foreground_since,
+                            std::time::Instant::now(),
+                            state.1,
+                        ) {
+                            return Err(anyhow!(
+                                "startup-to-main handoff timed out: active={}, foreground={}, presentations={}",
+                                state.0, state.1, state.2
+                            ));
+                        }
                     }
-                    Err(anyhow!("startup-to-main foreground handoff timed out"))
                 }
                 .await;
                 if let Err(error) = transition {
@@ -406,14 +484,18 @@ impl StartupShell {
             navigation::Action::Language | navigation::Action::Theme
                 if self.menu.accepts_input() =>
             {
-                let mut runtime = self.runtime.borrow_mut();
-                let mut settings = runtime.settings.clone();
                 if matches!(action, navigation::Action::Language) {
-                    settings.english = !settings.english;
+                    self.settings.english = !self.settings.english;
+                    self.preference_edits[0] = true;
                 } else {
-                    settings.dark = !settings.dark;
+                    self.settings.dark = !self.settings.dark;
+                    self.preference_edits[1] = true;
                 }
-                runtime.update_settings(settings, true);
+                if let Some(runtime) = &self.runtime {
+                    runtime
+                        .borrow_mut()
+                        .update_settings(self.settings.clone(), true);
+                }
             }
             navigation::Action::Github if self.menu.accepts_input() => {
                 cx.open_url("https://github.com/Nuitfanee/ClickSyncMouseTester")
@@ -432,7 +514,7 @@ impl StartupShell {
 }
 impl Render for StartupShell {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let settings = self.runtime.borrow().settings.clone();
+        let settings = self.settings.clone();
         let bounds = window.viewport_size();
         let geometry = navigation::geometry(f32::from(bounds.width), f32::from(bounds.height));
         let opening = self.menu.phase == navigation::Phase::Opening;
@@ -477,6 +559,15 @@ impl Render for StartupShell {
                 Self::menu_action,
                 cx,
             ))
+            .when(self.runtime.is_none(), |element| {
+                element.child(div().absolute().bottom(px(20.0)).left(px(24.0)).child(
+                    if settings.english {
+                        "Preparing devices…"
+                    } else {
+                        "正在准备设备…"
+                    },
+                ))
+            })
             .when_some(self.error.clone(), |element, error| element.child(error))
     }
 }
@@ -642,7 +733,7 @@ pub(super) fn frame(
         .flex_col()
         .bg(rgb(palette.background))
         .text_color(rgb(palette.text))
-        .font_family(design::Typography::body_font(host.settings.english))
+        .font(design::ui_font())
         .text_size(px(12.0))
         .track_focus(&host.focus)
         .on_key_down(cx.listener(|host, event, window, cx| host.keyboard(event, window, cx)))
@@ -670,4 +761,41 @@ pub(super) fn frame(
         ));
     }
     root
+}
+
+#[cfg(test)]
+mod handoff_tests {
+    use super::*;
+
+    #[test]
+    fn foreground_deadline_does_not_treat_background_or_minimized_time_as_failure() {
+        let now = std::time::Instant::now();
+        let mut since = None;
+        assert!(!handoff_wait_expired(&mut since, now, true));
+        assert!(!handoff_wait_expired(
+            &mut since,
+            now + Duration::from_secs(4),
+            true
+        ));
+        assert!(!handoff_wait_expired(
+            &mut since,
+            now + Duration::from_secs(60),
+            false
+        ));
+        assert!(!handoff_wait_expired(
+            &mut since,
+            now + Duration::from_secs(120),
+            true
+        ));
+        assert!(!handoff_wait_expired(
+            &mut since,
+            now + Duration::from_secs(124),
+            true
+        ));
+        assert!(handoff_wait_expired(
+            &mut since,
+            now + Duration::from_secs(125),
+            true
+        ));
+    }
 }

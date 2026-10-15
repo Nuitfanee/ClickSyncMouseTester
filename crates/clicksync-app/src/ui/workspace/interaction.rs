@@ -6,7 +6,9 @@ pub(in crate::ui) struct Frame {
     plots: [gpui::Entity<Plot>; 4],
     summary: gpui::Entity<Readout>,
     inspection: gpui::Entity<Inspection>,
-    bounds: [Rc<Cell<Bounds<gpui::Pixels>>>; 6],
+    gaps: gpui::Entity<GapReadout>,
+    bounds: [Rc<Cell<Bounds<gpui::Pixels>>>; 7],
+    gap_mask: Rc<Cell<Option<Bounds<gpui::Pixels>>>>,
     revision: Rc<Cell<u64>>,
     pointer: Option<(Rc<RefCell<ChartView>>, gpui::Point<gpui::Pixels>)>,
     #[cfg(feature = "ui-restoration-probe")]
@@ -59,6 +61,8 @@ impl Render for Plot {
         let content = self.content.clone();
         let presented = self.presented.clone();
         let refresh_content = host.workspace.analysis.is_some();
+        let gap_host = self.host.clone();
+        let main_plot = self.slot == 0;
         let pan_host = self.host.clone();
         #[cfg(feature = "ui-restoration-probe")]
         let (counts, slot) = self.counter.clone();
@@ -67,8 +71,24 @@ impl Render for Plot {
             (self.slot == 0).then(|| host.outcome.clone()),
             host.settings.dark,
             host.settings.english,
-            move |request, window| {
-                let changed = presented.replace(Some(request)) != Some(request);
+            move |request, window, cx| {
+                let changed =
+                    request.is_some_and(|id| presented.replace(Some(id)) != Some(id));
+                if main_plot && let Some(host) = gap_host.upgrade() {
+                    let host = host.read(cx);
+                    if let Some(frame) = &host.workspace.interaction
+                        && frame.bounds[6].get().size.height > px(0.0)
+                    {
+                        let gaps = frame.gaps.clone();
+                        let values = host.detail_gap_values();
+                        gaps.update(cx, |gaps, cx| {
+                            if gaps.values != values {
+                                gaps.values = values;
+                                cx.notify();
+                            }
+                        });
+                    }
+                }
                 #[cfg(feature = "ui-restoration-probe")]
                 if changed {
                     let mut next = counts.get();
@@ -211,6 +231,28 @@ struct Inspection {
     host: gpui::WeakEntity<GpuiHost>,
 }
 
+struct GapReadout {
+    host: gpui::WeakEntity<GpuiHost>,
+    values: Option<(usize, crate::chart::gaps::GapStatistics)>,
+    #[cfg(feature = "ui-restoration-probe")]
+    rendered_values: Option<(usize, crate::chart::gaps::GapStatistics)>,
+}
+
+impl Render for GapReadout {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let host = self
+            .host
+            .upgrade()
+            .expect("gap readout belongs to its live host");
+        let host = host.read(cx);
+        #[cfg(feature = "ui-restoration-probe")]
+        {
+            self.rendered_values = self.values;
+        }
+        host.render_gap_statistics(self.values)
+    }
+}
+
 impl Render for Inspection {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let host = self
@@ -306,7 +348,14 @@ impl Frame {
             inspection: cx.new(|_| Inspection {
                 host: host.downgrade(),
             }),
+            gaps: cx.new(|_| GapReadout {
+                host: host.downgrade(),
+                values: None,
+                #[cfg(feature = "ui-restoration-probe")]
+                rendered_values: None,
+            }),
             bounds: Default::default(),
+            gap_mask: Rc::default(),
             revision: Rc::default(),
             pointer: None,
             #[cfg(feature = "ui-restoration-probe")]
@@ -341,6 +390,16 @@ impl Frame {
     #[cfg(feature = "ui-restoration-probe")]
     pub(in crate::ui) fn counts(&self) -> [u64; 6] {
         self.counts.get()
+    }
+
+    #[cfg(feature = "ui-restoration-probe")]
+    pub(in crate::ui) fn gap_values(
+        &self,
+        cx: &gpui::App,
+    ) -> Option<(usize, crate::chart::gaps::GapStatistics)> {
+        (self.bounds[6].get().size.height > px(0.0))
+            .then(|| self.gaps.read(cx).rendered_values)
+            .flatten()
     }
 
     #[cfg(feature = "ui-restoration-probe")]
@@ -400,6 +459,7 @@ impl GpuiHost {
         let overlays = frame.plots.iter().cloned().map(gpui::AnyView::from).chain([
             gpui::AnyView::from(frame.summary.clone()),
             gpui::AnyView::from(frame.inspection.clone()),
+            gpui::AnyView::from(frame.gaps.clone()),
         ]);
         let mut root = div()
             .id("workspace-frame")
@@ -410,13 +470,14 @@ impl GpuiHost {
             })
             .size_full()
             .relative()
-            .font_family(design::Typography::body_font(self.settings.english))
+            .font(design::ui_font())
             .text_size(px(13.0))
             .text_color(rgb(design::Palette::for_theme(self.settings.dark).text))
             .child(gpui::AnyView::from(content).cached(div().size_full().style().clone()));
         for (slot, view) in overlays.enumerate() {
             let bounds = frame.bounds[slot].clone();
             let revision = frame.revision.clone();
+            let mask = frame.gap_mask.clone();
             root = root.child(
                 canvas(
                     move |_, window, cx| {
@@ -430,12 +491,20 @@ impl GpuiHost {
                             .size_full()
                             .child(view.cached(div().size_full().style().clone()))
                             .into_any_element();
-                        element.prepaint_as_root(bounds.origin, bounds.size.into(), window, cx);
-                        Some(element)
+                        // The metric list scrolls; its sibling cache must retain the inspector's clip.
+                        let mask = if slot == 6 {
+                            mask.get().map(|bounds| gpui::ContentMask { bounds })
+                        } else {
+                            None
+                        };
+                        window.with_content_mask(mask.clone(), |window| {
+                            element.prepaint_as_root(bounds.origin, bounds.size.into(), window, cx);
+                        });
+                        Some((element, mask))
                     },
                     |_, element, window, cx| {
-                        if let Some(mut element) = element {
-                            element.paint(window, cx);
+                        if let Some((mut element, mask)) = element {
+                            window.with_content_mask(mask, |window| element.paint(window, cx));
                         }
                     },
                 )
@@ -475,10 +544,7 @@ impl GpuiHost {
             .child(canvas(move |actual, _, _| bounds.set(actual), |_, _, _, _| {}).size_full())
     }
 
-    pub(in crate::ui::workspace) fn workspace_plot_views(
-        &self,
-        slot: usize,
-    ) -> Vec<Rc<RefCell<ChartView>>> {
+    pub(in crate::ui) fn workspace_plot_views(&self, slot: usize) -> Vec<Rc<RefCell<ChartView>>> {
         if slot == 0 {
             self.visible_views(
                 self.chart
@@ -584,5 +650,26 @@ impl GpuiHost {
             .h(px(40.0))
             .flex_shrink_0()
             .child(canvas(move |actual, _, _| bounds.set(actual), |_, _, _, _| {}).size_full())
+    }
+
+    pub(in crate::ui) fn workspace_gap_readout(&self, cx: &mut Context<Self>) -> gpui::Div {
+        let frame = self.workspace.interaction.as_ref().unwrap();
+        let values = self.detail_gap_values();
+        frame.gaps.update(cx, |gaps, cx| {
+            gaps.values = values;
+            cx.notify();
+        });
+        let bounds = frame.bounds[6].clone();
+        let mask = frame.gap_mask.clone();
+        div().h(px(90.0)).flex_shrink_0().child(
+            canvas(
+                move |actual, window, _| {
+                    bounds.set(actual);
+                    mask.set(Some(window.content_mask().bounds));
+                },
+                |_, _, _, _| {},
+            )
+            .size_full(),
+        )
     }
 }

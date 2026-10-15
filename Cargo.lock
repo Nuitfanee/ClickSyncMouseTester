@@ -700,6 +700,7 @@ dependencies = [
  "raw-window-handle",
  "serde",
  "serde_json",
+ "ttf-parser",
  "windows",
 ]
 

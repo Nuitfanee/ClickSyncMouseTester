@@ -25,6 +25,10 @@ pub fn distribution_with_dispersion(
         return None;
     }
     sorted.sort_by(f64::total_cmp);
+    Some(sorted_distribution(&sorted, include_dispersion))
+}
+
+pub(super) fn sorted_distribution(sorted: &[f64], include_dispersion: bool) -> Distribution {
     let average = sorted.iter().sum::<f64>() / sorted.len() as f64;
     let standard_deviation = (sorted
         .iter()
@@ -32,28 +36,29 @@ pub fn distribution_with_dispersion(
         .sum::<f64>()
         / sorted.len() as f64)
         .sqrt();
-    let p50 = percentile(&sorted, 0.5);
-    let mut deviations: Vec<_> = sorted.iter().map(|v| (v - p50).abs()).collect();
-    deviations.sort_by(f64::total_cmp);
-    Some(Distribution {
+    let p50 = percentile(sorted, 0.5);
+    let mad = if include_dispersion {
+        let mut deviations: Vec<_> = sorted.iter().map(|v| (v - p50).abs()).collect();
+        deviations.sort_by(f64::total_cmp);
+        percentile(&deviations, 0.5)
+    } else {
+        0.0
+    };
+    Distribution {
         sample_count: sorted.len(),
         average,
         standard_deviation,
         p50,
-        p95: percentile(&sorted, 0.95),
-        p99: percentile(&sorted, 0.99),
-        p999: (sorted.len() >= 1000).then(|| percentile(&sorted, 0.999)),
-        mad: if include_dispersion {
-            percentile(&deviations, 0.5)
-        } else {
-            0.0
-        },
+        p95: percentile(sorted, 0.95),
+        p99: percentile(sorted, 0.99),
+        p999: (sorted.len() >= 1000).then(|| percentile(sorted, 0.999)),
+        mad,
         iqr: if include_dispersion {
-            (percentile(&sorted, 0.75) - percentile(&sorted, 0.25)).max(0.0)
+            (percentile(sorted, 0.75) - percentile(sorted, 0.25)).max(0.0)
         } else {
             0.0
         },
-    })
+    }
 }
 
 pub fn summarize(
@@ -152,7 +157,7 @@ pub fn residual_distribution_pair(
             .map(|(a, b)| a.hypot(b)),
     )
 }
-fn percentile(values: &[f64], p: f64) -> f64 {
+pub(super) fn percentile(values: &[f64], p: f64) -> f64 {
     let position = p.clamp(0.0, 1.0) * (values.len() - 1) as f64;
     let (lower, upper) = (position.floor() as usize, position.ceil() as usize);
     values[lower] + (values[upper] - values[lower]) * (position - lower as f64)

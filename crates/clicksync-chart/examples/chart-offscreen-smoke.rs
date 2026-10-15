@@ -268,6 +268,87 @@ mod smoke {
             1,
         );
         let mut renderer = Renderer::new(device.clone(), 1, ResourceLimits::default())?;
+        let scan_checks = {
+            let mut hidden = scene(vec![Instance::point(1000.0, 1000.0); 1025], origin, 1);
+            let template = hidden.blocks[0].clone();
+            Arc::make_mut(&mut hidden).blocks = (0..1025)
+                .map(|id| {
+                    Arc::new(PreparedBlock {
+                        key: BlockKey { id, ..template.key },
+                        content_version: template.content_version,
+                        origin,
+                        instances: vec![Instance::point(1000.0, 1000.0)].into(),
+                    })
+                })
+                .collect();
+            let mut scanner = Renderer::new(device.clone(), 1, ResourceLimits::default())?;
+            scanner.begin(&context, hidden, spec.clone())?;
+            assert!(scanner.tick(&context)?.is_none());
+            assert_eq!(scanner.report().culled_instances, 1024);
+            assert_eq!(scanner.report().draw_calls, 0);
+            let start = Instant::now();
+            while scanner.tick(&context)?.is_none() {
+                if start.elapsed() > Duration::from_secs(10) {
+                    return Err("bounded scan did not finish".into());
+                }
+                std::thread::yield_now();
+            }
+            assert_eq!(scanner.report().culled_instances, 1025);
+            true
+        };
+        let capacity_checks = {
+            let mut limited = Renderer::new(
+                device.clone(),
+                1,
+                ResourceLimits {
+                    layer_bytes: 128 * 1024 * 1024 / 100 * 72 / 3,
+                    ..Default::default()
+                },
+            )?;
+            let large = RenderSpec::new(view, 2560, 1800, 1);
+            for _ in 0..120 {
+                if limited.begin(&context, fixture.clone(), large.clone())
+                    != Err(GpuError::LayerCapacity)
+                {
+                    return Err(
+                        "permanent layer exhaustion was admitted or treated as transient".into(),
+                    );
+                }
+            }
+            if limited.report().layers != 0 || limited.is_generating() {
+                return Err("capacity failure allocated an unreplaceable first layer".into());
+            }
+            let small = RenderSpec::new(view, 1280, 900, 1);
+            for _ in 0..8 {
+                drop(render(
+                    &mut limited,
+                    &context,
+                    fixture.clone(),
+                    small.clone(),
+                )?);
+            }
+            let old = limited.displayed().unwrap();
+            let resized = RenderSpec::new(view, 1600, 1000, 1);
+            let next = render(&mut limited, &context, fixture.clone(), resized.clone())?;
+            // External old-size leases remain immutable through publication.
+            if old.version.spec.width != 1280 || next.version.spec.width != 1600 {
+                return Err("resize changed a retained layer".into());
+            }
+            drop(old);
+            drop(next);
+            for _ in 0..8 {
+                drop(render(
+                    &mut limited,
+                    &context,
+                    fixture.clone(),
+                    resized.clone(),
+                )?);
+            }
+            if limited.report().peak_layer_bytes > limited.limits().layer_bytes {
+                return Err("capacity recovery exceeded the layer budget".into());
+            }
+            true
+        };
         let layer = render(&mut renderer, &context, fixture.clone(), spec.clone())?;
         let pixels = read(&mut renderer, &context, layer.clone())?;
         let images = vec![check_image(
@@ -425,6 +506,8 @@ mod smoke {
                 "premultiplied_blend": true, "resident_reuse": true,
                 "tail_range_upload": true, "leased_layer_pressure": true, "wrong_epoch_rejected": true,
                 "full_dense_streaming": true, "resize": true,
+                "permanent_capacity_and_resize_recovery": capacity_checks,
+                "bounded_culled_block_scan": scan_checks,
             },
         }))
     }

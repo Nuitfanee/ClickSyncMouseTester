@@ -563,7 +563,8 @@ impl GpuiHost {
                 }
                 cx.notify();
             }));
-        let status = if let Some(error) = &self.control_error {
+        let error = localized_ui_error(&self.control_error, &None, self.settings.english);
+        let status = if let Some(error) = &error {
             error.clone()
         } else if pending {
             self.text("正在准备设备…", "Preparing devices…").into()
@@ -588,7 +589,7 @@ impl GpuiHost {
         div().id("performance-setup").size_full().flex().flex_col()
             .px(px(68.0)).pt(px(32.0)).pb(px(20.0))
             .bg(rgb(palette.background)).text_color(rgb(palette.text))
-            .font_family(design::Typography::body_font(self.settings.english))
+            .font(design::ui_font())
             .child(div().flex_shrink_0().font_family(design::DISPLAY_FONT)
                 .font_weight(gpui::FontWeight::BOLD).text_size(px(display_size))
                 .line_height(px(display_size * 1.12)).child("PERFORMANCE")
@@ -632,7 +633,7 @@ impl GpuiHost {
                 .border_color(rgb(palette.hairline)).pt(px(16.0))
                 .flex().items_center().justify_between().gap(px(24.0))
                 .child(div().flex_1().min_w_0().text_size(px(13.0)).line_height(px(22.0))
-                    .text_color(rgb(if self.control_error.is_some() { palette.accent } else { palette.muted }))
+                    .text_color(rgb(if error.is_some() { palette.accent } else { palette.muted }))
                     .child(status))
                 .child(next_button))
     }
